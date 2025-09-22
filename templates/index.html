@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamify RPG</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Unix RPG Quest</h1>
+        <p>Fight enemies while learning Unix commands!</p>
+        <a href="{{ url_for('game') }}" class="btn">Start Game</a>
+    </div>
+</body>
+</html>

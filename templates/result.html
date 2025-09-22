@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamify RPG - Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Game Over</h1>
+        <p>{{ outcome }}</p>
+        <p>Final Score: {{ score }}</p>
+        <p>Player HP: {{ player_hp }}</p>
+        <p>Enemy HP: {{ enemy_hp }}</p>
+        <p>Level Reached: {{ level }}</p>
+        <p>Enemy Faced: {{ enemy['name'] }} {{ enemy['avatar'] }}</p>
+        <a href="{{ url_for('index') }}" class="btn">Play Again</a>
+    </div>
+</body>
+</html>

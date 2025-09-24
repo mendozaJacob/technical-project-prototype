@@ -1,4 +1,52 @@
-from flask import Flask, request, session, redirect, url_for, render_template
+# this code makes sure Flask and Whoosh are installed
+# before trying to import them, preventing runtime errors
+import subprocess
+import sys
+
+# Helper function to auto-install missing packages
+def install_and_import(package):
+    try:
+        __import__(package)
+    except ImportError:
+        print(f"📦 Installing {package} ...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+        globals()[package] = __import__(package)
+
+# Ensure Flask and Whoosh are available
+install_and_import("flask")
+install_and_import("whoosh")
+
+# Now safe to import normally
+from flask import Flask, render_template, request, redirect, url_for, session
+from whoosh.fields import Schema, TEXT, ID
+from whoosh import index
+import os, json
+
+
+# Define the schema for the Whoosh index
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    question=TEXT(stored=True),
+    answer=TEXT(stored=True),
+    keywords=TEXT(stored=True)
+)
+
+# Create or open the Whoosh index directory
+if not os.path.exists("indexdir"):
+    os.mkdir("indexdir")
+    ix = index.create_in("indexdir", schema)
+else:
+    ix = index.open_dir("indexdir")
+
+# Add data to the index
+from whoosh.writing import AsyncWriter
+writer = AsyncWriter(ix)
+writer.add_document(id="1", question="What does 'pwd' do?", answer="Prints working directory", keywords="pwd, command")
+writer.add_document(id="2", question="Which command lists files?", answer="ls", keywords="ls, list files")
+writer.add_document(id="3", question="What command changes directories?", answer="cd", keywords="cd, change directory")
+writer.add_document(id="4", question="Which command creates a file?", answer="touch", keywords="touch, create file")
+writer.add_document(id="5", question="Which command deletes a file?", answer="rm", keywords="rm, delete file")
+writer.commit()
 
 app = Flask(__name__)  # Fix: Initialize Flask app with __name__
 app.secret_key = "unix_rpg_secret"
@@ -66,10 +114,10 @@ def game():
     question = questions[session['q_index']]
 
     if request.method == 'POST':
-        selected = request.form.get('option')
-        correct = question['answer']
+        user_answer = request.form.get('answer').strip().lower()
+        correct_answer = question['answer'].strip().lower()
 
-        if selected == correct:
+        if user_answer == correct_answer:
             session['score'] += 10
             session['enemy_hp'] -= 10
             session['feedback'] = question['dialogue_correct']
@@ -130,6 +178,18 @@ def result():
                            outcome=outcome,
                            level=session['enemy_level'],
                            enemy=enemy)
+
+# Query route
+from whoosh.qparser import QueryParser
+
+@app.route('/search', methods=['GET'])
+def search():
+    query_text = request.args.get('q', '').strip().lower()  # Get query from URL parameter
+    results = []
+    with ix.searcher() as searcher:
+        query = QueryParser("keywords", ix.schema).parse(query_text)
+        results = searcher.search(query)
+    return render_template('search.html', results=results)
 
 if __name__ == "__main__":
     app.run(debug=True)

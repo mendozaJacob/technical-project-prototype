@@ -52,12 +52,9 @@
         <h2>Question {{ q_number }} of {{ total }}</h2>
         <p>{{ question['q'] }}</p>
         <form method="POST">
-            {% for option in question['options'] %}
-                <label>
-                    <input type="radio" name="option" value="{{ option[0] }}"> {{ option }}
-                </label><br>
-            {% endfor %}
-            <button type="submit" class="btn">Submit Answer</button>
+            <label for="answer">Type your command:</label>
+            <input type="text" id="answer" name="answer" placeholder="Type your command..." required>
+            <button type="submit" class="btn">Attack!</button>
         </form>
     </div>
 </body>

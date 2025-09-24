@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamify RPG - Feedback</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Feedback</h1>
+        <p>{{ feedback }}</p>
+        <p>Player HP: {{ player_hp }}</p>
+        <p>Enemy HP: {{ enemy_hp }}</p>
+        <p>Score: {{ score }}</p>
+        <a href="{{ url_for('game') }}" class="btn">Next Question</a>
+    </div>
+</body>
+</html>

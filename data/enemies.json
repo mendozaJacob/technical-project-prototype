@@ -1,0 +1,14 @@
+// this is an example of an enemy entry
+// you can add as many as you want
+[
+  {
+    "name": "Gremlin of pwd",
+    "avatar": "👹",
+    "taunt": "The Gremlin snarls: 'You'll never escape directories!'"
+  },
+  {
+    "name": "Orc of cd",
+    "avatar": "🧟",
+    "taunt": "The Orc grunts: 'You cannot move between my folders!'"
+  }
+]

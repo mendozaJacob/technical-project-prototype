@@ -1,18 +1,242 @@
 [
   {
     "id": 1,
-    "q": "What does the command 'pwd' do?",
-    "answer": "pwd",
-    "keywords": ["pwd", "print working directory"],
-    "dialogue_correct": "✅ Correct! 'pwd' shows your current location.",
-    "dialogue_wrong": "❌ Not quite. 'pwd' means 'print working directory'."
+    "q": "Configure your Host Name to server1.example.com",
+    "answer": "hostnamectl set-hostname server1.example.com",
+    "keywords": ["hostname", "hostnamectl"]
   },
   {
     "id": 2,
     "q": "Which command lists the files in your current directory?",
     "answer": "ls",
-    "keywords": ["ls", "list files"],
-    "dialogue_correct": "✅ Nice! 'ls' lists files and directories.",
-    "dialogue_wrong": "❌ Wrong. The correct command is 'ls'."
+    "keywords": ["ls", "list files"]
+  },
+  {
+    "id": 3,
+    "q": "Create a user named student with password student",
+    "answer": "useradd student; echo 'student' | passwd --stdin student",
+    "keywords": ["useradd", "create user", "passwd"]
+  },
+  {
+    "id": 4,
+    "q": "How do you create a new directory named /home/student/docs?",
+    "answer": "mkdir -p /home/student/docs",
+    "keywords": ["mkdir", "create directory"]
+  },
+  {
+    "id": 5,
+    "q": "Mount the /dev/sdb1 filesystem to /mnt/data",
+    "answer": "mount /dev/sdb1 /mnt/data",
+    "keywords": ["mount", "filesystem"]
+  },
+  {
+    "id": 6,
+    "q": "Configure the system to boot into graphical mode",
+    "answer": "systemctl set-default graphical.target",
+    "keywords": ["systemctl", "graphical target"]
+  },
+  {
+    "id": 7,
+    "q": "Install the httpd package",
+    "answer": "dnf install httpd -y",
+    "keywords": ["dnf", "install package", "httpd"]
+  },
+  {
+    "id": 8,
+    "q": "Create a cron job to run /usr/bin/backup.sh daily at 2 AM",
+    "answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
+    "keywords": ["crontab", "cron job", "schedule"]
+  },
+  {
+    "id": 9,
+    "q": "Find all files owned by user student",
+    "answer": "find / -user student 2>/dev/null",
+    "keywords": ["find", "user files"]
+  },
+  {
+    "id": 10,
+    "q": "Configure firewall to allow SSH",
+    "answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
+    "keywords": ["firewall-cmd", "SSH", "firewall"]
+  },
+  {
+    "id": 11,
+    "q": "Create a logical volume named lv_data of size 100M in volume group vg_system",
+    "answer": "lvcreate -L 100M -n lv_data vg_system",
+    "keywords": ["lvcreate", "LVM", "logical volume"]
+  },
+  {
+    "id": 12,
+    "q": "Format /dev/sdc1 with ext4 filesystem",
+    "answer": "mkfs.ext4 /dev/sdc1",
+    "keywords": ["mkfs", "ext4", "format"]
+  },
+  {
+    "id": 13,
+    "q": "Add the user student to the wheel group",
+    "answer": "usermod -aG wheel student",
+    "keywords": ["usermod", "group", "wheel"]
+  },
+  {
+    "id": 14,
+    "q": "Start and enable the httpd service",
+    "answer": "systemctl start httpd; systemctl enable httpd",
+    "keywords": ["systemctl", "httpd", "service"]
+  },
+  {
+    "id": 15,
+    "q": "Configure SELinux to enforcing mode",
+    "answer": "setenforce 1; sed -i 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config",
+    "keywords": ["SELinux", "setenforce", "enforcing"]
+  },
+  {
+    "id": 16,
+    "q": "Create a swap file of 512M and activate it",
+    "answer": "dd if=/dev/zero of=/swapfile bs=1M count=512; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile",
+    "keywords": ["swap", "mkswap", "swapon"]
+  },
+  {
+    "id": 17,
+    "q": "Archive and compress the /home directory to /tmp/home_backup.tar.gz",
+    "answer": "tar -czf /tmp/home_backup.tar.gz /home",
+    "keywords": ["tar", "compress", "archive"]
+  },
+  {
+    "id": 18,
+    "q": "Configure the system time zone to America/New_York",
+    "answer": "timedatectl set-timezone America/New_York",
+    "keywords": ["timedatectl", "timezone"]
+  },
+  {
+    "id": 19,
+    "q": "Set the password for user student to never expire",
+    "answer": "chage -M -1 student",
+    "keywords": ["chage", "password expire"]
+  },
+  {
+    "id": 20,
+    "q": "List all active network interfaces",
+    "answer": "nmcli device status",
+    "keywords": ["nmcli", "network interfaces"]
+  },
+  {
+    "id": 21,
+    "q": "Configure a static IP address 192.168.1.100/24 for interface enp0s3",
+    "answer": "nmcli con mod enp0s3 ipv4.addresses 192.168.1.100/24 ipv4.method manual; nmcli con up enp0s3",
+    "keywords": ["nmcli", "static IP", "network"]
+  },
+  {
+    "id": 22,
+    "q": "Create a new partition on /dev/sdb using fdisk",
+    "answer": "fdisk /dev/sdb; n; p; 1; <default>; <default>; w",
+    "keywords": ["fdisk", "partition", "disk"]
+  },
+  {
+    "id": 23,
+    "q": "Extend the filesystem on /dev/vg_system/lv_data to use all free space",
+    "answer": "lvextend -l +100%FREE /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data",
+    "keywords": ["lvextend", "resize2fs", "extend filesystem"]
+  },
+  {
+    "id": 24,
+    "q": "Install and enable the vsftpd service",
+    "answer": "dnf install vsftpd -y; systemctl enable vsftpd; systemctl start vsftpd",
+    "keywords": ["vsftpd", "FTP", "service"]
+  },
+  {
+    "id": 25,
+    "q": "Change the ownership of /home/student/docs to user admin",
+    "answer": "chown -R admin:admin /home/student/docs",
+    "keywords": ["chown", "ownership"]
+  },
+  {
+    "id": 26,
+    "q": "Set permissions on /etc/shadow to 000",
+    "answer": "chmod 000 /etc/shadow",
+    "keywords": ["chmod", "permissions", "shadow"]
+  },
+  {
+    "id": 27,
+    "q": "Create a simple shell script /usr/local/bin/hello.sh that prints 'Hello World' and make it executable",
+    "answer": "echo '#!/bin/bash\necho \"Hello World\"' > /usr/local/bin/hello.sh; chmod +x /usr/local/bin/hello.sh",
+    "keywords": ["shell script", "bash", "executable"]
+  },
+  {
+    "id": 28,
+    "q": "List all processes using more than 10% CPU",
+    "answer": "top -p $(pgrep -f .) | awk '$9 > 10'",
+    "keywords": ["top", "processes", "CPU"]
+  },
+  {
+    "id": 29,
+    "q": "Configure the system to use NTP for time synchronization",
+    "answer": "dnf install chrony -y; systemctl enable chronyd; systemctl start chronyd",
+    "keywords": ["chrony", "NTP", "time sync"]
+  },
+  {
+    "id": 30,
+    "q": "Create a new file system mount point /var/www and mount /dev/sdd1 there with defaults",
+    "answer": "mkdir /var/www; mount /dev/sdd1 /var/www; echo '/dev/sdd1 /var/www ext4 defaults 0 0' >> /etc/fstab",
+    "keywords": ["mount point", "fstab"]
+  },
+  {
+    "id": 31,
+    "q": "Disable the firewall for HTTP service",
+    "answer": "firewall-cmd --permanent --remove-service=http; firewall-cmd --reload",
+    "keywords": ["firewall-cmd", "disable service"]
+  },
+  {
+    "id": 32,
+    "q": "Find and kill a process with PID 1234",
+    "answer": "kill 1234",
+    "keywords": ["kill", "process"]
+  },
+  {
+    "id": 33,
+    "q": "Configure sudo for user student without password",
+    "answer": "echo 'student ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers",
+    "keywords": ["sudoers", "sudo"]
+  },
+  {
+    "id": 34,
+    "q": "Backup the /etc directory using rsync to /backup/etc",
+    "answer": "rsync -av /etc/ /backup/etc/",
+    "keywords": ["rsync", "backup"]
+  },
+  {
+    "id": 35,
+    "q": "Set the SELinux context for /var/www to httpd_sys_content_t",
+    "answer": "semanage fcontext -a -t httpd_sys_content_t '/var/www(/.*)?'; restorecon -Rv /var/www",
+    "keywords": ["semanage", "SELinux context"]
+  },
+  {
+    "id": 36,
+    "q": "List all mounted file systems",
+    "answer": "df -hT",
+    "keywords": ["df", "mounted filesystems"]
+  },
+  {
+    "id": 37,
+    "q": "Create a group named developers and add user student to it",
+    "answer": "groupadd developers; usermod -aG developers student",
+    "keywords": ["groupadd", "group"]
+  },
+  {
+    "id": 38,
+    "q": "Reboot the system immediately",
+    "answer": "reboot",
+    "keywords": ["reboot", "shutdown"]
+  },
+  {
+    "id": 39,
+    "q": "Check the status of the sshd service",
+    "answer": "systemctl status sshd",
+    "keywords": ["systemctl", "service status"]
+  },
+  {
+    "id": 40,
+    "q": "Update all packages on the system",
+    "answer": "dnf update -y",
+    "keywords": ["dnf", "update packages"]
   }
 ]

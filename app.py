@@ -156,9 +156,9 @@ def search():
 
 # Load and test the JSON file
 try:
-    with open('data/enemies.json', encoding='utf-8') as f:  # Specify UTF-8 encoding
+    with open('data/enemies.json', encoding='utf-8') as f:
         enemies = json.load(f)
-    print("Enemies loaded successfully!")
+    print(f"Enemies loaded successfully! Total enemies: {len(enemies)}")
 except FileNotFoundError:
     print("Error: enemies.json file not found in the data folder.")
     enemies = []  # Fallback to an empty list if the file is missing

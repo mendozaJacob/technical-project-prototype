@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     background: #1e1e2f;
-    color: #fff;
+    color: #fff; /* Ensure text is visible */
     text-align: center;
 }
 
@@ -20,8 +20,13 @@ body {
     padding: 12px 25px;
     background: #ff6f61;
     color: #fff;
-    text-decoration: none;
-    border-radius: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #e65a50;
 }
 
 .status {

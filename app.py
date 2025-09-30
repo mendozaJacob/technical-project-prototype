@@ -51,47 +51,6 @@ writer.commit()
 app = Flask(__name__)  # Fix: Initialize Flask app with __name__
 app.secret_key = "unix_rpg_secret"
 
-questions = [
-    {"q": "What does the command 'pwd' do?",
-     "options": ["A) Prints working directory",
-                 "B) Prints word document",
-                 "C) Password reset",
-                 "D) Print write data"],
-     "answer": "A",
-     "dialogue_correct": "✅ Correct! 'pwd' shows your current location in the filesystem. It's like asking: 'Where am I right now?'",
-     "dialogue_wrong": "❌ Not quite. 'pwd' stands for 'print working directory' — it tells you your current folder path."},
-
-    {"q": "Which command lists the files in your current directory?",
-     "options": ["A) ls", "B) cd", "C) cat", "D) echo"],
-     "answer": "A",
-     "dialogue_correct": "✅ Nice! 'ls' lists all files and directories in your current folder — like opening a treasure chest of files!",
-     "dialogue_wrong": "❌ Wrong. The 'ls' command shows all files and directories where you are. Think of it as 'Look Show'."},
-
-    {"q": "What command is used to change directories?",
-     "options": ["A) mv", "B) cd", "C) rm", "D) dir"],
-     "answer": "B",
-     "dialogue_correct": "✅ Correct! 'cd' means 'change directory' — it’s how you walk into a new folder.",
-     "dialogue_wrong": "❌ Nope. The right answer is 'cd'. It moves you from one folder to another, like stepping through a door."},
-
-    {"q": "Which command creates a new empty file?",
-     "options": ["A) touch", "B) mkdir", "C) rm", "D) nano"],
-     "answer": "A",
-     "dialogue_correct": "✅ Correct! 'touch filename' creates an empty file. It's like magically summoning a blank scroll.",
-     "dialogue_wrong": "❌ Wrong. The right answer is 'touch'. It’s used to create an empty file instantly."},
-
-    {"q": "Which command deletes a file?",
-     "options": ["A) cat", "B) rm", "C) delete", "D) erase"],
-     "answer": "B",
-     "dialogue_correct": "✅ Well done! 'rm' removes files permanently — be careful, there’s no recycle bin!",
-     "dialogue_wrong": "❌ Wrong. 'rm' is the delete command. Always double-check before using it!"}
-]
-
-enemies = [
-    {"name": "Gremlin of pwd", "avatar": "👹", "taunt": "The Gremlin snarls: 'You'll never escape directories!'"},
-    {"name": "Orc of cd", "avatar": "🧟", "taunt": "The Orc grunts: 'You cannot move between my folders!'"},
-    {"name": "Troll of ls", "avatar": "👺", "taunt": "The Troll laughs: 'You can't even see my files!'"},
-    {"name": "Dragon of rm", "avatar": "🐉", "taunt": "The Dragon roars: 'I will delete you like a file!'"},
-]
 
 BASE_ENEMY_HP = 50
 BASE_DAMAGE = 10
@@ -120,10 +79,10 @@ def game():
         if user_answer == correct_answer:
             session['score'] += 10
             session['enemy_hp'] -= 10
-            session['feedback'] = question['dialogue_correct']
+            session['feedback'] = "✅ Correct!"
         else:
             session['player_hp'] -= BASE_DAMAGE * session['enemy_level']
-            session['feedback'] = question['dialogue_wrong']
+            session['feedback'] = "❌ Incorrect!"
 
         if session['enemy_hp'] <= 0 and session['q_index'] < len(questions) - 1:
             session['enemy_level'] += 1
@@ -132,8 +91,12 @@ def game():
         session['q_index'] += 1
         return redirect(url_for('feedback'))
 
-    enemy_index = (session['enemy_level'] - 1) % len(enemies)
-    enemy = enemies[enemy_index]
+    # Fallback if enemies list is empty
+    if len(enemies) == 0:
+        enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found!"}
+    else:
+        enemy_index = (session['enemy_level'] - 1) % len(enemies)
+        enemy = enemies[enemy_index]
 
     return render_template('game.html', question=question,
                            score=session['score'],
@@ -190,6 +153,30 @@ def search():
         query = QueryParser("keywords", ix.schema).parse(query_text)
         results = searcher.search(query)
     return render_template('search.html', results=results)
+
+# Load and test the JSON file
+try:
+    with open('data/enemies.json', encoding='utf-8') as f:  # Specify UTF-8 encoding
+        enemies = json.load(f)
+    print("Enemies loaded successfully!")
+except FileNotFoundError:
+    print("Error: enemies.json file not found in the data folder.")
+    enemies = []  # Fallback to an empty list if the file is missing
+except json.JSONDecodeError as e:
+    print(f"Error: Failed to decode enemies.json - {e}")
+    enemies = []  # Fallback to an empty list if the file is invalid
+
+# Load questions from the JSON file
+try:
+    with open('data/questions.json', encoding='utf-8') as f:  # Specify UTF-8 encoding
+        questions = json.load(f)
+    print("Questions loaded successfully!")
+except FileNotFoundError:
+    print("Error: questions.json file not found in the data folder.")
+    questions = []  # Fallback to an empty list if the file is missing
+except json.JSONDecodeError as e:
+    print(f"Error: Failed to decode questions.json - {e}")
+    questions = []  # Fallback to an empty list if the file is invalid
 
 if __name__ == "__main__":
     app.run(debug=True)

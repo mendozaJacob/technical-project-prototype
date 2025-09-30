@@ -10,5 +10,15 @@
     "name": "Orc of cd",
     "avatar": "🧟",
     "taunt": "The Orc grunts: 'You cannot move between my folders!'"
+  },
+  {
+    "name": "Troll of ls",
+    "avatar": "👺",
+    "taunt": "The Troll laughs: 'You can't even see my files!'"
+  },
+  {
+    "name": "Dragon of rm",
+    "avatar": "🐉",
+    "taunt": "The Dragon roars: 'I will delete you like a file!'"
   }
 ]

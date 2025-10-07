@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -13,7 +15,8 @@
                     <th>Player</th>
                     <th>Score</th>
                     <th>Time (s)</th>
-                    <th>Question</th>
+                    <th>Correct Answers</th>
+                    <th>Wrong Answers</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,12 +25,12 @@
                     <td>{{ record.player }}</td>
                     <td>{{ record.score }}</td>
                     <td>{{ record.time }}</td>
-                    <td>{{ record.question }}</td>
+                    <td>{{ record.correct_answers }}</td>
+                    <td>{{ record.wrong_answers }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <a href="{{ url_for('index') }}" class="btn">Play Again</a>
     </div>
 </body>
 </html>

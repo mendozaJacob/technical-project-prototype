@@ -39,12 +39,14 @@ app = Flask(__name__)
 app.secret_key = "unix_rpg_secret"
 
 # Helper function to save leaderboard data
-def save_leaderboard(player_name, score, time_taken, question_text):
+def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers):
+    print("Saving leaderboard data...")  # Debugging
     record = {
         "player": player_name,
         "score": score,
-        "time": round(time_taken, 2),
-        "question": question_text
+        "time": round(total_time, 2),
+        "correct_answers": correct_answers,
+        "wrong_answers": wrong_answers
     }
     try:
         with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
@@ -67,7 +69,10 @@ def index():
     session['enemy_hp'] = BASE_ENEMY_HP * session['enemy_level']
     session['q_index'] = 0
     session['feedback'] = None
+    session['correct_answers'] = 0
+    session['wrong_answers'] = 0
     session["level_start_time"] = time.time()  # Initialize the timer for the first question
+    session["game_start_time"] = time.time()  # Track the start time of the game
     return render_template('index.html')  # Render the home page
 
 # Route for the game page
@@ -180,28 +185,23 @@ def result():
     bonus = 20 if session['q_index'] == len(questions) and session['player_hp'] > 0 else 0
     final_score = session['score'] + bonus
 
-    # Determine the outcome of the game
-    if session['player_hp'] <= 0:
-        outcome = "💀 You were defeated!"
-    elif session['q_index'] >= len(questions):
-        outcome = "🏆 You defeated all enemies!"
-    else:
-        outcome = "✅ Quiz completed!"
-
-    # Handle empty enemies list
-    if len(enemies) == 0:
-        enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found!"}
-    else:
-        enemy_index = (session['enemy_level'] - 1) % len(enemies)
-        enemy = enemies[enemy_index]
+    # Save the player's performance to the leaderboard
+    total_time = time.time() - session.get("game_start_time", time.time())
+    save_leaderboard(
+        player_name=session.get("player_name", "Anonymous"),
+        score=final_score,
+        total_time=total_time,
+        correct_answers=session.get('correct_answers', 0),
+        wrong_answers=session.get('wrong_answers', 0)
+    )
 
     # Render the result page
     return render_template('result.html', score=final_score,
                            player_hp=session['player_hp'],
                            enemy_hp=session['enemy_hp'],
-                           outcome=outcome,
+                           outcome="Game Over",
                            level=session['enemy_level'],
-                           enemy=enemy)
+                           enemy={"name": "Unknown Enemy", "avatar": "❓"})
 
 # Route for the search functionality
 from whoosh.qparser import QueryParser
@@ -224,8 +224,8 @@ def leaderboard():
     except (FileNotFoundError, json.JSONDecodeError):
         leaderboard = []
 
-    # Sort fastest answers first
-    leaderboard = sorted(leaderboard, key=lambda x: x["time"])
+    # Sort by score (highest first), then by time (lowest first)
+    leaderboard = sorted(leaderboard, key=lambda x: (-x["score"], x["time"]))
 
     return render_template("leaderboard.html", leaderboard=leaderboard)
 

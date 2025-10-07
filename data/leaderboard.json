@@ -1,0 +1,23 @@
+[
+    {
+        "player": "Anonymous",
+        "score": 10,
+        "time": 109.25,
+        "correct_answers": 3,
+        "wrong_answers": 4
+    },
+    {
+        "player": "Anonymous",
+        "score": 40,
+        "time": 82.43,
+        "correct_answers": 5,
+        "wrong_answers": 4
+    },
+    {
+        "player": "Anonymous",
+        "score": 45,
+        "time": 116.32,
+        "correct_answers": 5,
+        "wrong_answers": 4
+    }
+]

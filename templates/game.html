@@ -22,6 +22,10 @@
         <!-- Display the current question -->
         <h2>Question {{ q_number }} of {{ total }}</h2>
         <p>{{ question['q'] }}</p>
+        <form method="POST">
+            <input type="text" name="answer" placeholder="Type your command..." required>
+            <button type="submit" class="btn">Attack!</button>
+        </form>
     </div>
 
     <!-- Status section for additional stats -->

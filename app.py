@@ -84,7 +84,7 @@ def game():
 
     # Calculate remaining time
     elapsed = time.time() - session["level_start_time"]
-    time_left = max(0, LEVEL_TIME_LIMIT - int(elapsed))
+    time_left = max(0, session.get("current_timer", 20) - int(elapsed))
 
     if time_left == 0:
         # Time expired → apply penalty & move on
@@ -92,6 +92,7 @@ def game():
         session['feedback'] = "⏳ Time's up! You took too long."
         session['q_index'] += 1
         session["level_start_time"] = time.time()  # Reset timer for the next question
+        session["current_timer"] = max(20, session.get("current_timer", 20) - 5)  # Deduct 5s for next question
         return redirect(url_for('feedback'))
 
     if request.method == 'POST':
@@ -108,22 +109,30 @@ def game():
         # Calculate time taken to answer
         time_taken = time.time() - session["level_start_time"]
 
-        # Determine damage based on time taken
-        if time_taken <= 5:  # First 5 seconds → double damage
+        # Determine damage and score based on time taken
+        if time_taken <= 5:  # First 5 seconds → double damage and double score
             damage = 20
-        elif time_taken <= 15:  # Within 15 seconds → regular damage
+            score = 20
+        elif time_taken <= 15:  # Within 15 seconds → regular damage and score
             damage = 10
-        else:  # Remaining time → half damage
+            score = 10
+        else:  # Remaining time → half damage and low score
             damage = 5
+            score = 5
 
         # Check if the answer is correct
         if user_answer == correct_answer or user_answer in keywords:
-            session['score'] += damage  # Add damage to score
+            session['score'] += score  # Add score
             session['enemy_hp'] -= damage
-            session['feedback'] = f"✅ Correct! You dealt {damage} damage in {time_taken:.2f} seconds."
+            session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds."
+            session["current_timer"] = min(30, session.get("current_timer", 20) + 5)  # Add 5s to timer for next question
+            session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
         else:
             session['player_hp'] -= BASE_DAMAGE * session['enemy_level']
+            session['score'] -= 5  # Deduct points for wrong answer
             session['feedback'] = "❌ Incorrect!"
+            session["current_timer"] = max(20, session.get("current_timer", 20) - 5)  # Deduct 5s from timer for next question
+            session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
 
         # Reset timer for the next question
         session['level_start_time'] = time.time()

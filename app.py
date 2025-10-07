@@ -1,21 +1,7 @@
 # This code ensures Flask and Whoosh are installed before importing them, preventing runtime errors
 import subprocess
 import sys
-
-# Helper function to auto-install missing packages
-def install_and_import(package):
-    try:
-        __import__(package)
-    except ImportError:
-        print(f"📦 Installing {package} ...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-        globals()[package] = __import__(package)
-
-# Ensure Flask and Whoosh are available
-install_and_import("flask")
-install_and_import("whoosh")
-
-# Import necessary modules
+import os  # Add this line
 import json
 import time
 from flask import Flask, render_template, request, redirect, url_for, session

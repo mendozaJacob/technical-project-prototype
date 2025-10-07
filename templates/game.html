@@ -35,7 +35,7 @@
         <p>👾 Enemy HP: {{ enemy_hp }}</p>
         <p>⭐ Score: {{ score }}</p>
         <!-- Display the timer -->
-        <p id="timer">⏱️ Time Left: {{ time_left }}s</p>
+        <p id="timer">⏱️ Time Left: {{ time_left }} seconds</p>
     </div>
 
     <!-- Form for submitting the player's answer -->
@@ -54,13 +54,11 @@
             if (timeLeft > 0) {
                 // Decrease the time left and update the timer text
                 timeLeft--;
-                timerElement.innerText = "⏱️ Time Left: " + timeLeft + "s";
+                timerElement.innerText = "⏱️ Time Left: " + timeLeft + " seconds";
             } else {
                 // Stop the countdown when time reaches 0
                 clearInterval(countdown);
-                // ⏳ Auto-submit when time runs out
-                fetch(window.location.href, { method: "POST", body: new URLSearchParams({ answer: "" }) })
-                    .then(() => window.location.reload());
+                timerElement.innerText = "⏳ Time's up!";
             }
         }, 1000); // Run the function every 1000ms (1 second)
     </script>

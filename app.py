@@ -67,54 +67,66 @@ def index():
     session['enemy_hp'] = BASE_ENEMY_HP * session['enemy_level']
     session['q_index'] = 0
     session['feedback'] = None
+    session["level_start_time"] = time.time()  # Initialize the timer for the first question
     return render_template('index.html')  # Render the home page
 
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
 def game():
-    # Check if the game is over
     if session['q_index'] >= len(questions) or session['player_hp'] <= 0:
         return redirect(url_for('result'))
 
-    # Handle empty questions list
-    if len(questions) == 0:
-        return "No questions available. Please check the questions.json file."
-
     question = questions[session['q_index']]
 
-    # Initialize timer when new question starts
+    # Initialize the timer for the current question
     if "level_start_time" not in session:
         session["level_start_time"] = time.time()
 
     # Calculate remaining time
     elapsed = time.time() - session["level_start_time"]
-    if elapsed > LEVEL_TIME_LIMIT:
+    time_left = max(0, LEVEL_TIME_LIMIT - int(elapsed))
+
+    if time_left == 0:
         # Time expired → apply penalty & move on
         session['player_hp'] -= BASE_DAMAGE * session['enemy_level']
-        session['feedback'] = f"⏳ Time's up! You took too long."
+        session['feedback'] = "⏳ Time's up! You took too long."
         session['q_index'] += 1
-        session["level_start_time"] = time.time()  # reset timer
+        session["level_start_time"] = time.time()  # Reset timer for the next question
         return redirect(url_for('feedback'))
 
     if request.method == 'POST':
         user_answer = request.form.get('answer', '').strip().lower()
         correct_answer = question.get('answer', '').strip().lower()
 
-        # Normalize keywords: ensure it's a list
+        # Normalize keywords
         raw_keywords = question.get('keywords', [])
         if isinstance(raw_keywords, str):
             keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
         else:
             keywords = [str(k).strip().lower() for k in raw_keywords]
 
+        # Calculate time taken to answer
+        time_taken = time.time() - session["level_start_time"]
+
+        # Determine damage based on time taken
+        if time_taken <= 5:  # First 5 seconds → double damage
+            damage = 20
+        elif time_taken <= 15:  # Within 15 seconds → regular damage
+            damage = 10
+        else:  # Remaining time → half damage
+            damage = 5
+
         # Check if the answer is correct
         if user_answer == correct_answer or user_answer in keywords:
-            session['score'] += 10
-            session['enemy_hp'] -= 10
-            session['feedback'] = "✅ Correct!"
+            session['score'] += damage  # Add damage to score
+            session['enemy_hp'] -= damage
+            session['feedback'] = f"✅ Correct! You dealt {damage} damage in {time_taken:.2f} seconds."
         else:
             session['player_hp'] -= BASE_DAMAGE * session['enemy_level']
             session['feedback'] = "❌ Incorrect!"
+
+        # Reset timer for the next question
+        session['level_start_time'] = time.time()
 
         # Move to the next question
         session['q_index'] += 1
@@ -126,9 +138,6 @@ def game():
     else:
         enemy_index = (session['enemy_level'] - 1) % len(enemies)
         enemy = enemies[enemy_index]
-
-    # Calculate remaining time
-    time_left = max(0, LEVEL_TIME_LIMIT - int(elapsed))
 
     return render_template('game.html',
                            question=question,

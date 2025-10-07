@@ -1,7 +1,7 @@
 # This code ensures Flask and Whoosh are installed before importing them, preventing runtime errors
 import subprocess
 import sys
-import os  # Add this line
+import os  # fixes line 40 error
 import json
 import time
 from flask import Flask, render_template, request, redirect, url_for, session
@@ -99,9 +99,9 @@ def game():
     if request.method == 'POST':
         user_answer = request.form.get('answer').strip().lower()
         correct_answer = question['answer'].strip().lower()
-        keywords = [keyword.lower() for keyword in question.get('keywords', [])]
+        keywords = question['keywords'].strip().lower()
 
-        if user_answer == correct_answer or user_answer in keywords:
+        if user_answer == correct_answer or keywords:
             session['score'] += 10
             session['enemy_hp'] -= 10
             session['feedback'] = "✅ Correct!"

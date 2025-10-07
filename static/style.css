@@ -45,3 +45,9 @@ body {
     padding: 10px;
     border-radius: 10px;
 }
+
+#timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff6f61; /* Highlight the timer in red */
+}

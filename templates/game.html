@@ -1,24 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Metadata and linking the CSS file -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gamify RPG - Game</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Main container for the game content -->
     <div class="container">
+        <!-- Display the current level and enemy details -->
         <h1>Level {{ level }}: {{ enemy['name'] }}</h1>
         <p>{{ enemy['avatar'] }} {{ enemy['taunt'] }}</p>
+
+        <!-- Display player and enemy stats -->
         <p>Player HP: {{ player_hp }}</p>
         <p>Enemy HP: {{ enemy_hp }}</p>
         <p>Score: {{ score }}</p>
+
+        <!-- Display the current question -->
         <h2>Question {{ q_number }} of {{ total }}</h2>
         <p>{{ question['q'] }}</p>
         <form method="POST">
-            <input type="text" name="answer" placeholder="Type your answer..." required>
-            <button type="submit" class="btn">Submit</button>
+            <input type="text" name="answer" placeholder="Type your command..." required>
+            <button type="submit" class="btn">Attack!</button>
         </form>
     </div>
+
+    <!-- Status section for additional stats -->
+    <div class="status">
+        <!-- Display player stats -->
+        <p>🧑 Player HP: {{ player_hp }}</p>
+        <p>👾 Enemy HP: {{ enemy_hp }}</p>
+        <p>⭐ Score: {{ score }}</p>
+        <!-- Display the timer -->
+        <p id="timer">⏱️ Time Left: {{ time_left }}s</p>
+    </div>
+
+    <!-- Form for submitting the player's answer -->
+    <form method="POST">
+        <input type="text" name="answer" placeholder="Type your command..." required>
+        <button type="submit" class="btn">Attack!</button>
+    </form>
+
+    <script>
+        // Initialize the remaining time from the backend
+        let timeLeft = {{ time_left }};
+        const timerElement = document.getElementById("timer");
+
+        // Countdown logic to update the timer every second
+        const countdown = setInterval(() => {
+            if (timeLeft > 0) {
+                // Decrease the time left and update the timer text
+                timeLeft--;
+                timerElement.innerText = "⏱️ Time Left: " + timeLeft + "s";
+            } else {
+                // Stop the countdown when time reaches 0
+                clearInterval(countdown);
+                // ⏳ Auto-submit when time runs out
+                fetch(window.location.href, { method: "POST", body: new URLSearchParams({ answer: "" }) })
+                    .then(() => window.location.reload());
+            }
+        }, 1000); // Run the function every 1000ms (1 second)
+    </script>
 </body>
 </html>

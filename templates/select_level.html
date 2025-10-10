@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Level</title>
+    <!-- Fantasy font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #2e3d1f 0%, #7e5a2c 100%);
+            font-family: 'MedievalSharp', cursive;
+            color: #f3eac2;
+        }
+        .level-select-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #f3eac2;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            box-shadow: 0 0 24px #0008;
+            padding: 32px 24px 24px 24px;
+            text-align: center;
+        }
+        .level-title {
+            font-size: 2.5em;
+            color: #2e3d1f;
+            margin-bottom: 24px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0 #fff8, 0 0 8px #7e5a2c;
+        }
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .level-btn {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.5em;
+            padding: 18px 0;
+            border-radius: 16px;
+            border: 3px solid #4b2e05;
+            background: #b6d36b;
+            color: #2e3d1f;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0004;
+            transition: background 0.2s, transform 0.2s;
+            position: relative;
+        }
+        .level-btn.unlocked:hover {
+            background: #e6c15b;
+            transform: scale(1.08);
+        }
+        .level-btn.locked {
+            background: #b0b0b0;
+            color: #888;
+            border-style: dashed;
+            cursor: not-allowed;
+        }
+        .level-btn .icon {
+            display: block;
+            font-size: 1.2em;
+            margin-bottom: 4px;
+        }
+        .level-stars {
+            margin-top: 4px;
+            color: #e6c15b;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="level-select-container">
+        <div class="level-title">🛡️ Select Your Dungeon 🐉</div>
+        <form method="post">
+            <div class="level-grid">
+                {% for level in levels %}
+                    {% if level.level <= highest_unlocked %}
+                        <button class="level-btn unlocked" name="level" value="{{ level.level }}">
+                            <span class="icon">⚔️</span>
+                            {{ level.level }}
+                        </button>
+                    {% else %}
+                        <button class="level-btn locked" disabled>
+                            <span class="icon">🔒</span>
+                            {{ level.level }}
+                        </button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+</body>
+</html>

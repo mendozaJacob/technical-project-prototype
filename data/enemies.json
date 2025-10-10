@@ -1,205 +1,72 @@
-// this is an example of an enemy entry
-// you can add as many as you want
 [
   {
-    "name": "Imp of Hostnames",
-    "avatar": "👿",
-    "taunt": "The Imp hisses: 'Your name shall never be set!'"
-  },
-  {
-    "name": "Troll of ls",
-    "avatar": "👺",
-    "taunt": "The Troll laughs: 'You can't even see my files!'"
-  },
-  {
-    "name": "Orc of Useradd",
-    "avatar": "🧟",
-    "taunt": "The Orc growls: 'No new users shall join your ranks!'"
-  },
-  {
-    "name": "Goblin of Mkdir",
-    "avatar": "👹",
-    "taunt": "The Goblin cackles: 'No new directories shall exist under my watch!'"
-  },
-  {
-    "name": "Wraith of Mount",
-    "avatar": "👻",
-    "taunt": "The Wraith whispers: 'Your filesystems will never attach!'"
-  },
-  {
-    "name": "Specter of Graphical Mode",
-    "avatar": "💀",
-    "taunt": "The Specter moans: 'You shall be trapped in the command line forever!'"
-  },
-  {
-    "name": "Ogre of DNF",
-    "avatar": "👹",
-    "taunt": "The Ogre snarls: 'No package shall be installed without my permission!'"
-  },
-  {
-    "name": "Shade of Crontab",
-    "avatar": "🧞",
-    "taunt": "The Shade murmurs: 'Your jobs shall never run on time!'"
-  },
-  {
-    "name": "Phantom of Find",
-    "avatar": "👻",
-    "taunt": "The Phantom whispers: 'You’ll never find what you seek!'"
-  },
-  {
-    "name": "Guardian of Firewalls",
-    "avatar": "🛡️",
-    "taunt": "The Guardian booms: 'No SSH shall pass through me!'"
-  },
-  {
-    "name": "Golem of LVM",
-    "avatar": "🪨",
-    "taunt": "The Golem rumbles: 'Your volumes will crumble before my might!'"
-  },
-  {
-    "name": "Sprite of Mkfs",
-    "avatar": "🧚",
-    "taunt": "The Sprite giggles: 'You dare format my disk? Never!'"
-  },
-  {
-    "name": "Knight of Usermod",
-    "avatar": "🗡️",
-    "taunt": "The Knight proclaims: 'You shall not join the wheel of power!'"
-  },
-  {
-    "name": "Daemon of Services",
-    "avatar": "👾",
-    "taunt": "The Daemon growls: 'Your httpd shall never rise again!'"
-  },
-  {
-    "name": "Warden of SELinux",
-    "avatar": "🧙",
-    "taunt": "The Warden chants: 'Your system shall never enforce its will!'"
-  },
-  {
-    "name": "Ghoul of Swap",
-    "avatar": "💀",
-    "taunt": "The Ghoul sneers: 'Your memory shall run dry!'"
-  },
-  {
-    "name": "Dragon of Tar",
-    "avatar": "🐉",
-    "taunt": "The Dragon roars: 'Your backups will burn to ashes!'"
-  },
-  {
-    "name": "Chronomancer of Timezone",
-    "avatar": "⏳",
-    "taunt": "The Chronomancer laughs: 'You will never be on time again!'"
-  },
-  {
-    "name": "Lich of Chage",
+    "level": 1,
+    "name": "Novice Gnome",
     "avatar": "🧙‍♂️",
-    "taunt": "The Lich croaks: 'Your passwords shall wither and die!'"
+    "taunt": "Let's see if you even know what 'ls' does!",
+    "range": "Q1–Q10"
   },
   {
-    "name": "Imp of NMCLI",
-    "avatar": "👿",
-    "taunt": "The Imp snarls: 'Your network interfaces shall vanish!'"
+    "level": 2,
+    "name": "Apprentice Admin",
+    "avatar": "👨‍💻",
+    "taunt": "You’ve mastered the basics… but can you handle users and groups?",
+    "range": "Q11–Q20"
   },
   {
-    "name": "Siren of Static IPs",
-    "avatar": "🧜‍♀️",
-    "taunt": "The Siren sings: 'Your IP shall drift endlessly in the seas of DHCP!'"
+    "level": 3,
+    "name": "Daemon Scribe",
+    "avatar": "👾",
+    "taunt": "Services and mounts are my domain. Tread carefully.",
+    "range": "Q21–Q30"
   },
   {
-    "name": "Titan of Fdisk",
-    "avatar": "🪓",
-    "taunt": "The Titan grins: 'Your disks will remain uncut and unshaped!'"
+    "level": 4,
+    "name": "Shell Warden",
+    "avatar": "🧞",
+    "taunt": "Your shell skills are weak, mortal!",
+    "range": "Q31–Q40"
   },
   {
-    "name": "Beast of LVExtend",
-    "avatar": "🐲",
-    "taunt": "The Beast growls: 'Your storage shall never grow!'"
-  },
-  {
-    "name": "Harpy of VSFTPD",
-    "avatar": "🦅",
-    "taunt": "The Harpy screeches: 'Your FTP shall never take flight!'"
-  },
-  {
-    "name": "Gremlin of Chown",
-    "avatar": "👺",
-    "taunt": "The Gremlin jeers: 'No one owns these files but me!'"
-  },
-  {
-    "name": "Specter of Chmod",
-    "avatar": "👻",
-    "taunt": "The Specter whispers: 'You have no permission here!'"
-  },
-  {
-    "name": "Imp of Bash",
-    "avatar": "😈",
-    "taunt": "The Imp smirks: 'Your scripts shall never speak!'"
-  },
-  {
-    "name": "Ogre of CPU",
-    "avatar": "👹",
-    "taunt": "The Ogre bellows: 'I feast on your processes!'"
-  },
-  {
-    "name": "Watcher of Chrony",
-    "avatar": "👁️",
-    "taunt": "The Watcher mutters: 'Your clocks shall desync for eternity!'"
-  },
-  {
-    "name": "Guardian of Mount Points",
+    "level": 5,
+    "name": "System Guardian",
     "avatar": "🛡️",
-    "taunt": "The Guardian shouts: 'You shall not mount here!'"
+    "taunt": "Let's see how well you know your systemctl magic.",
+    "range": "Q41–Q50"
   },
   {
-    "name": "Banshee of Firewalls",
-    "avatar": "🧟‍♀️",
-    "taunt": "The Banshee wails: 'Your ports shall remain sealed!'"
+    "level": 6,
+    "name": "Kernel Knight",
+    "avatar": "⚔️",
+    "taunt": "Only true warriors understand SELinux and permissions!",
+    "range": "Q51–Q60"
   },
   {
-    "name": "Shade of Processes",
-    "avatar": "🌫️",
-    "taunt": "The Shade whispers: 'Your kill command will miss its mark!'"
+    "level": 7,
+    "name": "Network Phantom",
+    "avatar": "🕸️",
+    "taunt": "Firewalls, DNS, and IPs — your connectivity ends here.",
+    "range": "Q61–Q70"
   },
   {
-    "name": "Templar of Sudo",
-    "avatar": "🗡️",
-    "taunt": "The Templar declares: 'You shall always be asked for the password!'"
+    "level": 8,
+    "name": "Storage Titan",
+    "avatar": "💾",
+    "taunt": "LVM, RAID, and mounting madness await you!",
+    "range": "Q71–Q80"
   },
   {
-    "name": "Wraith of Rsync",
-    "avatar": "👻",
-    "taunt": "The Wraith moans: 'Your backups will drift into the void!'"
+    "level": 9,
+    "name": "Virtual Overlord",
+    "avatar": "🤖",
+    "taunt": "Containers, virtualization, and automation — prove your worth!",
+    "range": "Q81–Q90"
   },
   {
-    "name": "Sentinel of SELinux Context",
-    "avatar": "🛡️",
-    "taunt": "The Sentinel warns: 'Your files shall never serve the web!'"
-  },
-  {
-    "name": "Troll of DF",
-    "avatar": "👺",
-    "taunt": "The Troll laughs: 'You’ll never know what’s mounted!'"
-  },
-  {
-    "name": "Goblin of Groups",
-    "avatar": "👹",
-    "taunt": "The Goblin growls: 'No group shall form under your rule!'"
-  },
-  {
-    "name": "Reaper of Reboot",
-    "avatar": "💀",
-    "taunt": "The Reaper whispers: 'I will restart you forever!'"
-  },
-  {
-    "name": "Specter of SSHD",
-    "avatar": "👻",
-    "taunt": "The Specter murmurs: 'Your remote connections will be denied!'"
-  },
-  {
-    "name": "Overlord of Updates",
-    "avatar": "🧛",
-    "taunt": "The Overlord hisses: 'Your system shall remain outdated forever!'"
+    "level": 10,
+    "name": "Root Daemon",
+    "avatar": "🔥",
+    "taunt": "You’ve reached the core. Only a true sysadmin can defeat me!",
+    "range": "Q91–Q100"
   }
 ]
-

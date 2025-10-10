@@ -66,21 +66,48 @@ def get_questions_for_level(level_number, levels):
         return [q for q in questions if q.get("id") in level_info["questions"]]
     return []
 
+
+# Route for level selection
+@app.route('/select_level', methods=['GET', 'POST'])
+def select_level():
+    try:
+        with open("data/levels.json", "r", encoding="utf-8") as f:
+            levels = json.load(f)
+    except Exception:
+        levels = []
+
+    # Determine highest unlocked level (simple: highest completed in session, or 1 if none)
+    highest_unlocked = session.get('highest_unlocked', 1)
+    # Optionally, you could use leaderboard or persistent storage for this
+
+    if request.method == 'POST':
+        selected_level = int(request.form.get('level', 1))
+        session['selected_level'] = selected_level
+        # Reset session variables for a new game
+        session['score'] = 0
+        session['player_hp'] = 100  # Set player HP to 100
+        session['enemy_level'] = selected_level
+        session['enemy_hp'] = 100  # Set enemy HP to 100
+        session['q_index'] = 0
+        session['feedback'] = None
+        session['correct_answers'] = 0
+        session['wrong_answers'] = 0
+        session["level_start_time"] = time.time()
+        session["game_start_time"] = time.time()
+        session['level_completed'] = False
+        session['current_timer'] = 45  # Default timer is 45 seconds
+        return redirect(url_for('game'))
+
+    # Pass unlocked info to template
+    return render_template('select_level.html', levels=levels, highest_unlocked=highest_unlocked)
+
 # Route for the home page
 @app.route('/')
 def index():
-    # Initialize session variables for the game
-    session['score'] = 0
-    session['player_hp'] = 50
-    session['enemy_level'] = 1
-    session['enemy_hp'] = BASE_ENEMY_HP * session['enemy_level']
-    session['q_index'] = 0
-    session['feedback'] = None
-    session['correct_answers'] = 0
-    session['wrong_answers'] = 0
-    session["level_start_time"] = time.time()  # Initialize the timer for the first question
-    session["game_start_time"] = time.time()  # Track the start time of the game
-    return render_template('index.html')  # Render the home page
+    # Always redirect to level selection if no level is selected
+    if 'selected_level' not in session:
+        return redirect(url_for('select_level'))
+    return render_template('index.html')
 
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
@@ -89,10 +116,9 @@ def game():
     if session['q_index'] >= len(questions) or session['player_hp'] <= 0:
         return redirect(url_for('result'))
 
-    # Calculate the current level based on the question index
-    current_level = (session['q_index'] // 10) + 1
 
-    # Ensure the level does not exceed the number of levels
+    # Use selected level from session
+    selected_level = session.get('selected_level', 1)
     try:
         with open("data/levels.json", "r", encoding="utf-8") as f:
             levels = json.load(f)
@@ -101,23 +127,28 @@ def game():
     except json.JSONDecodeError as e:
         return f"Error: Failed to decode levels.json - {e}"
 
-    if current_level > len(levels):
-        current_level = len(levels)
-
-    # Get questions for the current level
+    # Only allow playing the selected level
+    current_level = selected_level
     level_questions = get_questions_for_level(current_level, levels)
     print(f"DEBUG: Level {current_level} questions: {level_questions}")  # Debugging
-
-    # Ensure there are questions for the current level
     if not level_questions:
         return "No questions available for this level. Please check levels.json."
 
-    # Get the current question
-    question_index = session['q_index'] % 10  # Ensure only 10 questions per level
+    # Only allow up to 10 questions per level
+    question_index = session['q_index'] % 10
+    if session['q_index'] >= 10:
+        # Level completed
+        session['level_completed'] = True
+        return redirect(url_for('result'))
     question = level_questions[question_index]
 
-    # Select the enemy for the current level
-    enemy = next((e for e in enemies if e["level"] == current_level), None)
+    # Always reload enemies from JSON for each game session
+    try:
+        with open('data/enemies.json', encoding='utf-8') as f:
+            enemies = json.load(f)
+    except Exception:
+        enemies = []
+    enemy = next((e for e in enemies if e.get("level") == current_level), None)
     if not enemy:
         enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found for this level."}
     print(f"DEBUG: Selected enemy for level {current_level}: {enemy}")  # Debugging
@@ -128,7 +159,7 @@ def game():
 
     # Calculate remaining time
     elapsed = time.time() - session["level_start_time"]
-    time_left = max(0, session.get("current_timer", 20) - int(elapsed))
+    time_left = max(0, session.get("current_timer", 45) - int(elapsed))
 
     if time_left == 0:
         # Time expired → apply penalty & move on
@@ -136,7 +167,7 @@ def game():
         session['feedback'] = "⏳ Time's up! You took too long."
         session['q_index'] += 1
         session["level_start_time"] = time.time()  # Reset timer for the next question
-        session["current_timer"] = max(20, session.get("current_timer", 20) - 5)  # Deduct 5s for next question
+        session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s for next question, min 10s
         return redirect(url_for('feedback'))
 
     if request.method == 'POST':
@@ -165,17 +196,23 @@ def game():
             score = 5
 
         # Check if the answer is correct
-        if user_answer == correct_answer or user_answer in keywords:
+        if user_answer == correct_answer:
+            session['score'] += score  # Add score
+            session['enemy_hp'] -= (damage * 3)
+            session['feedback'] = f"🔥 Exact answer! Triple damage: {damage*3} and {score} points in {time_taken:.2f} seconds."
+            session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
+            session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
+        elif user_answer in keywords:
             session['score'] += score  # Add score
             session['enemy_hp'] -= damage
             session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds."
-            session["current_timer"] = min(30, session.get("current_timer", 20) + 5)  # Add 5s to timer for next question
+            session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
             session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
         else:
             session['player_hp'] -= BASE_DAMAGE * current_level
             session['score'] -= 5  # Deduct points for wrong answer
             session['feedback'] = "❌ Incorrect!"
-            session["current_timer"] = max(20, session.get("current_timer", 20) - 5)  # Deduct 5s from timer for next question
+            session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s from timer for next question, min 10s
             session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
 
         # Reset timer for the next question
@@ -214,7 +251,7 @@ def feedback():
 @app.route('/result')
 def result():
     # Calculate the final score
-    bonus = 20 if session['q_index'] == len(questions) and session['player_hp'] > 0 else 0
+    bonus = 20 if session.get('level_completed', False) and session['player_hp'] > 0 else 0
     final_score = session['score'] + bonus
 
     # Save the player's performance to the leaderboard
@@ -227,13 +264,30 @@ def result():
         wrong_answers=session.get('wrong_answers', 0)
     )
 
-    # Render the result page
+    # If the level is completed, allow to select next level
+    next_level = session.get('selected_level', 1) + 1
+    try:
+        with open("data/levels.json", "r", encoding="utf-8") as f:
+            levels = json.load(f)
+    except Exception:
+        levels = []
+    max_level = max([lvl['level'] for lvl in levels], default=1)
+    can_advance = session.get('level_completed', False) and next_level <= max_level
+
+    # Unlock the next level if completed
+    if session.get('level_completed', False):
+        prev_highest = session.get('highest_unlocked', 1)
+        if next_level > prev_highest:
+            session['highest_unlocked'] = next_level
+
     return render_template('result.html', score=final_score,
                            player_hp=session['player_hp'],
                            enemy_hp=session['enemy_hp'],
                            outcome="Game Over",
                            level=session['enemy_level'],
-                           enemy={"name": "Unknown Enemy", "avatar": "❓"})
+                           enemy={"name": "Unknown Enemy", "avatar": "❓"},
+                           can_advance=can_advance,
+                           next_level=next_level)
 
 # Route for the search functionality
 from whoosh.qparser import QueryParser

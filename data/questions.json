@@ -3,240 +3,601 @@
     "id": 1,
     "q": "Configure your Host Name to server1.example.com",
     "answer": "hostnamectl set-hostname server1.example.com",
-    "keywords": "hostnamectl"
+    "keywords": ["hostname", "hostnamectl"]
   },
   {
     "id": 2,
     "q": "Which command lists the files in your current directory?",
     "answer": "ls",
-    "keywords": "ls"
+    "keywords": ["ls", "list files"]
   },
   {
     "id": 3,
     "q": "Create a user named student with password student",
     "answer": "useradd student; echo 'student' | passwd --stdin student",
-    "keywords": "useradd, passwd"
+    "keywords": ["useradd", "create user", "passwd"]
   },
   {
     "id": 4,
     "q": "How do you create a new directory named /home/student/docs?",
     "answer": "mkdir -p /home/student/docs",
-    "keywords": "mkdir"
+    "keywords": ["mkdir", "create directory"]
   },
   {
     "id": 5,
     "q": "Mount the /dev/sdb1 filesystem to /mnt/data",
     "answer": "mount /dev/sdb1 /mnt/data",
-    "keywords": "mount"
+    "keywords": ["mount", "filesystem"]
   },
   {
     "id": 6,
     "q": "Configure the system to boot into graphical mode",
     "answer": "systemctl set-default graphical.target",
-    "keywords": "systemctl"
+    "keywords": ["systemctl", "graphical target"]
   },
   {
     "id": 7,
     "q": "Install the httpd package",
     "answer": "dnf install httpd -y",
-    "keywords": "dnf install"
+    "keywords": ["dnf", "install package", "httpd"]
   },
   {
     "id": 8,
     "q": "Create a cron job to run /usr/bin/backup.sh daily at 2 AM",
     "answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
-    "keywords": "crontab"
+    "keywords": ["crontab", "cron job", "schedule"]
   },
   {
     "id": 9,
     "q": "Find all files owned by user student",
     "answer": "find / -user student 2>/dev/null",
-    "keywords": "find"
+    "keywords": ["find", "user files"]
   },
   {
     "id": 10,
     "q": "Configure firewall to allow SSH",
     "answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
-    "keywords": "firewall-cmd"
+    "keywords": ["firewall-cmd", "SSH", "firewall"]
   },
   {
     "id": 11,
     "q": "Create a logical volume named lv_data of size 100M in volume group vg_system",
     "answer": "lvcreate -L 100M -n lv_data vg_system",
-    "keywords": "lvcreate"
+    "keywords": ["lvcreate", "LVM", "logical volume"]
   },
   {
     "id": 12,
     "q": "Format /dev/sdc1 with ext4 filesystem",
     "answer": "mkfs.ext4 /dev/sdc1",
-    "keywords": "mkfs.ext4"
+    "keywords": ["mkfs", "ext4", "format"]
   },
   {
     "id": 13,
     "q": "Add the user student to the wheel group",
     "answer": "usermod -aG wheel student",
-    "keywords": "usermod"
+    "keywords": ["usermod", "group", "wheel"]
   },
   {
     "id": 14,
     "q": "Start and enable the httpd service",
     "answer": "systemctl start httpd; systemctl enable httpd",
-    "keywords": "systemctl"
+    "keywords": ["systemctl", "httpd", "service"]
   },
   {
     "id": 15,
     "q": "Configure SELinux to enforcing mode",
     "answer": "setenforce 1; sed -i 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config",
-    "keywords": "setenforce"
+    "keywords": ["SELinux", "setenforce", "enforcing"]
   },
   {
     "id": 16,
     "q": "Create a swap file of 512M and activate it",
     "answer": "dd if=/dev/zero of=/swapfile bs=1M count=512; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile",
-    "keywords": "swap, mkswap, swapon"
+    "keywords": ["swap", "mkswap", "swapon"]
   },
   {
     "id": 17,
     "q": "Archive and compress the /home directory to /tmp/home_backup.tar.gz",
     "answer": "tar -czf /tmp/home_backup.tar.gz /home",
-    "keywords": "tar"
+    "keywords": ["tar", "compress", "archive"]
   },
   {
     "id": 18,
     "q": "Configure the system time zone to America/New_York",
     "answer": "timedatectl set-timezone America/New_York",
-    "keywords": "timedatectl"
+    "keywords": ["timedatectl", "timezone"]
   },
   {
     "id": 19,
     "q": "Set the password for user student to never expire",
     "answer": "chage -M -1 student",
-    "keywords": "chage"
+    "keywords": ["chage", "password expire"]
   },
   {
     "id": 20,
     "q": "List all active network interfaces",
     "answer": "nmcli device status",
-    "keywords": "nmcli"
+    "keywords": ["nmcli", "network interfaces"]
   },
   {
     "id": 21,
     "q": "Configure a static IP address 192.168.1.100/24 for interface enp0s3",
     "answer": "nmcli con mod enp0s3 ipv4.addresses 192.168.1.100/24 ipv4.method manual; nmcli con up enp0s3",
-    "keywords": "nmcli"
+    "keywords": ["nmcli", "static IP", "network"]
   },
   {
     "id": 22,
     "q": "Create a new partition on /dev/sdb using fdisk",
     "answer": "fdisk /dev/sdb; n; p; 1; <default>; <default>; w",
-    "keywords": "fdisk"
+    "keywords": ["fdisk", "partition", "disk"]
   },
   {
     "id": 23,
     "q": "Extend the filesystem on /dev/vg_system/lv_data to use all free space",
     "answer": "lvextend -l +100%FREE /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data",
-    "keywords": "lvextend, resize2fs"
+    "keywords": ["lvextend", "resize2fs", "extend filesystem"]
   },
   {
     "id": 24,
     "q": "Install and enable the vsftpd service",
     "answer": "dnf install vsftpd -y; systemctl enable vsftpd; systemctl start vsftpd",
-    "keywords": "dnf install, systemctl"
+    "keywords": ["vsftpd", "FTP", "service"]
   },
   {
     "id": 25,
     "q": "Change the ownership of /home/student/docs to user admin",
     "answer": "chown -R admin:admin /home/student/docs",
-    "keywords": "chown"
+    "keywords": ["chown", "ownership"]
   },
   {
     "id": 26,
     "q": "Set permissions on /etc/shadow to 000",
     "answer": "chmod 000 /etc/shadow",
-    "keywords": "chmod"
+    "keywords": ["chmod", "permissions", "shadow"]
   },
   {
     "id": 27,
     "q": "Create a simple shell script /usr/local/bin/hello.sh that prints 'Hello World' and make it executable",
     "answer": "echo '#!/bin/bash\necho \"Hello World\"' > /usr/local/bin/hello.sh; chmod +x /usr/local/bin/hello.sh",
-    "keywords": "shell script, chmod"
+    "keywords": ["shell script", "bash", "executable"]
   },
   {
     "id": 28,
     "q": "List all processes using more than 10% CPU",
     "answer": "top -p $(pgrep -f .) | awk '$9 > 10'",
-    "keywords": "top"
+    "keywords": ["top", "processes", "CPU"]
   },
   {
     "id": 29,
     "q": "Configure the system to use NTP for time synchronization",
     "answer": "dnf install chrony -y; systemctl enable chronyd; systemctl start chronyd",
-    "keywords": "chrony, systemctl"
+    "keywords": ["chrony", "NTP", "time sync"]
   },
   {
     "id": 30,
     "q": "Create a new file system mount point /var/www and mount /dev/sdd1 there with defaults",
     "answer": "mkdir /var/www; mount /dev/sdd1 /var/www; echo '/dev/sdd1 /var/www ext4 defaults 0 0' >> /etc/fstab",
-    "keywords": "mkdir, mount, fstab"
+    "keywords": ["mount point", "fstab"]
   },
   {
     "id": 31,
     "q": "Disable the firewall for HTTP service",
     "answer": "firewall-cmd --permanent --remove-service=http; firewall-cmd --reload",
-    "keywords": "firewall-cmd"
+    "keywords": ["firewall-cmd", "disable service"]
   },
   {
     "id": 32,
     "q": "Find and kill a process with PID 1234",
     "answer": "kill 1234",
-    "keywords": "kill"
+    "keywords": ["kill", "process"]
   },
   {
     "id": 33,
     "q": "Configure sudo for user student without password",
     "answer": "echo 'student ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers",
-    "keywords": "sudoers"
+    "keywords": ["sudoers", "sudo"]
   },
   {
     "id": 34,
     "q": "Backup the /etc directory using rsync to /backup/etc",
     "answer": "rsync -av /etc/ /backup/etc/",
-    "keywords": "rsync"
+    "keywords": ["rsync", "backup"]
   },
   {
     "id": 35,
     "q": "Set the SELinux context for /var/www to httpd_sys_content_t",
     "answer": "semanage fcontext -a -t httpd_sys_content_t '/var/www(/.*)?'; restorecon -Rv /var/www",
-    "keywords": "semanage fcontext"
+    "keywords": ["semanage", "SELinux context"]
   },
   {
     "id": 36,
     "q": "List all mounted file systems",
     "answer": "df -hT",
-    "keywords": "df -hT"
+    "keywords": ["df", "mounted filesystems"]
   },
   {
     "id": 37,
     "q": "Create a group named developers and add user student to it",
     "answer": "groupadd developers; usermod -aG developers student",
-    "keywords": "groupadd, usermod"
+    "keywords": ["groupadd", "group"]
   },
   {
     "id": 38,
     "q": "Reboot the system immediately",
     "answer": "reboot",
-    "keywords": "reboot"
+    "keywords": ["reboot", "shutdown"]
   },
   {
     "id": 39,
     "q": "Check the status of the sshd service",
     "answer": "systemctl status sshd",
-    "keywords": "systemctl"
+    "keywords": ["systemctl", "service status"]
   },
   {
     "id": 40,
     "q": "Update all packages on the system",
     "answer": "dnf update -y",
-    "keywords": "dnf update"
+    "keywords": ["dnf", "update packages"]
+  },
+  {
+    "id": 41,
+    "q": "Create a volume group named vg_data using /dev/sdb",
+    "answer": "vgcreate vg_data /dev/sdb",
+    "keywords": ["vgcreate", "volume group", "LVM"]
+  },
+  {
+    "id": 42,
+    "q": "Reduce the size of logical volume lv_data by 50M",
+    "answer": "umount /dev/vg_system/lv_data; e2fsck -f /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data 150M; lvreduce -L 200M /dev/vg_system/lv_data",
+    "keywords": ["lvreduce", "resize2fs", "reduce LV"]
+  },
+  {
+    "id": 43,
+    "q": "Configure NFS export for /exports/share to 192.168.1.0/24 with read-write access",
+    "answer": "echo '/exports/share 192.168.1.0/24(rw,sync)' >> /etc/exports; exportfs -ra",
+    "keywords": ["NFS", "exports", "share"]
+  },
+  {
+    "id": 44,
+    "q": "Install and configure Samba for anonymous access to /samba/share",
+    "answer": "dnf install samba -y; mkdir /samba/share; chmod 777 /samba/share; echo '[share]\\npath = /samba/share\\nbrowseable = yes\\nguest ok = yes\\nread only = no' > /etc/samba/smb.conf; systemctl enable smb; systemctl start smb",
+    "keywords": ["Samba", "SMB", "share"]
+  },
+  {
+    "id": 45,
+    "q": "Set up auditing for file access on /var/log/audit.log",
+    "answer": "auditctl -w /var/log/audit.log -p wa -k log-watch",
+    "keywords": ["auditctl", "auditing"]
+  },
+  {
+    "id": 46,
+    "q": "Configure the system to ignore IPv6",
+    "answer": "echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf; sysctl -p",
+    "keywords": ["IPv6", "sysctl"]
+  },
+  {
+    "id": 47,
+    "q": "Create a symbolic link from /tmp/link to /etc/passwd",
+    "answer": "ln -s /etc/passwd /tmp/link",
+    "keywords": ["ln", "symbolic link"]
+  },
+  {
+    "id": 48,
+    "q": "List all users in the system",
+    "answer": "getent passwd",
+    "keywords": ["getent", "users"]
+  },
+  {
+    "id": 49,
+    "q": "Configure the firewall to allow port 8080/tcp",
+    "answer": "firewall-cmd --permanent --add-port=8080/tcp; firewall-cmd --reload",
+    "keywords": ["firewall-cmd", "port"]
+  },
+  {
+    "id": 50,
+    "q": "Delete the user student and its home directory",
+    "answer": "userdel -r student",
+    "keywords": ["userdel", "delete user"]
+  },
+  {
+    "id": 51,
+    "q": "Create a hard link named backup in /tmp to /etc/hosts",
+    "answer": "ln /etc/hosts /tmp/backup",
+    "keywords": ["ln", "hard link"]
+  },
+  {
+    "id": 52,
+    "q": "Check disk usage for the root filesystem",
+    "answer": "df -h /",
+    "keywords": ["df", "disk usage"]
+  },
+  {
+    "id": 53,
+    "q": "Install the vim-enhanced package",
+    "answer": "dnf install vim-enhanced -y",
+    "keywords": ["dnf", "vim"]
+  },
+  {
+    "id": 54,
+    "q": "Configure the system to boot into single-user mode by default",
+    "answer": "systemctl set-default rescue.target",
+    "keywords": ["systemctl", "rescue target"]
+  },
+  {
+    "id": 55,
+    "q": "Find all empty directories in /home",
+    "answer": "find /home -type d -empty",
+    "keywords": ["find", "empty directories"]
+  },
+  {
+    "id": 56,
+    "q": "Set the umask for the root user to 027",
+    "answer": "echo 'umask 027' >> /root/.bashrc",
+    "keywords": ["umask", "permissions"]
+  },
+  {
+    "id": 57,
+    "q": "Configure the hostname resolution for server2.example.com in /etc/hosts",
+    "answer": "echo '192.168.1.101 server2.example.com' >> /etc/hosts",
+    "keywords": ["/etc/hosts", "hostname resolution"]
+  },
+  {
+    "id": 58,
+    "q": "List all services that are enabled",
+    "answer": "systemctl list-unit-files --type=service | grep enabled",
+    "keywords": ["systemctl", "enabled services"]
+  },
+  {
+    "id": 59,
+    "q": "Create a new LVM physical volume on /dev/sde",
+    "answer": "pvcreate /dev/sde",
+    "keywords": ["pvcreate", "physical volume"]
+  },
+  {
+    "id": 60,
+    "q": "Mount an ISO file /tmp/rhel.iso to /mnt/iso",
+    "answer": "mkdir /mnt/iso; mount -o loop /tmp/rhel.iso /mnt/iso",
+    "keywords": ["mount", "ISO", "loop"]
+  },
+  {
+    "id": 61,
+    "q": "Configure the firewall to allow DNS service",
+    "answer": "firewall-cmd --permanent --add-service=dns; firewall-cmd --reload",
+    "keywords": ["firewall-cmd", "DNS"]
+  },
+  {
+    "id": 62,
+    "q": "Change the group ownership of /var/log to adm",
+    "answer": "chgrp -R adm /var/log",
+    "keywords": ["chgrp", "group ownership"]
+  },
+  {
+    "id": 63,
+    "q": "Create a cron job to clean /tmp every Sunday at 3 AM",
+    "answer": "crontab -e; 0 3 * * 0 rm -rf /tmp/*",
+    "keywords": ["crontab", "weekly cron"]
+  },
+  {
+    "id": 64,
+    "q": "Verify the integrity of the package database",
+    "answer": "dnf verify",
+    "keywords": ["dnf", "verify packages"]
+  },
+  {
+    "id": 65,
+    "q": "Set SELinux to permissive mode temporarily",
+    "answer": "setenforce 0",
+    "keywords": ["SELinux", "permissive"]
+  },
+  {
+    "id": 66,
+    "q": "List all kernel modules currently loaded",
+    "answer": "lsmod",
+    "keywords": ["lsmod", "kernel modules"]
+  },
+  {
+    "id": 67,
+    "q": "Configure a DHCP client for interface enp0s3",
+    "answer": "nmcli con mod enp0s3 ipv4.method auto; nmcli con up enp0s3",
+    "keywords": ["nmcli", "DHCP"]
+  },
+  {
+    "id": 68,
+    "q": "Create a file /etc/motd with content 'Welcome to RHCSA Lab'",
+    "answer": "echo 'Welcome to RHCSA Lab' > /etc/motd",
+    "keywords": ["motd", "message of the day"]
+  },
+  {
+    "id": 69,
+    "q": "Install the mariadb-server package and start it",
+    "answer": "dnf install mariadb-server -y; systemctl enable mariadb; systemctl start mariadb",
+    "keywords": ["mariadb", "database", "service"]
+  },
+  {
+    "id": 70,
+    "q": "Find all files modified in the last 7 days",
+    "answer": "find / -mtime -7 2>/dev/null",
+    "keywords": ["find", "modified files"]
+  },
+  {
+    "id": 71,
+    "q": "Configure the system to use a proxy server at 192.168.1.1:8080",
+    "answer": "echo 'http_proxy=http://192.168.1.1:8080' >> /etc/environment; source /etc/environment",
+    "keywords": ["proxy", "environment"]
+  },
+  {
+    "id": 72,
+    "q": "Create a new partition table on /dev/sdf using parted",
+    "answer": "parted /dev/sdf mklabel gpt",
+    "keywords": ["parted", "partition table"]
+  },
+  {
+    "id": 73,
+    "q": "Enable the firewalld service and set it to start on boot",
+    "answer": "systemctl enable firewalld; systemctl start firewalld",
+    "keywords": ["firewalld", "enable service"]
+  },
+  {
+    "id": 74,
+    "q": "List all logical volumes in the system",
+    "answer": "lvdisplay",
+    "keywords": ["lvdisplay", "logical volumes"]
+  },
+  {
+    "id": 75,
+    "q": "Set the password aging for user student to 30 days maximum",
+    "answer": "chage -M 30 student",
+    "keywords": ["chage", "password aging"]
+  },
+  {
+    "id": 76,
+    "q": "Configure the NFS client to mount /exports/share from server.example.com to /mnt/nfs",
+    "answer": "mkdir /mnt/nfs; mount -t nfs server.example.com:/exports/share /mnt/nfs; echo 'server.example.com:/exports/share /mnt/nfs nfs defaults 0 0' >> /etc/fstab",
+    "keywords": ["NFS", "mount client"]
+  },
+  {
+    "id": 77,
+    "q": "Check the current SELinux policy version",
+    "answer": "sestatus",
+    "keywords": ["sestatus", "SELinux policy"]
+  },
+  {
+    "id": 78,
+    "q": "Create a bootable USB from an ISO file using dd",
+    "answer": "dd if=/path/to/rhel.iso of=/dev/sdg bs=4M status=progress",
+    "keywords": ["dd", "bootable USB"]
+  },
+  {
+    "id": 79,
+    "q": "List all available repositories",
+    "answer": "dnf repolist",
+    "keywords": ["dnf", "repositories"]
+  },
+  {
+    "id": 80,
+    "q": "Troubleshoot and restart the network service if connectivity is lost",
+    "answer": "systemctl restart NetworkManager; nmcli device connect enp0s3",
+    "keywords": ["NetworkManager", "troubleshoot network"]
+  },
+  
+  {
+    "id": 81,
+    "q": "Tune the kernel parameter vm.swappiness to 10 for better memory management",
+    "answer": "echo 'vm.swappiness = 10' >> /etc/sysctl.conf; sysctl -p",
+    "keywords": ["sysctl vm.swappiness=10 (temporary)", "Edit /etc/sysctl.d/99-custom.conf for overrides"]
+  },
+  {
+    "id": 82,
+    "q": "Create a BTRFS subvolume named data in /mnt/btrfs and set it as default",
+    "answer": "mkfs.btrfs /dev/sdb1; mount /dev/sdb1 /mnt/btrfs; btrfs subvolume create /mnt/btrfs/data; umount /mnt/btrfs; echo '/dev/sdb1 /mnt/btrfs btrfs defaults,subvol=/data 0 0' >> /etc/fstab",
+    "keywords": ["btrfs subvolume snapshot /mnt/btrfs/data (for backups)", "Use mkfs.btrfs -f for force format"]
+  },
+  {
+    "id": 83,
+    "q": "Install Podman and run a simple nginx container on port 8080",
+    "answer": "dnf install podman -y; podman run -d -p 8080:80 --name web nginx",
+    "keywords": ["podman run -it for interactive mode", "Use docker.io if Podman compatibility needed"]
+  },
+  {
+    "id": 84,
+    "q": "Find and delete all files larger than 100M in /var/log older than 30 days",
+    "answer": "find /var/log -type f -size +100M -mtime +30 -delete",
+    "keywords": ["find /var/log -type f -size +100M -mtime +30 -exec rm {} \\; (explicit delete)", "Use -print first to list before deleting"]
+  },
+  {
+    "id": 85,
+    "q": "Configure disk quotas for user student on /home with 500M soft limit and 1G hard limit",
+    "answer": "dnf install quota -y; sed -i 's/0 1/1 1/' /etc/fstab; mount -o remount /home; quotacheck -cug /home; quotaon -vug /home; edquota -u student (set limits: blocks soft 500000, hard 1000000)",
+    "keywords": ["repquota -u student (to check after)", "Use quota tools for group quotas with -g"]
+  },
+  {
+    "id": 86,
+    "q": "Create a custom firewall zone named internal and assign interface enp0s8 to it",
+    "answer": "firewall-cmd --permanent --new-zone=internal; firewall-cmd --permanent --zone=internal --add-interface=enp0s8; firewall-cmd --reload",
+    "keywords": ["firewall-cmd --zone=internal --add-source=192.168.2.0/24 (for IP-based)", "Use --change-interface to reassign"]
+  },
+  {
+    "id": 87,
+    "q": "List and set the SELinux boolean httpd_can_network_connect to on",
+    "answer": "getsebool -a | grep httpd; setsebool -P httpd_can_network_connect on",
+    "keywords": ["semanage boolean -m --on httpd_can_network_connect (permanent)", "Use getsebool httpd_* for filtered list"]
+  },
+  {
+    "id": 88,
+    "q": "Boot the system into rescue mode from GRUB and fix a broken /etc/fstab",
+    "answer": "At GRUB menu, press e; append 'rd.break' to linux line; Ctrl+X; mount -o remount,rw /sysroot; chroot /sysroot; vi /etc/fstab (fix); touch /.autorelabel; exit; reboot",
+    "keywords": ["Use systemd unit for emergency.target", "dracut -f for initramfs rebuild if needed"]
+  },
+  {
+    "id": 89,
+    "q": "Install the 'Development Tools' package group",
+    "answer": "dnf groupinstall 'Development Tools' -y",
+    "keywords": ["dnf group list (to see available groups)", "yum groupinstall on older systems"]
+  },
+  {
+    "id": 90,
+    "q": "Configure network bonding for interfaces enp0s3 and enp0s8 in active-backup mode",
+    "answer": "nmcli con add type bond ifname bond0 mode active-backup; nmcli con add type ethernet ifname enp0s3 master bond0; nmcli con add type ethernet ifname enp0s8 master bond0; nmcli con up bond0",
+    "keywords": ["mode balance-rr for round-robin", "Edit /etc/sysconfig/network-scripts/ifcfg-bond0 manually"]
+  },
+  {
+    "id": 91,
+    "q": "Configure iSCSI initiator to discover and login to target iqn.2016-06.example.com:storage",
+    "answer": "dnf install iscsi-initiator-utils -y; echo 'iqn.2016-06.example.com:storage' > /etc/iscsi/initiatorname.iscsi; iscsiadm -m discovery -t sendtargets -p 192.168.1.200; iscsiadm -m node -T iqn.2016-06.example.com:storage -p 192.168.1.200 -l",
+    "keywords": ["iscsiadm --mode node --logout (to disconnect)", "Use open-iscsi service: systemctl enable iscsid"]
+  },
+  {
+    "id": 92,
+    "q": "Create a basic Kickstart file /tmp/ks.cfg for automated installation with minimal packages",
+    "answer": "vi /tmp/ks.cfg with content: url --url=http://mirror.example.com; lang en_US; keyboard us; rootpw --plaintext rootpass; clearpart --all; part / --fstype=ext4 --size=10240; %packages @core; %end",
+    "keywords": ["ksvalidator /tmp/ks.cfg (to validate)", "Use %pre for pre-install scripts"]
+  },
+  {
+    "id": 93,
+    "q": "Write a bash script /usr/local/bin/check_disk.sh that alerts if / is over 80% full",
+    "answer": "echo '#!/bin/bash\\ndf -h / | awk \"NR==2 {if (\\$5+0 > 80) print \\\\\\\"Disk usage critical: \\\\\\\" \\$5 \\\\\\\" on /\\\\\\\"}\"' > /usr/local/bin/check_disk.sh; chmod +x /usr/local/bin/check_disk.sh",
+    "keywords": ["Use threshold 90 for stricter check", "Integrate with cron: 0 * * * * /usr/local/bin/check_disk.sh"]
+  },
+  {
+    "id": 94,
+    "q": "Configure logrotate for /var/log/messages to rotate weekly and keep 4 weeks",
+    "answer": "echo '/var/log/messages {\nweekly\nrotate 4\ncompress\nmissingok\n}' > /etc/logrotate.d/messages",
+    "keywords": ["daily instead of weekly", "postrotate /bin/kill -HUP `cat /var/run/syslogd.pid` (for signal)"]
+  },
+  {
+    "id": 95,
+    "q": "Use rsync to mirror /data to remote server user@backup.example.com:/backup with compression",
+    "answer": "rsync -avz --delete /data/ user@backup.example.com:/backup/",
+    "keywords": ["--exclude='*.tmp' to skip files", "rsync -avz /data/ /local/backup/ (local mirror)"]
+  },
+  {
+    "id": 96,
+    "q": "Troubleshoot and relabel SELinux contexts after a filesystem move",
+    "answer": "restorecon -Rv /new/location; semanage fcontext -a -t default_t '/new/location(/.*)?'",
+    "keywords": ["ls -Z /new/location (to check contexts)", "setfiles -F /etc/selinux/targeted/contexts/files/file_contexts /new/location"]
+  },
+  {
+    "id": 97,
+    "q": "Monitor system performance with sar and generate a daily report",
+    "answer": "dnf install sysstat -y; systemctl enable sysstat; crontab -e; 0 0 * * * /usr/lib64/sa/sa1 1 1; echo 'sar -A -f /var/log/sa/saDD' > /tmp/report.sh",
+    "keywords": ["sar -u 1 5 (CPU every 5s for 1 min)", "mpstat for multi-processor stats"]
+  },
+  {
+    "id": 98,
+    "q": "Create an incremental backup of /etc using tar to /backup/etc-incremental.tar",
+    "answer": "tar --listed-incremental=/backup/etc-snapshot --create --gzip -f /backup/etc-incremental.tar /etc",
+    "keywords": ["--one-file-system to avoid crossing mounts", "Use rsync --backup for incremental alternative"]
+  },
+  {
+    "id": 99,
+    "q": "Mount /dev/sde1 with noatime and nodiratime options for performance",
+    "answer": "mount -o noatime,nodiratime /dev/sde1 /mnt/perf; echo '/dev/sde1 /mnt/perf ext4 defaults,noatime,nodiratime 0 0' >> /etc/fstab",
+    "keywords": ["-o remount,noatime (for existing mount)", "Use relatime for balanced performance"]
+  },
+  {
+    "id": 100,
+    "q": "Troubleshoot a failed boot by accessing the rescue environment and repairing GRUB",
+    "answer": "Boot from install media > Troubleshooting > Rescue; chroot /mnt/sysimage; grub2-mkconfig -o /boot/grub2/grub.cfg; grub2-install /dev/sda; exit; reboot",
+    "keywords": ["efibootmgr -v (for EFI systems)", "dracut --force /boot/initramfs-$(uname -r).img if kernel issue"]
   }
 ]

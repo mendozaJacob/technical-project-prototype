@@ -59,6 +59,13 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
     with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
         json.dump(leaderboard, f, indent=4)
 
+# Define the function to get questions for a specific level
+def get_questions_for_level(level_number, levels):
+    level_info = next((lvl for lvl in levels if lvl["level"] == level_number), None)
+    if level_info:
+        return [q for q in questions if q.get("id") in level_info["questions"]]
+    return []
+
 # Route for the home page
 @app.route('/')
 def index():
@@ -78,10 +85,42 @@ def index():
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
 def game():
+    # Check if the game is over
     if session['q_index'] >= len(questions) or session['player_hp'] <= 0:
         return redirect(url_for('result'))
 
-    question = questions[session['q_index']]
+    # Calculate the current level based on the question index
+    current_level = (session['q_index'] // 10) + 1
+
+    # Ensure the level does not exceed the number of levels
+    try:
+        with open("data/levels.json", "r", encoding="utf-8") as f:
+            levels = json.load(f)
+    except FileNotFoundError:
+        return "Error: levels.json file not found."
+    except json.JSONDecodeError as e:
+        return f"Error: Failed to decode levels.json - {e}"
+
+    if current_level > len(levels):
+        current_level = len(levels)
+
+    # Get questions for the current level
+    level_questions = get_questions_for_level(current_level, levels)
+    print(f"DEBUG: Level {current_level} questions: {level_questions}")  # Debugging
+
+    # Ensure there are questions for the current level
+    if not level_questions:
+        return "No questions available for this level. Please check levels.json."
+
+    # Get the current question
+    question_index = session['q_index'] % 10  # Ensure only 10 questions per level
+    question = level_questions[question_index]
+
+    # Select the enemy for the current level
+    enemy = next((e for e in enemies if e["level"] == current_level), None)
+    if not enemy:
+        enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found for this level."}
+    print(f"DEBUG: Selected enemy for level {current_level}: {enemy}")  # Debugging
 
     # Initialize the timer for the current question
     if "level_start_time" not in session:
@@ -93,7 +132,7 @@ def game():
 
     if time_left == 0:
         # Time expired → apply penalty & move on
-        session['player_hp'] -= BASE_DAMAGE * session['enemy_level']
+        session['player_hp'] -= BASE_DAMAGE * current_level
         session['feedback'] = "⏳ Time's up! You took too long."
         session['q_index'] += 1
         session["level_start_time"] = time.time()  # Reset timer for the next question
@@ -133,7 +172,7 @@ def game():
             session["current_timer"] = min(30, session.get("current_timer", 20) + 5)  # Add 5s to timer for next question
             session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
         else:
-            session['player_hp'] -= BASE_DAMAGE * session['enemy_level']
+            session['player_hp'] -= BASE_DAMAGE * current_level
             session['score'] -= 5  # Deduct points for wrong answer
             session['feedback'] = "❌ Incorrect!"
             session["current_timer"] = max(20, session.get("current_timer", 20) - 5)  # Deduct 5s from timer for next question
@@ -146,21 +185,14 @@ def game():
         session['q_index'] += 1
         return redirect(url_for('feedback'))
 
-    # Handle empty enemies list
-    if len(enemies) == 0:
-        enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found!"}
-    else:
-        enemy_index = (session['enemy_level'] - 1) % len(enemies)
-        enemy = enemies[enemy_index]
-
     return render_template('game.html',
                            question=question,
                            score=session['score'],
                            player_hp=session['player_hp'],
                            enemy_hp=session['enemy_hp'],
-                           q_number=session['q_index'] + 1,
-                           total=len(questions),
-                           level=session['enemy_level'],
+                           q_number=question_index + 1,
+                           total=10,  # Only 10 questions per level
+                           level=current_level,
                            enemy=enemy,
                            time_left=time_left)
 
@@ -229,11 +261,11 @@ def leaderboard():
 
     return render_template("leaderboard.html", leaderboard=leaderboard)
 
-# Load enemies from the JSON file
+# Load enemies from enemies.json
 try:
     with open('data/enemies.json', encoding='utf-8') as f:
         enemies = json.load(f)
-    print(f"Enemies loaded successfully! Total enemies: {len(enemies)}")
+    print(f"DEBUG: Enemies loaded successfully: {enemies}")  # Debugging
 except FileNotFoundError:
     print("Error: enemies.json file not found.")
     enemies = []

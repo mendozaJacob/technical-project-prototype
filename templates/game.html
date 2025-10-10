@@ -11,8 +11,11 @@
     <!-- Main container for the game content -->
     <div class="container">
         <!-- Display the current level and enemy details -->
-        <h1>Level {{ level }}: {{ enemy['name'] }}</h1>
-        <p>{{ enemy['avatar'] }} {{ enemy['taunt'] }}</p>
+        <div class="enemy">
+            <h2>Level {{ level }}: {{ enemy.name }}</h2>
+            <p>{{ enemy.avatar }}</p>
+            <p><em>{{ enemy.taunt }}</em></p>
+        </div>
 
         <!-- Display player and enemy stats -->
         <p>Player HP: {{ player_hp }}</p>

@@ -26,5 +26,12 @@
         "time": 70.78,
         "correct_answers": 5,
         "wrong_answers": 5
+    },
+    {
+        "player": "Anonymous",
+        "score": 10,
+        "time": 55.82,
+        "correct_answers": 2,
+        "wrong_answers": 8
     }
 ]

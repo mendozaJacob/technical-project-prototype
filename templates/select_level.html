@@ -39,7 +39,7 @@
         .level-btn {
             font-family: 'MedievalSharp', cursive;
             font-size: 1.5em;
-            padding: 18px 0;
+            padding: 14px 0;
             border-radius: 16px;
             border: 3px solid #4b2e05;
             background: #b6d36b;
@@ -48,6 +48,11 @@
             box-shadow: 0 2px 8px #0004;
             transition: background 0.2s, transform 0.2s;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 120px;
         }
         .level-btn.unlocked:hover {
             background: #e6c15b;
@@ -63,6 +68,21 @@
             display: block;
             font-size: 1.2em;
             margin-bottom: 4px;
+        }
+        .level-btn .number {
+            display: block;
+            font-size: 1.3em;
+            margin-top: 2px;
+        }
+        .level-btn .label {
+            display: block;
+            font-size: 0.7em;
+            margin-top: 4px;
+            color: #3e341a;
+            font-style: italic;
+            line-height: 1.1em;
+            text-align: center;
+            max-width: 95%;
         }
         .level-stars {
             margin-top: 4px;
@@ -80,12 +100,54 @@
                     {% if level.level <= highest_unlocked %}
                         <button class="level-btn unlocked" name="level" value="{{ level.level }}">
                             <span class="icon">⚔️</span>
-                            {{ level.level }}
+                            <span class="number">{{ level.level }}</span>
+                            {% if level.level == 1 %}
+                                <span class="label">Basic Linux commands & system setup</span>
+                            {% elif level.level == 2 %}
+                                <span class="label">File systems, users, networking basics</span>
+                            {% elif level.level == 3 %}
+                                <span class="label">Mounting, LVM basics, packages</span>
+                            {% elif level.level == 4 %}
+                                <span class="label">Firewall, systemctl, disk usage</span>
+                            {% elif level.level == 5 %}
+                                <span class="label">Storage, users, firewall deep dive</span>
+                            {% elif level.level == 6 %}
+                                <span class="label">Links, cron, SELinux, packages</span>
+                            {% elif level.level == 7 %}
+                                <span class="label">Networking, time, file find</span>
+                            {% elif level.level == 8 %}
+                                <span class="label">Advanced networking, troubleshooting</span>
+                            {% elif level.level == 9 %}
+                                <span class="label">Performance tuning, containers, bonding</span>
+                            {% elif level.level == 10 %}
+                                <span class="label">System automation, backup, boot repair</span>
+                            {% endif %}
                         </button>
                     {% else %}
                         <button class="level-btn locked" disabled>
                             <span class="icon">🔒</span>
-                            {{ level.level }}
+                            <span class="number">{{ level.level }}</span>
+                            {% if level.level == 1 %}
+                                <span class="label">Basic Linux commands & system setup</span>
+                            {% elif level.level == 2 %}
+                                <span class="label">File systems, users, networking basics</span>
+                            {% elif level.level == 3 %}
+                                <span class="label">Mounting, LVM basics, packages</span>
+                            {% elif level.level == 4 %}
+                                <span class="label">Firewall, systemctl, disk usage</span>
+                            {% elif level.level == 5 %}
+                                <span class="label">Storage, users, firewall deep dive</span>
+                            {% elif level.level == 6 %}
+                                <span class="label">Links, cron, SELinux, packages</span>
+                            {% elif level.level == 7 %}
+                                <span class="label">Networking, time, file find</span>
+                            {% elif level.level == 8 %}
+                                <span class="label">Advanced networking, troubleshooting</span>
+                            {% elif level.level == 9 %}
+                                <span class="label">Performance tuning, containers, bonding</span>
+                            {% elif level.level == 10 %}
+                                <span class="label">System automation, backup, boot repair</span>
+                            {% endif %}
                         </button>
                     {% endif %}
                 {% endfor %}
@@ -94,3 +156,4 @@
     </div>
 </body>
 </html>
+

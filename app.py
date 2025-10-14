@@ -1,3 +1,5 @@
+# ------------------- ENDLESS MODE -------------------
+# (Moved below app initialization)
 # This code ensures Flask and Whoosh are installed before importing them, preventing runtime errors
 import subprocess
 import sys
@@ -36,6 +38,37 @@ else:
 
 # Initialize the Flask app
 app = Flask(__name__)
+import copy
+
+# ------------------- MINIMAL TEST YOURSELF ROUTE -------------------
+@app.route('/test_minimal', methods=['GET', 'POST'])
+def test_minimal():
+    # Only reset on GET with ?new=1
+    if request.method == 'GET' and request.args.get('new') == '1':
+        session['test_questions'] = [copy.deepcopy(q) for q in (questions[:3] if len(questions) >= 3 else questions)]
+        while len(session['test_questions']) < 3:
+            session['test_questions'].append(copy.deepcopy(random.choice(questions)))
+        session['test_q_index'] = 0
+    test_questions = session.get('test_questions', [])
+    q_index = session.get('test_q_index', 0)
+    if not test_questions or q_index >= len(test_questions):
+        return f"Done! You answered {q_index} questions. <a href='/test_minimal?new=1'>Restart</a>"
+    question = test_questions[q_index]
+    if request.method == 'POST':
+        session['test_q_index'] = q_index + 1
+        print(f"[MINIMAL] POST: test_q_index={session['test_q_index']}, questions_left={len(test_questions)-session['test_q_index']}")
+        return redirect(url_for('test_minimal'))
+    return f'''
+        <h1>Minimal Test Yourself</h1>
+        <div>Questions Left: {len(test_questions) - q_index}</div>
+        <div>Question {q_index+1} of {len(test_questions)}</div>
+        <div>{question.get('q','')}</div>
+        <form method="POST">
+            <input type="text" name="answer" required>
+            <button type="submit">Submit</button>
+        </form>
+        <a href="/test_minimal?new=1">Restart</a>
+    '''
 app.secret_key = "unix_rpg_secret"
 
 # Helper function to save leaderboard data
@@ -195,25 +228,26 @@ def game():
             damage = 5
             score = 5
 
-        # Check if the answer is correct
-        if user_answer == correct_answer:
-            session['score'] += score  # Add score
-            session['enemy_hp'] -= (damage * 3)
-            session['feedback'] = f"🔥 Exact answer! Triple damage: {damage*3} and {score} points in {time_taken:.2f} seconds."
-            session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
-            session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
-        elif user_answer in keywords:
-            session['score'] += score  # Add score
-            session['enemy_hp'] -= damage
-            session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds."
-            session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
-            session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
-        else:
-            session['player_hp'] -= BASE_DAMAGE * current_level
-            session['score'] -= 5  # Deduct points for wrong answer
-            session['feedback'] = "❌ Incorrect!"
-            session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s from timer for next question, min 10s
-            session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
+        # Only apply this block for the main game mode, not endless or test yourself
+        if not session.get('endless_questions') and not session.get('test_questions'):
+            if user_answer == correct_answer:
+                session['score'] += score  # Add score
+                session['enemy_hp'] -= (damage * 3)
+                session['feedback'] = f"🔥 Exact answer! Triple damage: {damage*3} and {score} points in {time_taken:.2f} seconds."
+                session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
+                session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
+            elif user_answer in keywords:
+                session['score'] += score  # Add score
+                session['enemy_hp'] -= damage
+                session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds."
+                session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
+                session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
+            else:
+                session['player_hp'] -= BASE_DAMAGE * current_level
+                session['score'] -= 5  # Deduct points for wrong answer
+                session['feedback'] = "❌ Incorrect!"
+                session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s from timer for next question, min 10s
+                session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
 
         # Reset timer for the next question
         session['level_start_time'] = time.time()
@@ -272,7 +306,11 @@ def result():
     except Exception:
         levels = []
     max_level = max([lvl['level'] for lvl in levels], default=1)
-    can_advance = session.get('level_completed', False) and next_level <= max_level
+    can_advance = (
+        session.get('level_completed', False)
+        and session.get('correct_answers', 0) >= 7
+        and next_level <= max_level
+    )
 
     # Unlock the next level if completed
     if session.get('level_completed', False):
@@ -315,6 +353,100 @@ def leaderboard():
 
     return render_template("leaderboard.html", leaderboard=leaderboard)
 
+# ------------------- TEST YOURSELF MODE -------------------
+import random
+
+@app.route('/test_yourself', methods=['GET', 'POST'])
+def test_yourself():
+    # Only reset test state for a true new start (GET with ?new=1)
+    if request.method == 'GET' and request.args.get('new') == '1':
+        session.pop('test_questions', None)
+        session.pop('test_q_index', None)
+        session.pop('test_correct', None)
+        session.pop('test_start_time', None)
+        session.pop('test_time_limit', None)
+        session.pop('test_user_answers', None)
+        import copy
+        # Always create exactly 40 questions, even if there are duplicate IDs or not enough unique questions
+        if not questions:
+            session['test_questions'] = []
+        elif len(questions) >= 40:
+            session['test_questions'] = [copy.deepcopy(q) for q in random.sample(questions, 40)]
+        else:
+            session['test_questions'] = [copy.deepcopy(random.choice(questions)) for _ in range(40)]
+        # Defensive: forcibly truncate or pad to 40
+        while len(session['test_questions']) > 40:
+            session['test_questions'].pop()
+        while len(session['test_questions']) < 40:
+            session['test_questions'].append(copy.deepcopy(random.choice(questions)))
+        session['test_q_index'] = 0
+        session['test_correct'] = 0
+        session['test_start_time'] = time.time()
+        session['test_time_limit'] = 60 * 60  # 1 hour in seconds
+    total_seconds_left = max(0, int(session['test_time_limit'] - (time.time() - session['test_start_time'])))
+    time_left_min = total_seconds_left // 60
+    time_left_sec = total_seconds_left % 60
+    q_index = session.get('test_q_index', 0)
+    test_questions = session.get('test_questions', [])
+    if not test_questions:
+        question = {'q': ''}
+    elif q_index >= 40 or total_seconds_left <= 0:
+        return redirect(url_for('test_yourself_result'))
+    else:
+        # Defensive: if the question is missing, skip to next
+        if q_index >= len(test_questions) or not test_questions[q_index].get('q'):
+            session['test_q_index'] = q_index + 1
+            return redirect(url_for('test_yourself'))
+        question = test_questions[q_index]
+
+    # Track user answers for review
+    if 'test_user_answers' not in session:
+        session['test_user_answers'] = []
+    correct_count = session.get('test_correct', 0)
+    if request.method == 'POST':
+        user_answer = request.form.get('answer', '').strip()
+        correct_answer = question.get('answer', '').strip() if question else ''
+        # Save user answer for review
+        session['test_user_answers'].append({
+            'question': question.get('q', '') if question else '',
+            'user_answer': user_answer,
+            'correct_answer': correct_answer
+        })
+        if question and user_answer.strip().lower() == correct_answer.strip().lower():
+            session['test_correct'] = session.get('test_correct', 0) + 1
+        session['test_q_index'] = session.get('test_q_index', 0) + 1
+        return redirect(url_for('test_yourself'))
+    return render_template('test_yourself.html',
+                          question=question,
+                          q_number=q_index + 1,
+                          q_index=q_index,
+                          test_questions=test_questions,
+                          correct_count=correct_count,
+                          time_left_min=time_left_min,
+                          time_left_sec=time_left_sec,
+                          total_seconds_left=total_seconds_left)
+
+@app.route('/test_yourself_result')
+def test_yourself_result():
+    total = len(session.get('test_questions', []))
+    correct = session.get('test_correct', 0)
+    percent = int((correct / total) * 100) if total else 0
+    passed = percent >= 75
+    # Get user answers for review
+    user_answers = session.get('test_user_answers', [])
+    # Clear session state for test mode
+    session.pop('test_questions', None)
+    session.pop('test_q_index', None)
+    session.pop('test_correct', None)
+    session.pop('test_start_time', None)
+    session.pop('test_time_limit', None)
+    session.pop('test_user_answers', None)
+    return render_template('test_yourself_result.html',
+                          correct_count=correct,
+                          percent=percent,
+                          passed=passed,
+                          user_answers=user_answers)
+
 # Load enemies from enemies.json
 try:
     with open('data/enemies.json', encoding='utf-8') as f:
@@ -356,6 +488,91 @@ for question in questions:
         keywords=keywords
     )
 writer.commit()
+
+# ------------------- ENDLESS MODE -------------------
+import random
+@app.route('/endless', methods=['GET', 'POST'])
+def endless():
+    # Initialize session state for new endless run
+    if 'endless_questions' not in session or request.method == 'GET':
+        session['endless_questions'] = random.sample(questions, len(questions)) if len(questions) > 0 else []
+        session['endless_q_index'] = 0
+        session['endless_score'] = 0
+        session['endless_hp'] = 100
+        session['endless_streak'] = 0
+        session['endless_highest_streak'] = 0
+        session['endless_start_time'] = time.time()
+        session['endless_time_limit'] = 45  # 45 seconds per question
+    q_index = session['endless_q_index']
+    if session['endless_hp'] <= 0 or q_index >= len(session['endless_questions']):
+        return redirect(url_for('endless_result'))
+    question = session['endless_questions'][q_index]
+    streak = session['endless_streak']
+    score = session['endless_score']
+    player_hp = session['endless_hp']
+    highest_streak = session['endless_highest_streak']
+    # Timer logic
+    if 'endless_question_start' not in session or request.method == 'GET':
+        session['endless_question_start'] = time.time()
+    elapsed = time.time() - session['endless_question_start']
+    time_left = max(0, session['endless_time_limit'] - int(elapsed))
+    if time_left == 0:
+        session['endless_hp'] -= 10
+        session['endless_streak'] = 0
+        session['endless_q_index'] += 1
+        session['endless_question_start'] = time.time()
+        return redirect(url_for('endless'))
+    if request.method == 'POST':
+        user_answer = request.form.get('answer', '').strip().lower()
+        correct_answer = question.get('answer', '').strip().lower()
+        raw_keywords = question.get('keywords', [])
+        if isinstance(raw_keywords, str):
+            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+        else:
+            keywords = [str(k).strip().lower() for k in raw_keywords]
+        correct = user_answer == correct_answer or user_answer in keywords
+        if correct:
+            session['endless_score'] += 10
+            session['endless_streak'] += 1
+            if session['endless_streak'] > session['endless_highest_streak']:
+                session['endless_highest_streak'] = session['endless_streak']
+            # HP regen after 5 correct in a row
+            if session['endless_streak'] % 5 == 0:
+                session['endless_hp'] = min(100, session['endless_hp'] + 20)
+        else:
+            session['endless_hp'] -= 10
+            session['endless_streak'] = 0
+        session['endless_q_index'] += 1
+        session['endless_question_start'] = time.time()
+        return redirect(url_for('endless'))
+    return render_template('endless.html',
+                          question=question,
+                          q_number=q_index + 1,
+                          streak=streak,
+                          score=score,
+                          player_hp=player_hp,
+                          highest_streak=highest_streak,
+                          time_left=time_left)
+
+@app.route('/endless_result')
+def endless_result():
+    score = session.get('endless_score', 0)
+    highest_streak = session.get('endless_highest_streak', 0)
+    total_questions = session.get('endless_q_index', 0)
+    # Clear session state for endless mode
+    session.pop('endless_questions', None)
+    session.pop('endless_q_index', None)
+    session.pop('endless_score', None)
+    session.pop('endless_hp', None)
+    session.pop('endless_streak', None)
+    session.pop('endless_highest_streak', None)
+    session.pop('endless_start_time', None)
+    session.pop('endless_time_limit', None)
+    session.pop('endless_question_start', None)
+    return render_template('endless_result.html',
+                          score=score,
+                          highest_streak=highest_streak,
+                          total_questions=total_questions)
 
 # Run the Flask app
 if __name__ == "__main__":

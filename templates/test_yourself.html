@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Yourself Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: 'MedievalSharp', cursive; background: #2e3d1f; color: #f3eac2; }
+        .container { max-width: 600px; margin: 40px auto; background: #f3eac2; border: 6px solid #4b2e05; border-radius: 24px; box-shadow: 0 0 24px #0008; padding: 32px 24px 24px 24px; text-align: center; }
+    .timer { font-size: 1.3em; color: #b22222; margin-bottom: 12px; }
+    .questions-left { font-size: 1em; color: #4b2e05; margin-bottom: 10px; }
+        .progress { margin-bottom: 12px; }
+    .question { font-size: 1.2em; margin: 18px 0; color: #4b2e05; background: #fffbe6; border-radius: 8px; padding: 12px; }
+        .btn { font-family: 'MedievalSharp', cursive; }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h1 style="color:#4b2e05; font-size:2em; font-weight:bold; background:#fffbe6; border-radius:8px; padding:10px 0;">🧙‍♂️ Test Yourself</h1>
+    <div class="timer" id="timer">Time Left: {{ time_left_min }}m {{ '%02d' % time_left_sec }}s</div>
+    <div class="questions-left">Questions Left: {{ 40 - q_index }}</div>
+        <div class="progress">Question {{ q_number }} of 40 | Correct: {{ correct_count }}</div>
+        {% if question and question['q'] %}
+            <div class="question">{{ question['q'] }}</div>
+        {% else %}
+            <div class="question" style="color: red;">No question available.</div>
+        {% endif %}
+        <form method="POST" autocomplete="off">
+            <input type="text" name="answer" placeholder="Type your answer..." required autocomplete="off">
+            <button type="submit" class="btn">Submit</button>
+        </form>
+    </div>
+<script type="text/javascript">
+    // Live countdown timer (in minutes and seconds)
+    var timeLeft = {{ total_seconds_left|int }};
+    function updateTimer() {
+        if (timeLeft < 0) timeLeft = 0;
+        var min = Math.floor(timeLeft / 60);
+        var sec = timeLeft % 60;
+        document.getElementById('timer').textContent = `Time Left: ${min}m ${sec < 10 ? '0' : ''}${sec}s`;
+        if (timeLeft > 0) {
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        }
+    }
+    updateTimer();
+</script>
+</body>
+</html>

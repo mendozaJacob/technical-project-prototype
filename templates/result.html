@@ -21,6 +21,11 @@
                 <input type="hidden" name="level" value="{{ next_level }}">
                 <button type="submit" class="btn">Advance to Level {{ next_level }}</button>
             </form>
+        {% else %}
+            <p style="color: red; font-weight: bold;">
+                You need at least 7 correct answers to advance! Try again.
+            </p>
+            <a href="{{ url_for('select_level') }}" class="btn">Replay Level</a>
         {% endif %}
     </div>
 </body>

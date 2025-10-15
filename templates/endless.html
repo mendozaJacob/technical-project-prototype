@@ -19,7 +19,9 @@
 <body>
     <div class="container">
         <h1>🐉 Endless Mode</h1>
-        <div class="timer">Time Left: {{ time_left }} sec</div>
+        <div class="timer" id="timer" data-time-left="{{ time_left }}">Time Left: {{ time_left }} sec</div>
+        <div class="overall-timer" id="overall-timer" data-start="{{ overall_start_time }}" data-limit="{{ overall_limit }}">Overall Time Left: {{ overall_time_left_min }}:{{ overall_time_left_sec | string | zfill(2) }}</div>
+        <div class="questions-left">Questions Left: {{ total_questions - q_number + 1 }}</div>
         <div class="hp">Player HP: {{ player_hp }}</div>
         <div class="streak">Streak: {{ streak }}/5</div>
         <div class="score">Score: {{ score }}</div>
@@ -29,5 +31,36 @@
             <button type="submit" class="btn">Submit</button>
         </form>
     </div>
+<script type="text/javascript">
+    // Live countdown timer (in seconds)
+    var timerElement = document.getElementById('timer');
+    var timeLeft = parseInt(timerElement.getAttribute('data-time-left'));
+    function updateTimer() {
+        if (timeLeft < 0) timeLeft = 0;
+        timerElement.textContent = `Time Left: ${timeLeft} sec`;
+        if (timeLeft > 0) {
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        }
+    }
+    updateTimer();
+
+    // Overall timer
+    var overallTimerElement = document.getElementById('overall-timer');
+    var overallStartTime = parseFloat(overallTimerElement.getAttribute('data-start'));
+    var overallLimit = parseFloat(overallTimerElement.getAttribute('data-limit'));
+    function updateOverallTimer() {
+        var now = Date.now() / 1000;
+        var elapsed = now - overallStartTime;
+        var timeLeftOverall = Math.max(0, overallLimit - elapsed);
+        var min = Math.floor(timeLeftOverall / 60);
+        var sec = Math.floor(timeLeftOverall % 60);
+        overallTimerElement.textContent = `Overall Time Left: ${min}:${sec.toString().padStart(2, '0')}`;
+        if (timeLeftOverall > 0) {
+            setTimeout(updateOverallTimer, 1000);
+        }
+    }
+    updateOverallTimer();
+</script>
 </body>
 </html>

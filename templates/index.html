@@ -4,14 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gamify RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body, h1, .btn, .banner {
+            font-family: 'MedievalSharp', cursive !important;
+        }
+        .banner, h1 {
+            font-size: 2.3em;
+            color: #4b2e05;
+            text-shadow: 1px 1px 0 #fff, 2px 2px 2px #cfcfcf;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .btn {
+            background: #4b2e05;
+            color: #fffbe6;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            margin: 12px 10px;
+            font-size: 1.3em;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 1px 1px 4px #0004;
+            transition: background 0.2s, color 0.2s;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #fffbe6;
+            color: #4b2e05;
+            border: 1px solid #4b2e05;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Unix RPG Quest</h1>
-        <p>Fight enemies while learning Unix commands!</p>
+        <div class="banner"><h1>🎮 Unix RPG Quest</h1></div>
+        <p style="font-family: 'MedievalSharp', cursive; font-size:1.2em;">Fight enemies while learning Unix commands!</p>
         <a href="{{ url_for('select_level') }}" class="btn">Start Game</a>
-    <a href="{{ url_for('test_yourself', new=1) }}" class="btn">Test Yourself</a>
+        <a href="{{ url_for('test_yourself', new=1) }}" class="btn">Test Yourself</a>
         <a href="{{ url_for('endless') }}" class="btn">Endless Mode</a>
     </div>
 </body>

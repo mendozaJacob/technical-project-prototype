@@ -40,35 +40,6 @@ else:
 app = Flask(__name__)
 import copy
 
-# ------------------- MINIMAL TEST YOURSELF ROUTE -------------------
-@app.route('/test_minimal', methods=['GET', 'POST'])
-def test_minimal():
-    # Only reset on GET with ?new=1
-    if request.method == 'GET' and request.args.get('new') == '1':
-        session['test_questions'] = [copy.deepcopy(q) for q in (questions[:3] if len(questions) >= 3 else questions)]
-        while len(session['test_questions']) < 3:
-            session['test_questions'].append(copy.deepcopy(random.choice(questions)))
-        session['test_q_index'] = 0
-    test_questions = session.get('test_questions', [])
-    q_index = session.get('test_q_index', 0)
-    if not test_questions or q_index >= len(test_questions):
-        return f"Done! You answered {q_index} questions. <a href='/test_minimal?new=1'>Restart</a>"
-    question = test_questions[q_index]
-    if request.method == 'POST':
-        session['test_q_index'] = q_index + 1
-        print(f"[MINIMAL] POST: test_q_index={session['test_q_index']}, questions_left={len(test_questions)-session['test_q_index']}")
-        return redirect(url_for('test_minimal'))
-    return f'''
-        <h1>Minimal Test Yourself</h1>
-        <div>Questions Left: {len(test_questions) - q_index}</div>
-        <div>Question {q_index+1} of {len(test_questions)}</div>
-        <div>{question.get('q','')}</div>
-        <form method="POST">
-            <input type="text" name="answer" required>
-            <button type="submit">Submit</button>
-        </form>
-        <a href="/test_minimal?new=1">Restart</a>
-    '''
 app.secret_key = "unix_rpg_secret"
 
 # Helper function to save leaderboard data
@@ -360,62 +331,73 @@ import random
 def test_yourself():
     # Only reset test state for a true new start (GET with ?new=1)
     if request.method == 'GET' and request.args.get('new') == '1':
-        session.pop('test_questions', None)
+        session.pop('test_question_ids', None)
         session.pop('test_q_index', None)
         session.pop('test_correct', None)
         session.pop('test_start_time', None)
         session.pop('test_time_limit', None)
-        session.pop('test_user_answers', None)
-        import copy
-        # Always create exactly 40 questions, even if there are duplicate IDs or not enough unique questions
-        if not questions:
-            session['test_questions'] = []
-        elif len(questions) >= 40:
-            session['test_questions'] = [copy.deepcopy(q) for q in random.sample(questions, 40)]
+        session['test_user_answers'] = []
+        print(f"[DEBUG] questions list length at test start: {len(questions)}")
+        valid_questions = [q for q in questions if q.get('q') and str(q.get('q')).strip()]
+        if not valid_questions:
+            session['test_question_ids'] = []
+        elif len(valid_questions) >= 40:
+            session['test_question_ids'] = [q['id'] for q in random.sample(valid_questions, 40)]
         else:
-            session['test_questions'] = [copy.deepcopy(random.choice(questions)) for _ in range(40)]
-        # Defensive: forcibly truncate or pad to 40
-        while len(session['test_questions']) > 40:
-            session['test_questions'].pop()
-        while len(session['test_questions']) < 40:
-            session['test_questions'].append(copy.deepcopy(random.choice(questions)))
+            session['test_question_ids'] = [random.choice(valid_questions)['id'] for _ in range(40)]
+        while len(session['test_question_ids']) > 40:
+            session['test_question_ids'].pop()
+        while len(session['test_question_ids']) < 40 and valid_questions:
+            session['test_question_ids'].append(random.choice(valid_questions)['id'])
         session['test_q_index'] = 0
         session['test_correct'] = 0
         session['test_start_time'] = time.time()
         session['test_time_limit'] = 60 * 60  # 1 hour in seconds
-    total_seconds_left = max(0, int(session['test_time_limit'] - (time.time() - session['test_start_time'])))
+
+    # Calculate timer
+    total_seconds_left = max(0, int(session.get('test_time_limit', 3600) - (time.time() - session.get('test_start_time', time.time()))))
     time_left_min = total_seconds_left // 60
     time_left_sec = total_seconds_left % 60
     q_index = session.get('test_q_index', 0)
-    test_questions = session.get('test_questions', [])
-    if not test_questions:
-        question = {'q': ''}
-    elif q_index >= 40 or total_seconds_left <= 0:
+    test_question_ids = session.get('test_question_ids', [])
+    # Rebuild the test_questions list from global questions using IDs
+    id_to_question = {q['id']: q for q in questions}
+    test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
+    if not test_questions or q_index >= 40 or total_seconds_left <= 0:
+        print(f"[DEBUG] REDIRECT TO RESULT: test_q_index={q_index}, test_questions={len(test_questions)}, total_seconds_left={total_seconds_left}, test_user_answers={len(session.get('test_user_answers', []))}")
+        session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
-    else:
-        # Defensive: if the question is missing, skip to next
-        if q_index >= len(test_questions) or not test_questions[q_index].get('q'):
-            session['test_q_index'] = q_index + 1
-            return redirect(url_for('test_yourself'))
-        question = test_questions[q_index]
 
-    # Track user answers for review
-    if 'test_user_answers' not in session:
-        session['test_user_answers'] = []
+    # Skip invalid questions
+    while q_index < len(test_questions) and not test_questions[q_index].get('q'):
+        q_index += 1
+        session['test_q_index'] = q_index
+    if q_index >= len(test_questions):
+        session['test_q_index'] = 40
+        return redirect(url_for('test_yourself_result'))
+    question = test_questions[q_index]
+
     correct_count = session.get('test_correct', 0)
     if request.method == 'POST':
-        user_answer = request.form.get('answer', '').strip()
-        correct_answer = question.get('answer', '').strip() if question else ''
-        # Save user answer for review
+        user_answer = request.form.get('answer', '').strip().lower()
+        correct_answer = question.get('answer', '').strip().lower()
+        # Normalize keywords
+        raw_keywords = question.get('keywords', [])
+        if isinstance(raw_keywords, str):
+            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+        else:
+            keywords = [str(k).strip().lower() for k in raw_keywords]
         session['test_user_answers'].append({
-            'question': question.get('q', '') if question else '',
+            'question': question.get('q', ''),
             'user_answer': user_answer,
             'correct_answer': correct_answer
         })
-        if question and user_answer.strip().lower() == correct_answer.strip().lower():
-            session['test_correct'] = session.get('test_correct', 0) + 1
-        session['test_q_index'] = session.get('test_q_index', 0) + 1
+        if user_answer == correct_answer or user_answer in keywords:
+            session['test_correct'] = correct_count + 1
+        session['test_q_index'] = q_index + 1
+        print(f"[DEBUG] POST: test_q_index={session['test_q_index']}, test_questions={len(test_questions)}, test_user_answers={len(session['test_user_answers'])}")
         return redirect(url_for('test_yourself'))
+
     return render_template('test_yourself.html',
                           question=question,
                           q_number=q_index + 1,
@@ -428,14 +410,15 @@ def test_yourself():
 
 @app.route('/test_yourself_result')
 def test_yourself_result():
-    total = len(session.get('test_questions', []))
+    # Use the question IDs to determine total
+    total = len(session.get('test_question_ids', []))
     correct = session.get('test_correct', 0)
     percent = int((correct / total) * 100) if total else 0
     passed = percent >= 75
     # Get user answers for review
     user_answers = session.get('test_user_answers', [])
     # Clear session state for test mode
-    session.pop('test_questions', None)
+    session.pop('test_question_ids', None)
     session.pop('test_q_index', None)
     session.pop('test_correct', None)
     session.pop('test_start_time', None)
@@ -461,9 +444,10 @@ except json.JSONDecodeError as e:
 
 # Load questions from the JSON file
 try:
-    with open('data/questions.json', encoding='utf-8') as f:
+    questions_file = os.path.join(os.path.dirname(__file__), 'data', 'questions.json')
+    with open(questions_file, encoding='utf-8') as f:
         questions = json.load(f)
-    print("Questions loaded successfully!")
+    print(f"Questions loaded successfully! Loaded {len(questions)} questions.")
 except FileNotFoundError:
     print("Error: questions.json file not found.")
     questions = []
@@ -495,7 +479,7 @@ import random
 def endless():
     # Initialize session state for new endless run
     if 'endless_questions' not in session or request.method == 'GET':
-        session['endless_questions'] = random.sample(questions, len(questions)) if len(questions) > 0 else []
+        session['endless_questions'] = random.sample(questions, min(40, len(questions))) if len(questions) > 0 else []
         session['endless_q_index'] = 0
         session['endless_score'] = 0
         session['endless_hp'] = 100
@@ -503,8 +487,10 @@ def endless():
         session['endless_highest_streak'] = 0
         session['endless_start_time'] = time.time()
         session['endless_time_limit'] = 45  # 45 seconds per question
+        session['endless_overall_time_limit'] = 60 * 60  # 1 hour overall
     q_index = session['endless_q_index']
-    if session['endless_hp'] <= 0 or q_index >= len(session['endless_questions']):
+    overall_time_left = max(0, int(session.get('endless_overall_time_limit', 3600) - (time.time() - session.get('endless_start_time', time.time()))))
+    if session['endless_hp'] <= 0 or q_index >= 40 or overall_time_left <= 0:
         return redirect(url_for('endless_result'))
     question = session['endless_questions'][q_index]
     streak = session['endless_streak']
@@ -545,6 +531,9 @@ def endless():
         session['endless_q_index'] += 1
         session['endless_question_start'] = time.time()
         return redirect(url_for('endless'))
+    total_questions = len(session['endless_questions'])
+    overall_time_left_min = overall_time_left // 60
+    overall_time_left_sec = overall_time_left % 60
     return render_template('endless.html',
                           question=question,
                           q_number=q_index + 1,
@@ -552,7 +541,12 @@ def endless():
                           score=score,
                           player_hp=player_hp,
                           highest_streak=highest_streak,
-                          time_left=time_left)
+                          time_left=time_left,
+                          total_questions=total_questions,
+                          overall_time_left_min=overall_time_left_min,
+                          overall_time_left_sec=overall_time_left_sec,
+                          overall_start_time=session['endless_start_time'],
+                          overall_limit=session['endless_overall_time_limit'])
 
 @app.route('/endless_result')
 def endless_result():
@@ -569,6 +563,7 @@ def endless_result():
     session.pop('endless_start_time', None)
     session.pop('endless_time_limit', None)
     session.pop('endless_question_start', None)
+    session.pop('endless_overall_time_limit', None)
     return render_template('endless_result.html',
                           score=score,
                           highest_streak=highest_streak,

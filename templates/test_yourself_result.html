@@ -7,37 +7,128 @@
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        body { font-family: 'MedievalSharp', cursive; background: #2e3d1f; color: #f3eac2; }
-        .container { max-width: 600px; margin: 40px auto; background: #f3eac2; border: 6px solid #4b2e05; border-radius: 24px; box-shadow: 0 0 24px #0008; padding: 32px 24px 24px 24px; text-align: center; }
-        .result-pass { color: #228B22; font-size: 1.5em; font-weight: bold; }
-        .result-fail { color: #b22222; font-size: 1.5em; font-weight: bold; }
-        .btn { font-family: 'MedievalSharp', cursive; }
+        body, h1, h2, h3, h4, h5, h6, table, th, td, .btn, .score-banner, .result-pass, .result-fail, .review-answers-title {
+            font-family: 'MedievalSharp', cursive !important;
+        }
+        body {
+            background: #2e3d1f;
+            color: #222;
+            font-size: 1.25em;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fffbe6;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            box-shadow: 0 0 24px #0008;
+            padding: 40px 32px 32px 32px;
+            text-align: center;
+        }
+        .result-pass {
+            color: #228B22;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #fff, 2px 2px 2px #cfcfcf;
+        }
+        .result-fail {
+            color: #b22222;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #fff, 2px 2px 2px #cfcfcf;
+        }
+        .btn {
+            font-family: 'MedievalSharp', cursive;
+            background: #4b2e05;
+            color: #fffbe6;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            margin: 12px 10px;
+            font-size: 1.3em;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 1px 1px 4px #0004;
+            transition: background 0.2s, color 0.2s;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #fffbe6;
+            color: #4b2e05;
+            border: 1px solid #4b2e05;
+        }
+        table {
+            width: 100%;
+            background: #fff;
+            color: #222;
+            border-radius: 8px;
+            border-collapse: collapse;
+            box-shadow: 0 0 8px #0002;
+            font-size: 1.1em;
+            margin: 0 auto;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 1.08em;
+        }
+        tr {
+            border-bottom: 1px solid #d2b48c;
+        }
+        tr:nth-child(even) {
+            background: #f3eac2;
+        }
+        tr:nth-child(odd) {
+            background: #fffbe6;
+        }
+        h1, h2 {
+            color: #4b2e05;
+            text-shadow: 1px 1px 0 #fff, 2px 2px 2px #cfcfcf;
+            text-align: center;
+            font-size: 2.2em;
+        }
+        .review-answers-title {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .score-banner {
+            color: #4b2e05;
+            font-size: 1.5em;
+            font-weight: bold;
+            background: #fffbe6;
+            border-radius: 8px;
+            padding: 14px 0;
+            margin: 0 auto 18px auto;
+            text-align: center;
+            width: 80%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🧙‍♂️ Test Yourself Results</h1>
-    <p style="color: #4b2e05; font-size: 1.3em; font-weight: bold; background: #fffbe6; border-radius: 8px; padding: 10px 0;">You got {{ correct_count }} out of 40 correct ({{ percent }}%).</p>
+    <div class="score-banner">You got {{ correct_count }} out of 40 correct ({{ percent }}%).</div>
         {% if passed %}
             <div class="result-pass">You Passed!</div>
         {% else %}
             <div class="result-fail">You did not pass. Try again!</div>
         {% endif %}
         <div style="margin: 24px 0 12px 0;">
-            <h2 style="color:#4b2e05; font-size:1.1em; margin-bottom:8px;">Review Answers</h2>
-            <table style="width:100%; background:#fffbe6; color:#4b2e05; border-radius:8px; border-collapse:collapse;">
+            <h2 class="review-answers-title">Review Answers</h2>
+            <table>
                 <tr style="font-weight:bold; background:#e6c15b;">
-                    <td style="padding:4px;">#</td>
-                    <td style="padding:4px;">Question</td>
-                    <td style="padding:4px;">Your Answer</td>
-                    <td style="padding:4px;">Correct Answer</td>
+                    <th>#</th>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
                 </tr>
                 {% for entry in user_answers %}
-                <tr style="border-bottom:1px solid #d2b48c;">
-                    <td style="padding:4px;">{{ loop.index }}</td>
-                    <td style="padding:4px;">{{ entry.question }}</td>
-                    <td style="padding:4px;">{{ entry.user_answer }}</td>
-                    <td style="padding:4px;">{{ entry.correct_answer }}</td>
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ entry.question }}</td>
+                    <td>{{ entry.user_answer }}</td>
+                    <td>{{ entry.correct_answer }}</td>
                 </tr>
                 {% endfor %}
             </table>

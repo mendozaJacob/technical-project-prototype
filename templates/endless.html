@@ -21,7 +21,15 @@
     <h1 class="endless-title">🐉 Endless Mode</h1>
     <div class="timer" id="timer" data-time-left="{{ time_left }}">Time Left: {{ time_left }} sec</div>
     <div class="questions-left">Questions Answered: {{ q_number - 1 }}</div>
-        <div class="hp">Player HP: {{ player_hp }}</div>
+        {% if session.get('player_name') %}
+        <div class="hp">Player: {{ session.get('player_name') }} &nbsp;|&nbsp; HP: {{ player_hp }}</div>
+        {% else %}
+        <form method="POST" action="{{ url_for('set_name') }}" style="margin-bottom:12px;">
+            <input type="text" name="player_name" placeholder="Enter name (or leave anonymous)" style="padding:6px 8px; border-radius:6px; border:1px solid #4b2e05;">
+            <button type="submit" class="btn">Set Name</button>
+        </form>
+        <div class="hp">HP: {{ player_hp }}</div>
+        {% endif %}
         <div class="streak">Streak: {{ streak }}/5</div>
         <div class="score">Score: {{ score }}</div>
         <div class="question" style="margin-top:32px;">{{ question['q'] }}</div>

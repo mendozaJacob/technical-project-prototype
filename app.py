@@ -583,6 +583,17 @@ def endless_result():
                           total_time=round(total_time, 2),
                           player_name=player_name)
 
+
+@app.route('/set_name', methods=['POST'])
+def set_name():
+    # Simple endpoint to set player's name in session
+    name = request.form.get('player_name', '').strip()
+    if not name:
+        name = 'Anonymous'
+    session['player_name'] = name
+    # Return to the referring page (or index)
+    return redirect(request.referrer or url_for('index'))
+
 # Run the Flask app
 if __name__ == "__main__":
     app.run(debug=True)

@@ -19,8 +19,16 @@
         <div class="score">Final Score: {{ score }}</div>
         <div>Highest Streak: {{ highest_streak }}</div>
         <div>Total Questions Answered: {{ total_questions }}</div>
-        <a href="{{ url_for('endless') }}" class="btn">Retry</a>
-        <a href="{{ url_for('index') }}" class="btn">Main Menu</a>
+        <div>Correct: {{ correct }} &nbsp;&nbsp; Wrong: {{ wrong }}</div>
+        <div>Total Time: {{ total_time }}s</div>
+        <form method="POST" style="margin-top:18px;">
+            <label for="player_name">Enter your name for the leaderboard:</label><br>
+            <input type="text" id="player_name" name="player_name" placeholder="Anonymous" style="margin-top:8px; padding:8px 10px; font-size:1em; border-radius:6px; border:1px solid #4b2e05;">
+            <div style="margin-top:12px;">
+                <button type="submit" class="btn">Save to Leaderboard</button>
+                <a href="{{ url_for('index') }}" class="btn">Main Menu</a>
+            </div>
+        </form>
     </div>
 </body>
 </html>

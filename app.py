@@ -478,35 +478,40 @@ import random
 @app.route('/endless', methods=['GET', 'POST'])
 def endless():
     # Initialize session state for new endless run
-    if 'endless_questions' not in session or request.method == 'GET':
-        session['endless_questions'] = random.sample(questions, min(40, len(questions))) if len(questions) > 0 else []
-        session['endless_q_index'] = 0
+    if 'endless_score' not in session or request.method == 'GET':
         session['endless_score'] = 0
         session['endless_hp'] = 100
         session['endless_streak'] = 0
         session['endless_highest_streak'] = 0
+        session['endless_total_answered'] = 0
+        session['endless_correct'] = 0
+        session['endless_wrong'] = 0
         session['endless_start_time'] = time.time()
-        session['endless_time_limit'] = 45  # 45 seconds per question
-        session['endless_overall_time_limit'] = 60 * 60  # 1 hour overall
-    q_index = session['endless_q_index']
-    overall_time_left = max(0, int(session.get('endless_overall_time_limit', 3600) - (time.time() - session.get('endless_start_time', time.time()))))
-    if session['endless_hp'] <= 0 or q_index >= 40 or overall_time_left <= 0:
+        session['endless_question_start'] = time.time()
+        session['endless_current_question'] = random.choice(questions)
+    if session['endless_hp'] <= 0:
         return redirect(url_for('endless_result'))
-    question = session['endless_questions'][q_index]
-    streak = session['endless_streak']
-    score = session['endless_score']
-    player_hp = session['endless_hp']
-    highest_streak = session['endless_highest_streak']
     # Timer logic
     if 'endless_question_start' not in session or request.method == 'GET':
         session['endless_question_start'] = time.time()
     elapsed = time.time() - session['endless_question_start']
-    time_left = max(0, session['endless_time_limit'] - int(elapsed))
+    time_left = max(0, 45 - int(elapsed))
+    # Pick or keep the current question
+    if 'endless_current_question' not in session or request.method == 'GET':
+        session['endless_current_question'] = random.choice(questions)
+    question = session['endless_current_question']
+    streak = session['endless_streak']
+    score = session['endless_score']
+    player_hp = session['endless_hp']
+    highest_streak = session['endless_highest_streak']
+    total_answered = session['endless_total_answered']
     if time_left == 0:
         session['endless_hp'] -= 10
         session['endless_streak'] = 0
-        session['endless_q_index'] += 1
+        session['endless_wrong'] += 1
+        session['endless_total_answered'] += 1
         session['endless_question_start'] = time.time()
+        session['endless_current_question'] = random.choice(questions)
         return redirect(url_for('endless'))
     if request.method == 'POST':
         user_answer = request.form.get('answer', '').strip().lower()
@@ -517,9 +522,11 @@ def endless():
         else:
             keywords = [str(k).strip().lower() for k in raw_keywords]
         correct = user_answer == correct_answer or user_answer in keywords
+        session['endless_total_answered'] += 1
         if correct:
             session['endless_score'] += 10
             session['endless_streak'] += 1
+            session['endless_correct'] += 1
             if session['endless_streak'] > session['endless_highest_streak']:
                 session['endless_highest_streak'] = session['endless_streak']
             # HP regen after 5 correct in a row
@@ -528,46 +535,53 @@ def endless():
         else:
             session['endless_hp'] -= 10
             session['endless_streak'] = 0
-        session['endless_q_index'] += 1
+            session['endless_wrong'] += 1
         session['endless_question_start'] = time.time()
+        session['endless_current_question'] = random.choice(questions)
         return redirect(url_for('endless'))
-    total_questions = len(session['endless_questions'])
-    overall_time_left_min = overall_time_left // 60
-    overall_time_left_sec = overall_time_left % 60
     return render_template('endless.html',
                           question=question,
-                          q_number=q_index + 1,
+                          q_number=total_answered + 1,
                           streak=streak,
                           score=score,
                           player_hp=player_hp,
                           highest_streak=highest_streak,
-                          time_left=time_left,
-                          total_questions=total_questions,
-                          overall_time_left_min=overall_time_left_min,
-                          overall_time_left_sec=overall_time_left_sec,
-                          overall_start_time=session['endless_start_time'],
-                          overall_limit=session['endless_overall_time_limit'])
+                          total_questions=100,
+                          time_left=time_left)
 
-@app.route('/endless_result')
+@app.route('/endless_result', methods=['GET', 'POST'])
 def endless_result():
     score = session.get('endless_score', 0)
     highest_streak = session.get('endless_highest_streak', 0)
-    total_questions = session.get('endless_q_index', 0)
-    # Clear session state for endless mode
-    session.pop('endless_questions', None)
-    session.pop('endless_q_index', None)
-    session.pop('endless_score', None)
-    session.pop('endless_hp', None)
-    session.pop('endless_streak', None)
-    session.pop('endless_highest_streak', None)
-    session.pop('endless_start_time', None)
-    session.pop('endless_time_limit', None)
-    session.pop('endless_question_start', None)
-    session.pop('endless_overall_time_limit', None)
+    total_answered = session.get('endless_total_answered', 0)
+    correct = session.get('endless_correct', 0)
+    wrong = session.get('endless_wrong', 0)
+    total_time = time.time() - session.get('endless_start_time', time.time())
+    player_name = session.get('player_name', None)
+    if request.method == 'POST':
+        if not player_name:
+            player_name = request.form.get('player_name', 'Anonymous')
+            session['player_name'] = player_name
+        save_leaderboard(player_name, score, total_time, correct, wrong)
+        # Clear session state for endless mode
+        session.pop('endless_score', None)
+        session.pop('endless_hp', None)
+        session.pop('endless_streak', None)
+        session.pop('endless_highest_streak', None)
+        session.pop('endless_total_answered', None)
+        session.pop('endless_correct', None)
+        session.pop('endless_wrong', None)
+        session.pop('endless_start_time', None)
+        session.pop('player_name', None)
+        return redirect(url_for('leaderboard'))
     return render_template('endless_result.html',
                           score=score,
                           highest_streak=highest_streak,
-                          total_questions=total_questions)
+                          total_questions=total_answered,
+                          correct=correct,
+                          wrong=wrong,
+                          total_time=round(total_time, 2),
+                          player_name=player_name)
 
 # Run the Flask app
 if __name__ == "__main__":

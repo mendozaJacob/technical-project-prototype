@@ -1,3 +1,26 @@
+.endless-title {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #fffbe6;
+    background: #4b2e05;
+    border-radius: 16px;
+    padding: 18px 0 14px 0;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 12px #0004;
+    letter-spacing: 2px;
+    text-shadow: 1px 2px 8px #000a;
+}
+.questions-left {
+    margin: 18px 0 0 0;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #2e3d1f;
+    background: #ffeebc;
+    border-radius: 10px;
+    padding: 10px 0;
+    box-shadow: 0 2px 8px #0002;
+    display: block;
+}
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #000000 50%, #8b0000 50%);
@@ -36,8 +59,15 @@ body {
 }
 
 .question {
-    margin: 20px 0;
-    font-size: 20px;
+    margin: 24px 0;
+    font-size: 2em;
+    font-weight: bold;
+    color: #2e3d1f;
+    background: #ffeebc;
+    border-radius: 12px;
+    padding: 18px 12px;
+    box-shadow: 0 2px 8px #0002;
+    display: block;
 }
 
 .feedback {

@@ -109,9 +109,22 @@ def select_level():
 @app.route('/')
 def index():
     # Always redirect to level selection if no level is selected
+    # If no selected level, show the landing/home page first
     if 'selected_level' not in session:
-        return redirect(url_for('select_level'))
+        return render_template('home.html')
     return render_template('index.html')
+
+
+# Home route (explicit)
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+
+# How-to-play route (ensure it exists)
+@app.route('/howto')
+def howto():
+    return render_template('howto.html')
 
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])

@@ -109,9 +109,11 @@ def select_level():
 @app.route('/')
 def index():
     # Always redirect to level selection if no level is selected
-    # If no selected level, show the landing/home page first
+    # If no selected level, show the merged landing page
     if 'selected_level' not in session:
-        return render_template('home.html')
+        return render_template('index.html')
+    # If a selected level exists, render the index page
+    return render_template('index.html')
     return render_template('index.html')
 
 

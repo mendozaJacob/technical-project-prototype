@@ -3,49 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamify RPG</title>
+    <title>Quiz Battle — Home</title>
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        body, h1, .btn, .banner {
-            font-family: 'MedievalSharp', cursive !important;
-        }
-        .banner, h1 {
-            font-size: 2.3em;
-            color: #4b2e05;
-            text-shadow: 1px 1px 0 #fff, 2px 2px 2px #cfcfcf;
+        /* Merge of home + index styles */
+        body {
+            font-family: 'Georgia', serif;
+            background: url('https://i.imgur.com/5m5rJmB.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            color: #f8e5b3;
             text-align: center;
-            margin-bottom: 18px;
+            margin: 0;
+            padding: 0;
+        }
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.65);
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+        }
+        .site-title {
+            margin-top: 60px;
+            font-size: 3em;
+            color: #ffcc66;
+            text-shadow: 2px 2px 10px #8b0000;
+            font-family: 'MedievalSharp', cursive;
+        }
+        .tagline {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.2em;
+            color: #f5deb3;
+            margin-top: 6px;
+        }
+        .scroll-box {
+            background: rgba(40, 20, 10, 0.85);
+            border: 3px solid #b8860b;
+            border-radius: 15px;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 30px;
+            box-shadow: 0 0 25px #000;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: center;
+        }
+        .intro {
+            flex: 2;
+            text-align: left;
+            color: #f5deb3;
+        }
+        .controls {
+            flex: 1;
+            text-align: center;
         }
         .btn {
-            background: #4b2e05;
-            color: #fffbe6;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 28px;
-            margin: 12px 10px;
-            font-size: 1.3em;
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 1px 1px 4px #0004;
-            transition: background 0.2s, color 0.2s;
             display: inline-block;
+            margin: 12px 10px;
+            padding: 12px 28px;
+            font-size: 1.15em;
+            border-radius: 8px;
+            border: 2px solid #b8860b;
+            background: linear-gradient(145deg, #8b0000, #3b0000);
+            color: #f8e5b3;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 1px 1px 6px #0008;
+            transition: transform 0.15s, box-shadow 0.15s;
         }
-        .btn:hover {
-            background: #fffbe6;
-            color: #4b2e05;
-            border: 1px solid #4b2e05;
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #0008; }
+        .small { font-size: 0.9em; padding: 10px 18px; }
+        footer { margin-top: 40px; color: #d2b48c; }
+        @media (max-width: 800px) {
+            .scroll-box { flex-direction: column; padding: 20px; }
+            .intro { text-align: center; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="banner"><h1>🎮 Unix RPG Quest</h1></div>
-        <p style="font-family: 'MedievalSharp', cursive; font-size:1.2em;">Fight enemies while learning Unix commands!</p>
-    <a href="{{ url_for('select_level') }}" class="btn">Start Game</a>
-    <a href="{{ url_for('home') }}" class="btn">Home</a>
-        <a href="{{ url_for('test_yourself', new=1) }}" class="btn">Test Yourself</a>
-        <a href="{{ url_for('endless') }}" class="btn">Endless Mode</a>
+    <div class="overlay"></div>
+    <div class="site-title">⚔️ Quiz Battle: Dungeons of Knowledge ⚔️</div>
+    <div class="tagline">Fight enemies while learning Unix commands — conquer the dungeon!</div>
+
+    <div class="scroll-box">
+        <div class="intro">
+            <h2>Brave adventurer, your quest awaits!</h2>
+            <p>
+                Test your wisdom in the mystical Quiz Battle. Each correct answer strikes down your foes —
+                but beware, for every mistake weakens your spirit! Conquer all 10 enemies and earn your title as the
+                <strong>Ultimate Champion of the Realm</strong>.
+            </p>
+            <p style="margin-top:12px; color:#f0d9b5;">Quick tips: answer fast for bonus damage; use keywords when unsure; watch your health and the timer.</p>
+        </div>
+
+        <div class="controls">
+            <a href="{{ url_for('select_level') }}" class="btn">🎮 Start Game</a>
+            <a href="{{ url_for('test_yourself', new=1) }}" class="btn">🧪 Test Yourself</a>
+            <a href="{{ url_for('endless') }}" class="btn">♾️ Endless Mode</a>
+            <a href="{{ url_for('howto') }}" class="btn small">📜 How to Play</a>
+            <div style="margin-top:14px; font-size:0.9em; color:#e6d3b0;">Already have a level selected? Continue to play.</div>
+        </div>
     </div>
+
+    <footer>
+        <p>&copy; Quiz Battle — Built for learning and fun</p>
+    </footer>
 </body>
 </html>

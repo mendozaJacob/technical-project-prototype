@@ -128,6 +128,21 @@ def home():
 def howto():
     return render_template('howto.html')
 
+
+@app.route('/choose_character', methods=['GET', 'POST'])
+def choose_character():
+    total_characters = 16
+    if request.method == 'POST':
+        char = request.form.get('character') or request.form.get('character_id')
+        try:
+            char_id = int(char)
+        except (TypeError, ValueError):
+            char_id = None
+        if char_id and 1 <= char_id <= total_characters:
+            session['character'] = char_id
+            return redirect(url_for('select_level'))
+    return render_template('choose_character.html', total_characters=total_characters)
+
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
 def game():

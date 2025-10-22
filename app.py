@@ -100,9 +100,10 @@ def select_level():
         session["game_start_time"] = time.time()
         session['level_completed'] = False
         session['current_timer'] = 45  # Default timer is 45 seconds
-        return redirect(url_for('game'))
+        # After the player selects a level, send them to choose their character
+        return redirect(url_for('choose_character'))
 
-    # Pass unlocked info to template
+    # Pass unlocked info to template (GET request)
     return render_template('select_level.html', levels=levels, highest_unlocked=highest_unlocked)
 
 # Route for the home page
@@ -140,7 +141,8 @@ def choose_character():
             char_id = None
         if char_id and 1 <= char_id <= total_characters:
             session['character'] = char_id
-            return redirect(url_for('select_level'))
+            # After choosing a character, start the game
+            return redirect(url_for('game'))
     return render_template('choose_character.html', total_characters=total_characters)
 
 # Route for the game page

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Leaderboard</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>Time (s)</th>
+                    <th>Correct Answers</th>
+                    <th>Wrong Answers</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in leaderboard %}
+                <tr>
+                    <td>{{ record.player }}</td>
+                    <td>{{ record.score }}</td>
+                    <td>{{ record.time }}</td>
+                    <td>{{ record.correct_answers }}</td>
+                    <td>{{ record.wrong_answers }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

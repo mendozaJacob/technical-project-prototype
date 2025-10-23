@@ -1,0 +1,72 @@
+[
+  {
+    "level": 1,
+    "name": "Novice Gnome",
+    "avatar": "🧙‍♂️",
+    "taunt": "Let's see if you even know what 'ls' does!",
+    "range": "Q1–Q10"
+  },
+  {
+    "level": 2,
+    "name": "Apprentice Admin",
+    "avatar": "👨‍💻",
+    "taunt": "You’ve mastered the basics… but can you handle users and groups?",
+    "range": "Q11–Q20"
+  },
+  {
+    "level": 3,
+    "name": "Daemon Scribe",
+    "avatar": "👾",
+    "taunt": "Services and mounts are my domain. Tread carefully.",
+    "range": "Q21–Q30"
+  },
+  {
+    "level": 4,
+    "name": "Shell Warden",
+    "avatar": "🧞",
+    "taunt": "Your shell skills are weak, mortal!",
+    "range": "Q31–Q40"
+  },
+  {
+    "level": 5,
+    "name": "System Guardian",
+    "avatar": "🛡️",
+    "taunt": "Let's see how well you know your systemctl magic.",
+    "range": "Q41–Q50"
+  },
+  {
+    "level": 6,
+    "name": "Kernel Knight",
+    "avatar": "⚔️",
+    "taunt": "Only true warriors understand SELinux and permissions!",
+    "range": "Q51–Q60"
+  },
+  {
+    "level": 7,
+    "name": "Network Phantom",
+    "avatar": "🕸️",
+    "taunt": "Firewalls, DNS, and IPs — your connectivity ends here.",
+    "range": "Q61–Q70"
+  },
+  {
+    "level": 8,
+    "name": "Storage Titan",
+    "avatar": "💾",
+    "taunt": "LVM, RAID, and mounting madness await you!",
+    "range": "Q71–Q80"
+  },
+  {
+    "level": 9,
+    "name": "Virtual Overlord",
+    "avatar": "🤖",
+    "taunt": "Containers, virtualization, and automation — prove your worth!",
+    "range": "Q81–Q90"
+  },
+  {
+    "level": 10,
+    "name": "Root Daemon",
+    "avatar": "🔥",
+    "taunt": "You’ve reached the core. Only a true sysadmin can defeat me!",
+    "range": "Q91–Q100"
+  }
+]

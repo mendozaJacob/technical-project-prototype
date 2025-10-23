@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endless Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: 'MedievalSharp', cursive; background: #2e3d1f; color: #f3eac2; }
+        .container { max-width: 600px; margin: 40px auto; background: #f3eac2; border: 6px solid #4b2e05; border-radius: 24px; box-shadow: 0 0 24px #0008; padding: 32px 24px 24px 24px; text-align: center; }
+        .timer { font-size: 1.3em; color: #b22222; margin-bottom: 12px; }
+        .hp { color: #228B22; font-weight: bold; }
+        .streak { color: #e6c15b; font-weight: bold; }
+        .score { color: #2e3d1f; font-weight: bold; }
+        .btn { font-family: 'MedievalSharp', cursive; }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h1 class="endless-title">🐉 Endless Mode</h1>
+    <div class="timer" id="timer" data-time-left="{{ time_left }}">Time Left: {{ time_left }} sec</div>
+    <div class="questions-left">Questions Answered: {{ q_number - 1 }}</div>
+        {% if session.get('player_name') %}
+        <div class="hp">Player: {{ session.get('player_name') }} &nbsp;|&nbsp; HP: {{ player_hp }}</div>
+        {% else %}
+        <form method="POST" action="{{ url_for('set_name') }}" style="margin-bottom:12px;">
+            <input type="text" name="player_name" placeholder="Enter name (or leave anonymous)" style="padding:6px 8px; border-radius:6px; border:1px solid #4b2e05;">
+            <button type="submit" class="btn">Set Name</button>
+        </form>
+        <div class="hp">HP: {{ player_hp }}</div>
+        {% endif %}
+        <div class="streak">Streak: {{ streak }}/5</div>
+        <div class="score">Score: {{ score }}</div>
+        <div class="question" style="margin-top:32px;">{{ question['q'] }}</div>
+        <form method="POST" style="margin-top:24px;">
+            <input type="text" name="answer" placeholder="Type your answer..." required style="font-size:1.2em; padding:8px 12px; border-radius:8px; border:2px solid #4b2e05;">
+            <button type="submit" class="btn" style="margin-left:12px;">Submit</button>
+        </form>
+    </div>
+<script type="text/javascript">
+    // Live countdown timer (in seconds)
+    var timerElement = document.getElementById('timer');
+    var timeLeft = parseInt(timerElement.getAttribute('data-time-left'));
+    function updateTimer() {
+        if (timeLeft < 0) timeLeft = 0;
+        timerElement.textContent = `Time Left: ${timeLeft} sec`;
+        if (timeLeft > 0) {
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        } else {
+            // Auto-submit form if timer runs out
+            document.querySelector('form').submit();
+        }
+    }
+    updateTimer();
+</script>
+</body>
+</html>

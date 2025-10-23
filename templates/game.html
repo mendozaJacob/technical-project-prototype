@@ -9,26 +9,48 @@
 </head>
 <body>
     <!-- Main container for the game content -->
-    <div class="container">
-        <!-- Display the current level and enemy details -->
-        <div class="enemy">
-            <h2>Level {{ level }}: {{ enemy.name }}</h2>
-            <p>{{ enemy.avatar }}</p>
-            <p><em>{{ enemy.taunt }}</em></p>
+    <div class="container game-layout">
+        <!-- Left column: player avatar -->
+        <div class="avatar-column">
+            {% if session.get('character') %}
+            <img class="player-avatar" src="{{ url_for('static', filename='characters/character' ~ session.get('character') ~ '.png') }}" alt="Player avatar">
+            {% else %}
+            <div class="player-avatar placeholder">🧑</div>
+            {% endif %}
+            <p class="avatar-label">Player</p>
         </div>
 
-        <!-- Display player and enemy stats -->
-        <p>Player HP: {{ player_hp }}</p>
-        <p>Enemy HP: {{ enemy_hp }}</p>
-        <p>Score: {{ score }}</p>
+        <!-- Right column: game info -->
+        <div class="game-column">
+            <!-- Display the current level and enemy details -->
+            <div class="enemy">
+                <h2>Level {{ level }}: {{ enemy.name }}</h2>
+                <p><em>{{ enemy.taunt }}</em></p>
+            </div>
 
-        <!-- Display the current question -->
-        <h2>Question {{ q_number }} of {{ total }}</h2>
-        <p>{{ question['q'] }}</p>
-        <form method="POST">
-            <input type="text" name="answer" placeholder="Type your command..." required>
-            <button type="submit" class="btn">Attack!</button>
-        </form>
+            <!-- Display player and enemy stats -->
+            <p>Player HP: {{ player_hp }}</p>
+            <p>Enemy HP: {{ enemy_hp }}</p>
+            <p>Score: {{ score }}</p>
+
+            <!-- Display the current question -->
+            <h2>Question {{ q_number }} of {{ total }}</h2>
+            <p>{{ question['q'] }}</p>
+            <form method="POST">
+                <input type="text" name="answer" placeholder="Type your command..." required>
+                <button type="submit" class="btn">Attack!</button>
+            </form>
+        </div>
+
+            <!-- Right column: enemy avatar -->
+            <div class="enemy-column">
+                {% if enemy_image %}
+                    <img class="player-avatar" src="{{ enemy_image }}" alt="Enemy avatar">
+                {% else %}
+                    <div class="player-avatar placeholder">{{ enemy.avatar }}</div>
+                {% endif %}
+                <p class="avatar-label">Enemy</p>
+            </div>
     </div>
 
     <!-- Status section for additional stats -->

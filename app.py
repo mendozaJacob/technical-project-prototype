@@ -25,16 +25,29 @@ schema = Schema(
 )
 
 # Create or open the Whoosh index directory
-if not os.path.exists("indexdir"):
-    os.mkdir("indexdir")
-    ix = index.create_in("indexdir", schema)
-else:
+def create_or_open_index():
+    """Open the Whoosh index if valid; otherwise recreate it."""
     try:
-        ix = index.open_dir("indexdir")
+        if not os.path.exists("indexdir"):
+            os.mkdir("indexdir")
+            return index.create_in("indexdir", schema)
+        try:
+            return index.open_dir("indexdir")
+        except Exception as e:
+            print(f"Whoosh index open failed: {e}. Recreating indexdir...")
+            try:
+                # Remove the corrupted indexdir and recreate
+                import shutil
+                shutil.rmtree("indexdir")
+            except Exception:
+                pass
+            os.mkdir("indexdir")
+            return index.create_in("indexdir", schema)
     except Exception as e:
-        print(f"Error opening Whoosh index: {e}")
-        os.mkdir("indexdir")
-        ix = index.create_in("indexdir", schema)
+        print(f"Unexpected error creating/opening indexdir: {e}")
+        raise
+
+ix = create_or_open_index()
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -100,6 +113,8 @@ def select_level():
         session["game_start_time"] = time.time()
         session['level_completed'] = False
         session['current_timer'] = 45  # Default timer is 45 seconds
+        # Initialize enemy progression index (follow order in data/enemies.json)
+        session['enemy_index'] = 0
         # After the player selects a level, send them to choose their character
         return redirect(url_for('choose_character'))
 
@@ -184,10 +199,70 @@ def game():
             enemies = json.load(f)
     except Exception:
         enemies = []
-    enemy = next((e for e in enemies if e.get("level") == current_level), None)
+    # Prefer ordered progression using session['enemy_index'] if present
+    enemy = None
+    enemy_index = session.get('enemy_index')
+    if enemy_index is not None and isinstance(enemies, list) and 0 <= int(enemy_index) < len(enemies):
+        try:
+            enemy = enemies[int(enemy_index)]
+        except Exception:
+            enemy = None
+
+    # Fallback: try to find an enemy that matches the current level
+    if not enemy:
+        enemy = next((e for e in enemies if e.get("level") == current_level), None)
     if not enemy:
         enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found for this level."}
     print(f"DEBUG: Selected enemy for level {current_level}: {enemy}")  # Debugging
+
+    # Determine enemy image URL to mirror how player avatar images are used
+    enemy_image = None
+    # If the enemy JSON includes an explicit image field, use it (assume path under static/)
+    if isinstance(enemy, dict) and enemy.get('image'):
+        enemy_image = url_for('static', filename=enemy.get('image'))
+    else:
+        # Attempt to find an image in static/enemies matching the enemy name (safe fallback)
+        # Create a safe filename from the enemy name (lowercase, replace spaces with underscores)
+        if isinstance(enemy, dict) and enemy.get('name'):
+            safe_base = ''.join(c if c.isalnum() else '_' for c in enemy.get('name').lower()).strip('_')
+            # Check common extensions
+            for ext in ['.png', '.jpg', '.jpeg', '.gif']:
+                candidate = f'enemies/{safe_base}{ext}'
+                candidate_path = os.path.join(os.path.dirname(__file__), 'static', candidate)
+                if os.path.exists(candidate_path):
+                    enemy_image = url_for('static', filename=candidate)
+                    break
+
+            # If not found by safe name, try fuzzy matching against files in static/enemies
+            if not enemy_image:
+                try:
+                    enemy_tokens = [t for t in ''.join(c if c.isalnum() else ' ' for c in enemy.get('name').lower()).split() if t]
+                    enemies_dir = os.path.join(os.path.dirname(__file__), 'static', 'enemies')
+                    best_match = None
+                    best_score = 0
+                    if os.path.isdir(enemies_dir):
+                        for fn in os.listdir(enemies_dir):
+                            fn_lower = fn.lower()
+                            name_part = os.path.splitext(fn_lower)[0]
+                            file_tokens = [t for t in ''.join(c if c.isalnum() else ' ' for c in name_part).split() if t]
+                            # score = number of matching tokens
+                            score = sum(1 for t in enemy_tokens if t in file_tokens)
+                            # if all tokens match, immediate perfect match
+                            if score == len(enemy_tokens) and score > 0:
+                                best_match = fn
+                                best_score = score
+                                break
+                            if score > best_score:
+                                best_score = score
+                                best_match = fn
+                        # accept best match if it matches at least one token
+                        if best_match and best_score > 0:
+                            candidate = f'enemies/{best_match}'
+                            enemy_image = url_for('static', filename=candidate)
+                except Exception:
+                    enemy_image = None
+
+    # Attach enemy_image into the template context
 
     # Initialize the timer for the current question
     if "level_start_time" not in session:
@@ -268,6 +343,7 @@ def game():
                            total=10,  # Only 10 questions per level
                            level=current_level,
                            enemy=enemy,
+                           enemy_image=enemy_image,
                            time_left=time_left)
 
 # Route for the feedback page
@@ -320,6 +396,22 @@ def result():
         prev_highest = session.get('highest_unlocked', 1)
         if next_level > prev_highest:
             session['highest_unlocked'] = next_level
+
+        # Advance the enemy_index so a new enemy appears after each completed level
+        try:
+            with open('data/enemies.json', encoding='utf-8') as f:
+                enemies_list = json.load(f)
+        except Exception:
+            enemies_list = []
+        if isinstance(enemies_list, list) and enemies_list:
+            current_idx = session.get('enemy_index', 0) or 0
+            try:
+                current_idx = int(current_idx)
+            except Exception:
+                current_idx = 0
+            # Move to next enemy but don't exceed list bounds (wrap to last)
+            next_idx = min(current_idx + 1, len(enemies_list) - 1)
+            session['enemy_index'] = next_idx
 
     return render_template('result.html', score=final_score,
                            player_hp=session['player_hp'],
@@ -503,7 +595,32 @@ for question in questions:
         answer=question.get("answer", ""),
         keywords=keywords
     )
-writer.commit()
+try:
+    writer.commit()
+except Exception as e:
+    print(f"Whoosh writer.commit() failed: {e}. Attempting to recreate index and retry...")
+    try:
+        import shutil
+        if os.path.exists("indexdir"):
+            shutil.rmtree("indexdir")
+    except Exception:
+        pass
+    # Recreate index and re-add documents
+    ix = create_or_open_index()
+    writer = AsyncWriter(ix)
+    for question in questions:
+        raw_keywords = question.get('keywords', [])
+        if isinstance(raw_keywords, str):
+            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+        else:
+            keywords = [str(k).strip().lower() for k in raw_keywords]
+        writer.add_document(
+            id=str(question.get("id", "")),
+            question=question.get("q", ""),
+            answer=question.get("answer", ""),
+            keywords=keywords
+        )
+    writer.commit()
 
 # ------------------- ENDLESS MODE -------------------
 import random

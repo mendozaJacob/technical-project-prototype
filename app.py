@@ -308,22 +308,25 @@ def game():
 
         # Only apply this block for the main game mode, not endless or test yourself
         if not session.get('endless_questions') and not session.get('test_questions'):
+            # Get the question feedback
+            question_feedback = question.get('feedback', 'No additional information available.')
+            
             if user_answer == correct_answer:
                 session['score'] += score  # Add score
                 session['enemy_hp'] -= (damage * 3)
-                session['feedback'] = f"🔥 Exact answer! Triple damage: {damage*3} and {score} points in {time_taken:.2f} seconds."
+                session['feedback'] = f"🔥 Exact answer! Triple damage: {damage*3} and {score} points in {time_taken:.2f} seconds.<br><br>✅ {question_feedback}"
                 session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
                 session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
             elif user_answer in keywords:
                 session['score'] += score  # Add score
                 session['enemy_hp'] -= damage
-                session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds."
+                session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds.<br><br>✅ {question_feedback}"
                 session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
                 session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
             else:
                 session['player_hp'] -= BASE_DAMAGE * current_level
                 session['score'] -= 5  # Deduct points for wrong answer
-                session['feedback'] = "❌ Incorrect!"
+                session['feedback'] = f"❌ Incorrect!<br><br>💡 {question_feedback}"
                 session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s from timer for next question, min 10s
                 session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
 
@@ -514,7 +517,9 @@ def test_yourself():
         session['test_user_answers'].append({
             'question': question.get('q', ''),
             'user_answer': user_answer,
-            'correct_answer': correct_answer
+            'correct_answer': correct_answer,
+            'correct': user_answer == correct_answer or user_answer in keywords,
+            'feedback': question.get('feedback', 'No additional information available.')
         })
         if user_answer == correct_answer or user_answer in keywords:
             session['test_correct'] = correct_count + 1
@@ -711,6 +716,21 @@ def endless_game():
         else:
             keywords = [str(k).strip().lower() for k in raw_keywords]
         correct = user_answer == correct_answer or user_answer in keywords
+        
+        # Store feedback for this question
+        question_feedback = question.get('feedback', 'No additional information available.')
+        if 'endless_feedback_list' not in session:
+            session['endless_feedback_list'] = []
+        
+        feedback_entry = {
+            'question': question.get('q', ''),
+            'user_answer': user_answer,
+            'correct_answer': correct_answer,
+            'correct': correct,
+            'feedback': question_feedback
+        }
+        session['endless_feedback_list'].append(feedback_entry)
+        
         session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
         if correct:
             session['endless_score'] = session.get('endless_score', 0) + 10
@@ -748,6 +768,8 @@ def endless_result():
     wrong = session.get('endless_wrong', 0)
     total_time = time.time() - session.get('endless_start_time', time.time())
     player_name = session.get('player_name', None)
+    feedback_list = session.get('endless_feedback_list', [])
+    
     if request.method == 'POST':
         if not player_name:
             player_name = request.form.get('player_name', 'Anonymous')
@@ -765,8 +787,18 @@ def endless_result():
         session.pop('endless_score_initialized', None)
         session.pop('endless_question_start', None)
         session.pop('endless_current_question', None)
+        session.pop('endless_feedback_list', None)
         session.pop('player_name', None)
         return redirect(url_for('leaderboard'))
+    return render_template('endless_result.html',
+                          score=score,
+                          highest_streak=highest_streak,
+                          total_questions=total_answered,
+                          correct=correct,
+                          wrong=wrong,
+                          total_time=round(total_time, 2),
+                          player_name=player_name,
+                          feedback_list=feedback_list)
     return render_template('endless_result.html',
                           score=score,
                           highest_streak=highest_streak,

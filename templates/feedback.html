@@ -4,16 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gamify RPG - Feedback</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { 
+            font-family: 'MedievalSharp', cursive; 
+            background: #2e3d1f; 
+            color: #f3eac2; 
+            margin: 0;
+            padding: 20px;
+        }
+        .feedback-container { 
+            max-width: 700px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 32px 24px 24px 24px; 
+            text-align: center; 
+        }
+        .feedback-title {
+            color: #4b2e05; 
+            font-size: 2em; 
+            font-weight: bold; 
+            background: #fffbe6; 
+            border-radius: 16px; 
+            padding: 18px 0 14px 0; 
+            margin-bottom: 18px;
+        }
+        .feedback-content {
+            color: #4b2e05;
+            background: #fffbe6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            color: #4b2e05;
+            font-weight: bold;
+        }
+        .btn { 
+            font-family: 'MedievalSharp', cursive;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Feedback</h1>
-        <p>{{ feedback }}</p>
-        <p>Player HP: {{ player_hp }}</p>
-        <p>Enemy HP: {{ enemy_hp }}</p>
-        <p>Score: {{ score }}</p>
-        <a href="{{ url_for('game') }}" class="btn">Next Question</a>
+    <div class="feedback-container">
+        <h1 class="feedback-title">📜 Battle Report</h1>
+        
+        <div class="feedback-content">
+            {{ feedback|safe }}
+        </div>
+        
+        <div class="stats">
+            <div>❤️ Player HP: {{ player_hp }}</div>
+            <div>👾 Enemy HP: {{ enemy_hp }}</div>
+            <div>⭐ Score: {{ score }}</div>
+        </div>
+        
+        <a href="{{ url_for('game') }}" class="btn">⚔️ Next Battle</a>
     </div>
 </body>
 </html>

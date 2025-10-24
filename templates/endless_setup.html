@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endless Mode Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: 'MedievalSharp', cursive; background: #2e3d1f; color: #f3eac2; }
+        .container { max-width: 600px; margin: 40px auto; background: #f3eac2; border: 6px solid #4b2e05; border-radius: 24px; box-shadow: 0 0 24px #0008; padding: 32px 24px 24px 24px; text-align: center; }
+        .setup-form { margin: 30px 0; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #4b2e05; font-weight: bold; margin-bottom: 8px; font-size: 1.2em; }
+        .form-group input { 
+            font-family: 'MedievalSharp', cursive;
+            padding: 12px; 
+            border: 2px solid #4b2e05; 
+            border-radius: 8px; 
+            font-size: 1.1em; 
+            width: 300px; 
+            text-align: center;
+        }
+        .btn { 
+            font-family: 'MedievalSharp', cursive;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .game-info {
+            color: #4b2e05;
+            background: #fffbe6;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="endless-title">🐉 Endless Mode</h1>
+        
+        <div class="game-info">
+            <h3>📜 About Endless Mode</h3>
+            <p>Test your knowledge in an endless stream of questions!</p>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>⏱️ 45 seconds per question</li>
+                <li>💚 Gain 20 HP after every 5 correct answers</li>
+                <li>❤️ Lose 10 HP for wrong answers or timeouts</li>
+                <li>🔥 Build streaks for higher scores</li>
+                <li>⚔️ Survive as long as you can!</li>
+            </ul>
+        </div>
+
+        <form method="POST" action="{{ url_for('endless_start') }}" class="setup-form">
+            <div class="form-group">
+                <label for="player_name">🧙‍♂️ Enter Your Name:</label>
+                <input type="text" 
+                       id="player_name" 
+                       name="player_name" 
+                       placeholder="Enter your warrior name..." 
+                       required 
+                       maxlength="20">
+            </div>
+            
+            <button type="submit" class="btn">⚔️ Begin Endless Battle!</button>
+        </form>
+
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('index') }}" class="btn" style="background: #8b7355; text-decoration: none; display: inline-block;">
+                🏠 Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

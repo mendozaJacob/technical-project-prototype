@@ -624,44 +624,84 @@ except Exception as e:
 
 # ------------------- ENDLESS MODE -------------------
 import random
-@app.route('/endless', methods=['GET', 'POST'])
+
+@app.route('/endless')
 def endless():
-    # Initialize session state for new endless run
-    if 'endless_score' not in session or request.method == 'GET':
-        session['endless_score'] = 0
-        session['endless_hp'] = 100
-        session['endless_streak'] = 0
-        session['endless_highest_streak'] = 0
-        session['endless_total_answered'] = 0
-        session['endless_correct'] = 0
-        session['endless_wrong'] = 0
-        session['endless_start_time'] = time.time()
-        session['endless_question_start'] = time.time()
-        session['endless_current_question'] = random.choice(questions)
-    if session['endless_hp'] <= 0:
+    # Show setup page if no player name is set or if this is a fresh start
+    if not session.get('player_name') or not session.get('endless_score_initialized'):
+        return render_template('endless_setup.html')
+    
+    # If player has died, redirect to results
+    if session.get('endless_hp', 0) <= 0:
         return redirect(url_for('endless_result'))
+        
+    # Continue with existing game
+    return redirect(url_for('endless_game'))
+
+@app.route('/endless/start', methods=['POST'])
+def endless_start():
+    # Get player name from form
+    player_name = request.form.get('player_name', '').strip()
+    if not player_name:
+        player_name = 'Anonymous Warrior'
+    
+    # Set player name in session
+    session['player_name'] = player_name
+    
+    # Initialize endless mode session state
+    session['endless_score'] = 0
+    session['endless_hp'] = 100
+    session['endless_streak'] = 0
+    session['endless_highest_streak'] = 0
+    session['endless_total_answered'] = 0
+    session['endless_correct'] = 0
+    session['endless_wrong'] = 0
+    session['endless_start_time'] = time.time()
+    session['endless_question_start'] = time.time()
+    session['endless_current_question'] = random.choice(questions)
+    session['endless_score_initialized'] = True
+    
+    return redirect(url_for('endless_game'))
+
+@app.route('/endless/game', methods=['GET', 'POST'])
+def endless_game():
+    # Check if player name is set, if not redirect to setup
+    if not session.get('player_name'):
+        return redirect(url_for('endless'))
+        
+    # Check if game is over
+    if session.get('endless_hp', 0) <= 0:
+        return redirect(url_for('endless_result'))
+        
     # Timer logic
-    if 'endless_question_start' not in session or request.method == 'GET':
+    if 'endless_question_start' not in session:
         session['endless_question_start'] = time.time()
     elapsed = time.time() - session['endless_question_start']
     time_left = max(0, 45 - int(elapsed))
+    
     # Pick or keep the current question
-    if 'endless_current_question' not in session or request.method == 'GET':
+    if 'endless_current_question' not in session:
         session['endless_current_question'] = random.choice(questions)
     question = session['endless_current_question']
-    streak = session['endless_streak']
-    score = session['endless_score']
-    player_hp = session['endless_hp']
-    highest_streak = session['endless_highest_streak']
-    total_answered = session['endless_total_answered']
+    
+    # Get session variables
+    streak = session.get('endless_streak', 0)
+    score = session.get('endless_score', 0)
+    player_hp = session.get('endless_hp', 100)
+    highest_streak = session.get('endless_highest_streak', 0)
+    total_answered = session.get('endless_total_answered', 0)
+    
+    # Handle timeout
     if time_left == 0:
-        session['endless_hp'] -= 10
+        session['endless_hp'] = session.get('endless_hp', 100) - 10
         session['endless_streak'] = 0
-        session['endless_wrong'] += 1
-        session['endless_total_answered'] += 1
+        session['endless_wrong'] = session.get('endless_wrong', 0) + 1
+        session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
         session['endless_question_start'] = time.time()
         session['endless_current_question'] = random.choice(questions)
-        return redirect(url_for('endless'))
+        return redirect(url_for('endless_game'))
+    
+    # Handle answer submission
     if request.method == 'POST':
         user_answer = request.form.get('answer', '').strip().lower()
         correct_answer = question.get('answer', '').strip().lower()
@@ -671,23 +711,24 @@ def endless():
         else:
             keywords = [str(k).strip().lower() for k in raw_keywords]
         correct = user_answer == correct_answer or user_answer in keywords
-        session['endless_total_answered'] += 1
+        session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
         if correct:
-            session['endless_score'] += 10
-            session['endless_streak'] += 1
-            session['endless_correct'] += 1
-            if session['endless_streak'] > session['endless_highest_streak']:
+            session['endless_score'] = session.get('endless_score', 0) + 10
+            session['endless_streak'] = session.get('endless_streak', 0) + 1
+            session['endless_correct'] = session.get('endless_correct', 0) + 1
+            if session['endless_streak'] > session.get('endless_highest_streak', 0):
                 session['endless_highest_streak'] = session['endless_streak']
             # HP regen after 5 correct in a row
             if session['endless_streak'] % 5 == 0:
-                session['endless_hp'] = min(100, session['endless_hp'] + 20)
+                session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
         else:
-            session['endless_hp'] -= 10
+            session['endless_hp'] = session.get('endless_hp', 100) - 10
             session['endless_streak'] = 0
-            session['endless_wrong'] += 1
+            session['endless_wrong'] = session.get('endless_wrong', 0) + 1
         session['endless_question_start'] = time.time()
         session['endless_current_question'] = random.choice(questions)
-        return redirect(url_for('endless'))
+        return redirect(url_for('endless_game'))
+    
     return render_template('endless.html',
                           question=question,
                           q_number=total_answered + 1,
@@ -721,6 +762,9 @@ def endless_result():
         session.pop('endless_correct', None)
         session.pop('endless_wrong', None)
         session.pop('endless_start_time', None)
+        session.pop('endless_score_initialized', None)
+        session.pop('endless_question_start', None)
+        session.pop('endless_current_question', None)
         session.pop('player_name', None)
         return redirect(url_for('leaderboard'))
     return render_template('endless_result.html',

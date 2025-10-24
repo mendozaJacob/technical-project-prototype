@@ -4,6 +4,7 @@
     "name": "Novice Gnome",
     "avatar": "🧙‍♂️",
     "taunt": "Let's see if you even know what 'ls' does!",
+    "image": "enemies/novice gnome.jpg",
     "range": "Q1–Q10"
   },
   {
@@ -11,6 +12,7 @@
     "name": "Apprentice Admin",
     "avatar": "👨‍💻",
     "taunt": "You’ve mastered the basics… but can you handle users and groups?",
+    "image": "enemies/apprentice.jpg",
     "range": "Q11–Q20"
   },
   {
@@ -18,6 +20,7 @@
     "name": "Daemon Scribe",
     "avatar": "👾",
     "taunt": "Services and mounts are my domain. Tread carefully.",
+    "image": "enemies/phantom.jpg",
     "range": "Q21–Q30"
   },
   {
@@ -25,6 +28,7 @@
     "name": "Shell Warden",
     "avatar": "🧞",
     "taunt": "Your shell skills are weak, mortal!",
+    "image": "enemies/Guardian.jpg",
     "range": "Q31–Q40"
   },
   {
@@ -32,6 +36,7 @@
     "name": "System Guardian",
     "avatar": "🛡️",
     "taunt": "Let's see how well you know your systemctl magic.",
+    "image": "enemies/knight.jpg",
     "range": "Q41–Q50"
   },
   {
@@ -39,6 +44,7 @@
     "name": "Kernel Knight",
     "avatar": "⚔️",
     "taunt": "Only true warriors understand SELinux and permissions!",
+    "image": "enemies/titan.jpg",
     "range": "Q51–Q60"
   },
   {
@@ -46,6 +52,7 @@
     "name": "Network Phantom",
     "avatar": "🕸️",
     "taunt": "Firewalls, DNS, and IPs — your connectivity ends here.",
+    "image": "enemies/phantom.jpg",
     "range": "Q61–Q70"
   },
   {
@@ -53,6 +60,7 @@
     "name": "Storage Titan",
     "avatar": "💾",
     "taunt": "LVM, RAID, and mounting madness await you!",
+    "image": "enemies/titan.jpg",
     "range": "Q71–Q80"
   },
   {
@@ -60,6 +68,7 @@
     "name": "Virtual Overlord",
     "avatar": "🤖",
     "taunt": "Containers, virtualization, and automation — prove your worth!",
+    "image": "enemies/overlord.jpeg",
     "range": "Q81–Q90"
   },
   {
@@ -67,6 +76,7 @@
     "name": "Root Daemon",
     "avatar": "🔥",
     "taunt": "You’ve reached the core. Only a true sysadmin can defeat me!",
+    "image": "enemies/overlord.jpeg",
     "range": "Q91–Q100"
   }
 ]

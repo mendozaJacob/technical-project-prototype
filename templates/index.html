@@ -10,7 +10,8 @@
         /* Merge of home + index styles */
         body {
             font-family: 'Georgia', serif;
-            background: url('https://i.imgur.com/5m5rJmB.jpeg') no-repeat center center fixed;
+            /* Use local static background to avoid remote-hosting issues */
+            background: url("{{ url_for('static', filename='enemies/overlord.jpeg') }}") no-repeat center center fixed;
             background-size: cover;
             color: #f8e5b3;
             text-align: center;
@@ -22,7 +23,8 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            z-index: -1;
+            /* place overlay above the background but behind the interactive content */
+            z-index: 0;
         }
         .site-title {
             margin-top: 60px;
@@ -49,6 +51,8 @@
             flex-direction: row;
             gap: 20px;
             align-items: center;
+            position: relative;
+            z-index: 1; /* ensure content sits above overlay */
         }
         .intro {
             flex: 2;

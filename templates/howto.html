@@ -8,8 +8,8 @@
   <style>
     body {
       font-family: 'Georgia', serif;
-      background: url('https://i.imgur.com/GQXccnX.jpeg') no-repeat center center fixed;
-      background-size: cover;
+      /* Use the project's gradient background instead of an image */
+      background: linear-gradient(135deg, #2e3d1f 0%, #1a2312 100%);
       color: #f8e5b3;
       text-align: center;
       margin: 0;
@@ -17,11 +17,8 @@
     }
 
     .overlay {
-      background-color: rgba(0, 0, 0, 0.7);
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
+      /* overlay not needed when there's no background image */
+      display: none;
     }
 
     h1 {

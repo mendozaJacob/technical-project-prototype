@@ -10,19 +10,16 @@
         /* Merge of home + index styles */
         body {
             font-family: 'Georgia', serif;
-            background: url('https://i.imgur.com/5m5rJmB.jpeg') no-repeat center center fixed;
-            background-size: cover;
+            /* Use the same gradient/color as the main stylesheet instead of an image */
+            background: linear-gradient(135deg, #2e3d1f 0%, #1a2312 100%);
             color: #f8e5b3;
             text-align: center;
             margin: 0;
             padding: 0;
         }
         .overlay {
-            background-color: rgba(0, 0, 0, 0.65);
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
+            /* overlay not needed when using a solid/gradient background */
+            display: none;
         }
         .site-title {
             margin-top: 60px;

@@ -114,7 +114,11 @@ def select_level():
         session['level_completed'] = False
         session['current_timer'] = 45  # Default timer is 45 seconds
         # Initialize enemy progression index (follow order in data/enemies.json)
-        session['enemy_index'] = 0
+        # Only initialize to 0 on a fresh session / first selection. If an enemy_index
+        # already exists (e.g. advanced from the result page), preserve it so the
+        # next enemy set by `result()` is not overwritten.
+        if 'enemy_index' not in session:
+            session['enemy_index'] = 0
         # After the player selects a level, send them to choose their character
         return redirect(url_for('choose_character'))
 

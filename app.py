@@ -104,7 +104,8 @@ def select_level():
         session['score'] = 0
         session['player_hp'] = 100  # Set player HP to 100
         session['enemy_level'] = selected_level
-        session['enemy_hp'] = 100  # Set enemy HP to 100
+        # Set enemy HP to the base enemy HP constant
+        session['enemy_hp'] = BASE_ENEMY_HP
         session['q_index'] = 0
         session['feedback'] = None
         session['correct_answers'] = 0
@@ -113,11 +114,26 @@ def select_level():
         session["game_start_time"] = time.time()
         session['level_completed'] = False
         session['current_timer'] = 45  # Default timer is 45 seconds
-        # Initialize enemy progression index (follow order in data/enemies.json)
-        # Only initialize to 0 on a fresh session / first selection. If an enemy_index
-        # already exists (e.g. advanced from the result page), preserve it so the
-        # next enemy set by `result()` is not overwritten.
-        if 'enemy_index' not in session:
+        # Initialize enemy progression index to the Novice Gnome every time a new
+        # game is started. This ensures each new game begins against the Novice Gnome
+        # regardless of previous session state.
+        try:
+            novice_idx = 0
+            try:
+                with open('data/enemies.json', encoding='utf-8') as ef:
+                    enemies_list = json.load(ef)
+                # Look for an enemy by name or level that indicates the novice gnome
+                for i, e in enumerate(enemies_list):
+                    name = str(e.get('name', '')).strip().lower()
+                    level = e.get('level')
+                    if name == 'novice gnome' or level == 1:
+                        novice_idx = i
+                        break
+            except Exception:
+                # If we can't read the file, default to index 0
+                novice_idx = 0
+            session['enemy_index'] = int(novice_idx)
+        except Exception:
             session['enemy_index'] = 0
         # After the player selects a level, send them to choose their character
         return redirect(url_for('choose_character'))
@@ -479,12 +495,26 @@ def leaderboard():
 @app.route('/you_win')
 def you_win():
     # Simple win page when all levels are completed
+    # Reset enemy state to original when the player finishes the game
+    try:
+        session['enemy_index'] = 0
+        session['enemy_hp'] = BASE_ENEMY_HP
+        session.pop('enemy_level', None)
+    except Exception:
+        pass
     return render_template('you_win.html')
 
 
 @app.route('/you_lose')
 def you_lose():
     # Simple lose page when player HP hits 0
+    # Reset enemy state to original when the player loses
+    try:
+        session['enemy_index'] = 0
+        session['enemy_hp'] = BASE_ENEMY_HP
+        session.pop('enemy_level', None)
+    except Exception:
+        pass
     return render_template('you_lose.html')
 
 # ------------------- TEST YOURSELF MODE -------------------

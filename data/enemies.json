@@ -44,7 +44,7 @@
     "name": "Kernel Knight",
     "avatar": "⚔️",
     "taunt": "Only true warriors understand SELinux and permissions!",
-  "image": "enemies/titan.jpg",
+    "image": "enemies/titan.jpg",
     "range": "Q51–Q60"
   },
   {
@@ -52,7 +52,7 @@
     "name": "Network Phantom",
     "avatar": "🕸️",
     "taunt": "Firewalls, DNS, and IPs — your connectivity ends here.",
-  "image": "enemies/phantom.jpg",
+    "image": "enemies/phantom.jpg",
     "range": "Q61–Q70"
   },
   {

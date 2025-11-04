@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Analytics</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #f3eac2; 
+            margin: 0;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 40px; 
+        }
+        .page-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .btn {
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: #e8dcc6;
+            border: 2px solid #4b2e05;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4b2e05;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .stat-description {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .charts-section {
+            margin-bottom: 40px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            color: #4b2e05;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4a7c59;
+            transition: width 0.3s ease;
+        }
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .leaderboard-table th {
+            background: #4b2e05;
+            color: #f3eac2;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+        }
+        .leaderboard-table tr:hover {
+            background: #f5f5f5;
+        }
+        .rank-badge {
+            background: #4b2e05;
+            color: #f3eac2;
+            padding: 4px 8px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .rank-1 { background: #ffd700; color: #333; }
+        .rank-2 { background: #c0c0c0; color: #333; }
+        .rank-3 { background: #cd7f32; color: #fff; }
+        .performance-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .performance-excellent { background: #4a7c59; color: white; }
+        .performance-good { background: #f39c12; color: white; }
+        .performance-poor { background: #e74c3c; color: white; }
+        .time-period-selector {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .time-period-selector select {
+            padding: 8px 15px;
+            border: 2px solid #4b2e05;
+            border-radius: 6px;
+            font-size: 1em;
+            margin: 0 10px;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .question-analysis {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .question-analysis h3 {
+            color: #4b2e05;
+            margin-bottom: 15px;
+        }
+        .difficulty-breakdown {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .difficulty-item {
+            text-align: center;
+        }
+        .difficulty-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            color: white;
+        }
+        .easy { background: #4a7c59; }
+        .medium { background: #e67e22; }
+        .hard { background: #b22222; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-controls">
+            <h1 class="page-title">📊 Student Analytics</h1>
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn">← Dashboard</a>
+        </div>
+
+        <!-- Time Period Selector -->
+        <div class="time-period-selector">
+            <label for="timePeriod"><strong>Time Period:</strong></label>
+            <select id="timePeriod" onchange="updateAnalytics()">
+                <option value="all">All Time</option>
+                <option value="week">Last 7 Days</option>
+                <option value="month" selected>Last 30 Days</option>
+                <option value="quarter">Last 3 Months</option>
+            </select>
+        </div>
+
+        <!-- Overview Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_students }}</div>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-description">Unique players who attempted the game</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ avg_score }}%</div>
+                <div class="stat-label">Average Score</div>
+                <div class="stat-description">Overall student performance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_attempts }}</div>
+                <div class="stat-label">Total Attempts</div>
+                <div class="stat-description">All game sessions completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ avg_time }}m</div>
+                <div class="stat-label">Avg. Session Time</div>
+                <div class="stat-description">Average time per game session</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ completion_rate }}%</div>
+                <div class="stat-label">Completion Rate</div>
+                <div class="stat-description">Students who finished the game</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ engagement_score }}</div>
+                <div class="stat-label">Engagement Score</div>
+                <div class="stat-description">Based on attempts and time spent</div>
+            </div>
+        </div>
+
+        <!-- Analytics Grid -->
+        <div class="analytics-grid">
+            <!-- Performance Distribution -->
+            <div class="chart-container">
+                <h3 class="chart-title">Performance Distribution</h3>
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Excellent (80-100%)</span>
+                        <span>{{ excellent_students }} students</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (excellent_students / total_students * 100) if total_students > 0 else 0 }}%; background: #4a7c59;"></div>
+                    </div>
+                </div>
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Good (60-79%)</span>
+                        <span>{{ good_students }} students</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (good_students / total_students * 100) if total_students > 0 else 0 }}%; background: #f39c12;"></div>
+                    </div>
+                </div>
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Needs Improvement (&lt;60%)</span>
+                        <span>{{ poor_students }} students</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (poor_students / total_students * 100) if total_students > 0 else 0 }}%; background: #e74c3c;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Difficulty Analysis -->
+            <div class="chart-container">
+                <h3 class="chart-title">Question Difficulty Performance</h3>
+                <div class="difficulty-breakdown">
+                    <div class="difficulty-item">
+                        <div class="difficulty-circle easy">{{ easy_success }}%</div>
+                        <div>Easy Questions</div>
+                        <small>{{ easy_attempts }} attempts</small>
+                    </div>
+                    <div class="difficulty-item">
+                        <div class="difficulty-circle medium">{{ medium_success }}%</div>
+                        <div>Medium Questions</div>
+                        <small>{{ medium_attempts }} attempts</small>
+                    </div>
+                    <div class="difficulty-item">
+                        <div class="difficulty-circle hard">{{ hard_success }}%</div>
+                        <div>Hard Questions</div>
+                        <small>{{ hard_attempts }} attempts</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers -->
+        <div class="chart-container">
+            <h3 class="chart-title">🏆 Leaderboard - Top Performers</h3>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Student Name</th>
+                        <th>Score</th>
+                        <th>Correct Answers</th>
+                        <th>Wrong Answers</th>
+                        <th>Time Taken</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in leaderboard[:10] %}
+                    <tr>
+                        <td>
+                            <span class="rank-badge rank-{{ loop.index if loop.index <= 3 else 'default' }}">
+                                {{ loop.index }}
+                            </span>
+                        </td>
+                        <td><strong>{{ student.player }}</strong></td>
+                        <td>{{ student.score }}</td>
+                        <td style="color: #4a7c59;">{{ student.correct_answers }}</td>
+                        <td style="color: #e74c3c;">{{ student.wrong_answers }}</td>
+                        <td>{{ "%.1f"|format(student.time) }}s</td>
+                        <td>
+                            {% set accuracy = (student.correct_answers / (student.correct_answers + student.wrong_answers) * 100) if (student.correct_answers + student.wrong_answers) > 0 else 0 %}
+                            {% if accuracy >= 80 %}
+                                <span class="performance-indicator performance-excellent">Excellent</span>
+                            {% elif accuracy >= 60 %}
+                                <span class="performance-indicator performance-good">Good</span>
+                            {% else %}
+                                <span class="performance-indicator performance-poor">Needs Help</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Most Challenging Questions -->
+        <div class="chart-container">
+            <h3 class="chart-title">🎯 Most Challenging Questions</h3>
+            <p style="color: #666; margin-bottom: 20px;">Questions with lowest success rates - consider reviewing these topics</p>
+            {% for question in challenging_questions[:5] %}
+            <div class="question-analysis">
+                <h4 style="color: #4b2e05;">Question ID: {{ question.id }}</h4>
+                <p><strong>Question:</strong> {{ question.q[:100] }}{% if question.q|length > 100 %}...{% endif %}</p>
+                <p><strong>Correct Answer:</strong> {{ question.answer }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>Success Rate: </strong>
+                        <span style="color: {{ '#4a7c59' if question.success_rate >= 70 else '#e74c3c' }};">
+                            {{ question.success_rate }}%
+                        </span>
+                    </div>
+                    <div>
+                        <strong>Attempts:</strong> {{ question.total_attempts }}
+                    </div>
+                </div>
+                <div class="progress-bar" style="margin-top: 10px;">
+                    <div class="progress-fill" style="width: {{ question.success_rate }}%; background: {{ '#4a7c59' if question.success_rate >= 70 else '#e74c3c' }};"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="chart-container">
+            <h3 class="chart-title">📈 Recent Activity (Last 7 Days)</h3>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Student</th>
+                        <th>Score</th>
+                        <th>Game Mode</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in recent_activity[:10] %}
+                    <tr>
+                        <td>{{ activity.date }}</td>
+                        <td>{{ activity.player }}</td>
+                        <td>{{ activity.score }}</td>
+                        <td>{{ activity.mode }}</td>
+                        <td>{{ "%.1f"|format(activity.time) }}s</td>
+                        <td>
+                            {% if activity.completed %}
+                                <span class="performance-indicator performance-excellent">Completed</span>
+                            {% else %}
+                                <span class="performance-indicator performance-poor">Incomplete</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function updateAnalytics() {
+            const timePeriod = document.getElementById('timePeriod').value;
+            // In a real implementation, this would reload the page with new data
+            window.location.href = `/teacher/analytics?period=${timePeriod}`;
+        }
+
+        // Initialize charts (in a real app, you'd use Chart.js or similar)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Student Analytics loaded');
+            // Add any chart initialization here
+        });
+    </script>
+</body>
+</html>

@@ -1230,22 +1230,292 @@ def teacher_test_ai_grading():
 @app.route('/teacher/questions')
 @teacher_required
 def teacher_questions():
-    return "<h1>Question Management - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+    # Load questions and statistics
+    stats = {
+        'total_questions': len(questions),
+        'ai_questions': sum(1 for q in questions if q.get('ai_generated', False)),
+        'manual_questions': len(questions) - sum(1 for q in questions if q.get('ai_generated', False)),
+        'levels_count': len(set(q.get('level', 1) for q in questions))
+    }
+    return render_template('teacher_questions.html', questions=questions, **stats)
 
 @app.route('/teacher/analytics')
 @teacher_required
 def teacher_analytics():
-    return "<h1>Student Analytics - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+    # Load leaderboard and calculate analytics
+    leaderboard = get_leaderboard_data()
+    
+    # Calculate statistics
+    total_students = len(set(entry.get('player', 'Anonymous') for entry in leaderboard))
+    total_attempts = len(leaderboard)
+    
+    if leaderboard:
+        avg_score = sum(entry.get('score', 0) for entry in leaderboard) / len(leaderboard)
+        avg_time = sum(entry.get('time', 0) for entry in leaderboard) / len(leaderboard) / 60  # in minutes
+        
+        # Performance distribution
+        excellent_students = len([e for e in leaderboard if e.get('score', 0) >= 80])
+        good_students = len([e for e in leaderboard if 60 <= e.get('score', 0) < 80])
+        poor_students = len([e for e in leaderboard if e.get('score', 0) < 60])
+    else:
+        avg_score = avg_time = 0
+        excellent_students = good_students = poor_students = 0
+    
+    completion_rate = 85  # Placeholder
+    engagement_score = 7.2  # Placeholder
+    
+    # Mock difficulty performance data
+    easy_success = 78
+    medium_success = 65
+    hard_success = 45
+    easy_attempts = medium_attempts = hard_attempts = 150
+    
+    # Mock challenging questions
+    challenging_questions = []
+    for i, question in enumerate(questions[:5]):
+        challenging_questions.append({
+            'id': question.get('id', i+1),
+            'q': question.get('q', ''),
+            'answer': question.get('answer', ''),
+            'success_rate': 45 + i * 5,
+            'total_attempts': 25 - i * 2
+        })
+    
+    # Recent activity (mock data)
+    recent_activity = []
+    for i, entry in enumerate(leaderboard[-10:]):
+        recent_activity.append({
+            'date': '2025-11-04',
+            'player': entry.get('player', 'Anonymous'),
+            'score': entry.get('score', 0),
+            'mode': 'Main Game',
+            'time': entry.get('time', 0),
+            'completed': entry.get('score', 0) > 50
+        })
+    
+    analytics_data = {
+        'total_students': total_students,
+        'avg_score': int(avg_score),
+        'total_attempts': total_attempts,
+        'avg_time': int(avg_time),
+        'completion_rate': completion_rate,
+        'engagement_score': engagement_score,
+        'excellent_students': excellent_students,
+        'good_students': good_students,
+        'poor_students': poor_students,
+        'easy_success': easy_success,
+        'medium_success': medium_success,
+        'hard_success': hard_success,
+        'easy_attempts': easy_attempts,
+        'medium_attempts': medium_attempts,
+        'hard_attempts': hard_attempts,
+        'leaderboard': sorted(leaderboard, key=lambda x: x.get('score', 0), reverse=True),
+        'challenging_questions': challenging_questions,
+        'recent_activity': recent_activity
+    }
+    
+    return render_template('teacher_analytics.html', **analytics_data)
 
 @app.route('/teacher/levels')
 @teacher_required
 def teacher_levels():
-    return "<h1>Level Configuration - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+    # Load levels and enemies
+    try:
+        with open("data/levels.json", "r", encoding="utf-8") as f:
+            levels = json.load(f)
+    except:
+        levels = []
+    
+    try:
+        with open('data/enemies.json', encoding='utf-8') as f:
+            enemies = json.load(f)
+    except:
+        enemies = []
+    
+    # Create a question dictionary for lookup
+    questions_dict = {q.get('id'): q for q in questions}
+    
+    # Calculate statistics
+    total_questions = len(questions)
+    avg_questions_per_level = total_questions / len(levels) if levels else 0
+    available_questions = [q for q in questions if q.get('id')]
+    
+    template_data = {
+        'levels': levels,
+        'enemies': enemies,
+        'questions_dict': questions_dict,
+        'total_questions': total_questions,
+        'avg_questions_per_level': int(avg_questions_per_level),
+        'available_questions': available_questions
+    }
+    
+    return render_template('teacher_levels.html', **template_data)
 
 @app.route('/teacher/settings')
 @teacher_required
 def teacher_settings():
-    return "<h1>Game Settings - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+    # Load current settings (mock data for now)
+    settings = {
+        'base_player_hp': 100,
+        'base_enemy_hp': 50,
+        'base_damage': 10,
+        'question_time_limit': 30,
+        'questions_per_level': 10,
+        'points_correct': 10,
+        'points_wrong': 5,
+        'speed_bonus': True,
+        'level_bonus': 20,
+        'adaptive_difficulty': False,
+        'min_accuracy': 70,
+        'lives_system': False,
+        'max_lives': 3,
+        'sound_effects': False,
+        'show_timer': True,
+        'show_progress': True,
+        'animation_speed': 'normal',
+        'debug_mode': False,
+        'analytics_enabled': True,
+        'auto_save': True,
+        'session_timeout': 30
+    }
+    
+    return render_template('teacher_settings.html', settings=settings)
+
+# Additional teacher portal routes for full functionality
+@app.route('/teacher/add-question', methods=['POST'])
+@teacher_required
+def teacher_add_question():
+    try:
+        # Get form data
+        question_text = request.form.get('question')
+        answer = request.form.get('answer')
+        keywords = request.form.get('keywords', '')
+        difficulty = request.form.get('difficulty', 'medium')
+        feedback = request.form.get('feedback', '')
+        
+        # Load existing questions
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
+            existing_questions = json.load(f)
+        
+        # Find next ID
+        next_id = max([q.get('id', 0) for q in existing_questions]) + 1
+        
+        # Create new question
+        new_question = {
+            'id': next_id,
+            'q': question_text,
+            'answer': answer,
+            'keywords': [k.strip() for k in keywords.split(',') if k.strip()],
+            'difficulty': difficulty,
+            'feedback': feedback,
+            'ai_generated': False
+        }
+        
+        existing_questions.append(new_question)
+        
+        # Save questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(existing_questions, f, indent=2, ensure_ascii=False)
+        
+        flash('Question added successfully!')
+        return redirect(url_for('teacher_questions'))
+        
+    except Exception as e:
+        flash(f'Error adding question: {str(e)}')
+        return redirect(url_for('teacher_questions'))
+
+@app.route('/teacher/get-question/<int:question_id>')
+@teacher_required
+def teacher_get_question(question_id):
+    question = next((q for q in questions if q.get('id') == question_id), None)
+    if question:
+        return jsonify(question)
+    return jsonify({'error': 'Question not found'}), 404
+
+@app.route('/teacher/edit-question', methods=['POST'])
+@teacher_required
+def teacher_edit_question():
+    try:
+        question_id = int(request.form.get('question_id'))
+        
+        # Load questions
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
+            all_questions = json.load(f)
+        
+        # Find and update question
+        for i, q in enumerate(all_questions):
+            if q.get('id') == question_id:
+                all_questions[i].update({
+                    'q': request.form.get('question'),
+                    'answer': request.form.get('answer'),
+                    'keywords': [k.strip() for k in request.form.get('keywords', '').split(',') if k.strip()],
+                    'difficulty': request.form.get('difficulty', 'medium'),
+                    'feedback': request.form.get('feedback', '')
+                })
+                break
+        
+        # Save questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(all_questions, f, indent=2, ensure_ascii=False)
+        
+        flash('Question updated successfully!')
+        return redirect(url_for('teacher_questions'))
+        
+    except Exception as e:
+        flash(f'Error updating question: {str(e)}')
+        return redirect(url_for('teacher_questions'))
+
+@app.route('/teacher/delete-question/<int:question_id>', methods=['POST'])
+@teacher_required
+def teacher_delete_question(question_id):
+    try:
+        # Load questions
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
+            all_questions = json.load(f)
+        
+        # Remove question
+        all_questions = [q for q in all_questions if q.get('id') != question_id]
+        
+        # Save questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(all_questions, f, indent=2, ensure_ascii=False)
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/update-settings', methods=['POST'])
+@teacher_required
+def teacher_update_settings():
+    try:
+        # In a real app, you'd save these to a database or config file
+        # For now, just return success
+        flash('Settings updated successfully!')
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/clear-progress', methods=['POST'])
+@teacher_required
+def teacher_clear_progress():
+    try:
+        # Clear leaderboard
+        with open('data/leaderboard.json', 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/clear-leaderboard', methods=['POST'])
+@teacher_required
+def teacher_clear_leaderboard():
+    try:
+        with open('data/leaderboard.json', 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 # Helper functions for teacher portal
 def get_leaderboard_data():

@@ -6,7 +6,7 @@ TEACHER_CREDENTIALS = {
 }
 
 # AI API Configuration (you'll need to set these)
-OPENAI_API_KEY = "your-openai-api-key-here"  # Set this in environment variables
+OPENAI_API_KEY = "your-api-key-here"  # Set this in environment variables
 AI_MODEL = "gpt-3.5-turbo"  # or "gpt-4" for better results
 
 # File upload configuration

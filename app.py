@@ -104,7 +104,8 @@ def select_level():
         session['score'] = 0
         session['player_hp'] = 100  # Set player HP to 100
         session['enemy_level'] = selected_level
-        session['enemy_hp'] = 100  # Set enemy HP to 100
+        # Set enemy HP to the base enemy HP constant
+        session['enemy_hp'] = BASE_ENEMY_HP
         session['q_index'] = 0
         session['feedback'] = None
         session['correct_answers'] = 0
@@ -113,8 +114,27 @@ def select_level():
         session["game_start_time"] = time.time()
         session['level_completed'] = False
         session['current_timer'] = 45  # Default timer is 45 seconds
-        # Initialize enemy progression index (follow order in data/enemies.json)
-        session['enemy_index'] = 0
+        # Initialize enemy progression index to the Novice Gnome every time a new
+        # game is started. This ensures each new game begins against the Novice Gnome
+        # regardless of previous session state.
+        try:
+            novice_idx = 0
+            try:
+                with open('data/enemies.json', encoding='utf-8') as ef:
+                    enemies_list = json.load(ef)
+                # Look for an enemy by name or level that indicates the novice gnome
+                for i, e in enumerate(enemies_list):
+                    name = str(e.get('name', '')).strip().lower()
+                    level = e.get('level')
+                    if name == 'novice gnome' or level == 1:
+                        novice_idx = i
+                        break
+            except Exception:
+                # If we can't read the file, default to index 0
+                novice_idx = 0
+            session['enemy_index'] = int(novice_idx)
+        except Exception:
+            session['enemy_index'] = 0
         # After the player selects a level, send them to choose their character
         return redirect(url_for('choose_character'))
 
@@ -164,8 +184,11 @@ def choose_character():
 @app.route('/game', methods=['GET', 'POST'])
 def game():
     # Check if the game is over
-    if session['q_index'] >= len(questions) or session['player_hp'] <= 0:
+    # Use safe gets to avoid KeyError from malformed sessions
+    if session.get('q_index', 0) >= len(questions):
         return redirect(url_for('result'))
+    if session.get('player_hp', 0) <= 0:
+        return redirect(url_for('you_lose'))
 
 
     # Use selected level from session
@@ -352,6 +375,9 @@ def game():
 # Route for the feedback page
 @app.route('/feedback')
 def feedback():
+    # If player's HP reached 0, go straight to defeat
+    if session.get('player_hp', 0) <= 0:
+        return redirect(url_for('you_lose'))
     if not session.get('feedback'):
         return redirect(url_for('game'))  # Redirect to the game page if no feedback
     feedback = session['feedback']
@@ -379,6 +405,10 @@ def result():
         correct_answers=session.get('correct_answers', 0),
         wrong_answers=session.get('wrong_answers', 0)
     )
+
+    # If the player died, show lose page
+    if session.get('player_hp', 0) <= 0:
+        return redirect(url_for('you_lose'))
 
     # If the level is completed, allow to select next level
     next_level = session.get('selected_level', 1) + 1
@@ -415,6 +445,16 @@ def result():
             # Move to next enemy but don't exceed list bounds (wrap to last)
             next_idx = min(current_idx + 1, len(enemies_list) - 1)
             session['enemy_index'] = next_idx
+        # If we've unlocked past the maximum level, the player beat the game
+        try:
+            with open("data/levels.json", "r", encoding="utf-8") as f:
+                levels = json.load(f)
+        except Exception:
+            levels = []
+        max_level = max([lvl['level'] for lvl in levels], default=1)
+        if session.get('highest_unlocked', 1) > max_level:
+            # Player has unlocked beyond max level -> they completed all levels
+            return redirect(url_for('you_win'))
 
     return render_template('result.html', score=final_score,
                            player_hp=session['player_hp'],
@@ -450,6 +490,32 @@ def leaderboard():
     leaderboard = sorted(leaderboard, key=lambda x: (-x["score"], x["time"]))
 
     return render_template("leaderboard.html", leaderboard=leaderboard)
+
+
+@app.route('/you_win')
+def you_win():
+    # Simple win page when all levels are completed
+    # Reset enemy state to original when the player finishes the game
+    try:
+        session['enemy_index'] = 0
+        session['enemy_hp'] = BASE_ENEMY_HP
+        session.pop('enemy_level', None)
+    except Exception:
+        pass
+    return render_template('you_win.html')
+
+
+@app.route('/you_lose')
+def you_lose():
+    # Simple lose page when player HP hits 0
+    # Reset enemy state to original when the player loses
+    try:
+        session['enemy_index'] = 0
+        session['enemy_hp'] = BASE_ENEMY_HP
+        session.pop('enemy_level', None)
+    except Exception:
+        pass
+    return render_template('you_lose.html')
 
 # ------------------- TEST YOURSELF MODE -------------------
 import random

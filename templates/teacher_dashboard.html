@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { 
+            font-family: 'MedievalSharp', cursive; 
+            background: #2e3d1f; 
+            color: #f3eac2; 
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard-container { 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 40px; 
+        }
+        .dashboard-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .feature-card {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+        .feature-card h3 {
+            color: #4b2e05;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        .feature-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .btn {
+            font-family: 'MedievalSharp', cursive;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .btn-secondary {
+            background: #8b7355;
+        }
+        .btn-secondary:hover {
+            background: #a68660;
+        }
+        .stats-section {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4b2e05;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .welcome-text {
+            color: #4b2e05;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header-controls">
+            <div class="welcome-text">Welcome, {{ session.teacher_username }}! 👋</div>
+            <div>
+                <a href="{{ url_for('teacher_logout') }}" class="btn btn-secondary">🚪 Logout</a>
+            </div>
+        </div>
+        
+        <h1 class="dashboard-title">🎓 Teacher Portal Dashboard</h1>
+        
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <h3 style="color: #4b2e05; text-align: center; margin-bottom: 20px;">📊 Game Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.total_questions }}</div>
+                    <div class="stat-label">Total Questions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.total_students }}</div>
+                    <div class="stat-label">Student Attempts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.avg_score }}%</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.ai_questions }}</div>
+                    <div class="stat-label">AI Generated</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="feature-grid">
+            <!-- AI Question Generation -->
+            <div class="feature-card">
+                <h3>🤖 AI Question Generator</h3>
+                <p>Upload curriculum files and let AI generate relevant questions automatically.</p>
+                <a href="{{ url_for('teacher_ai_generator') }}" class="btn">Generate Questions</a>
+            </div>
+            
+            <!-- Manual Question Management -->
+            <div class="feature-card">
+                <h3>📝 Question Management</h3>
+                <p>Manually add, edit, or remove questions from the question bank.</p>
+                <a href="{{ url_for('teacher_questions') }}" class="btn">Manage Questions</a>
+            </div>
+            
+            <!-- AI Grading Setup -->
+            <div class="feature-card">
+                <h3>🎯 AI Grading</h3>
+                <p>Configure AI-powered answer evaluation for more flexible grading.</p>
+                <a href="{{ url_for('teacher_ai_grading') }}" class="btn">Setup AI Grading</a>
+            </div>
+            
+            <!-- Student Progress -->
+            <div class="feature-card">
+                <h3>📈 Student Analytics</h3>
+                <p>View detailed student performance and learning analytics.</p>
+                <a href="{{ url_for('teacher_analytics') }}" class="btn">View Analytics</a>
+            </div>
+            
+            <!-- Level Management -->
+            <div class="feature-card">
+                <h3>🎮 Level Configuration</h3>
+                <p>Organize questions into levels and manage game progression.</p>
+                <a href="{{ url_for('teacher_levels') }}" class="btn">Configure Levels</a>
+            </div>
+            
+            <!-- Settings -->
+            <div class="feature-card">
+                <h3>⚙️ Game Settings</h3>
+                <p>Customize game mechanics, scoring, and visual themes.</p>
+                <a href="{{ url_for('teacher_settings') }}" class="btn">Game Settings</a>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">🎮 Preview Game</a>
+            <a href="{{ url_for('leaderboard') }}" class="btn btn-secondary">🏆 View Leaderboard</a>
+        </div>
+    </div>
+</body>
+</html>

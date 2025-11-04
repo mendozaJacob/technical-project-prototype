@@ -1,0 +1,240 @@
+# Teacher Portal Setup & Usage Guide
+
+## Overview
+The Teacher Portal is an AI-powered management system that allows educators to efficiently manage questions, generate new content, and analyze student performance in the Medieval RPG Learning Game.
+
+## 🚀 Quick Setup
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Configure AI Integration
+1. Copy `config.py` and update your settings:
+   - Add your OpenAI API key
+   - Set up teacher credentials
+   - Configure AI model preferences
+
+2. Example configuration:
+```python
+# AI Configuration
+OPENAI_API_KEY = "your-actual-api-key-here"
+AI_MODEL = "gpt-3.5-turbo"  # or "gpt-4"
+AI_MAX_TOKENS = 2000
+
+# Teacher Credentials
+TEACHER_CREDENTIALS = {
+    "teacher1": "password123",
+    "admin": "admin456"
+}
+```
+
+### 3. Create Upload Directory
+```bash
+mkdir uploads
+```
+
+## 🎯 Teacher Portal Features
+
+### Dashboard
+- View student statistics
+- Monitor AI-generated questions
+- Quick access to all tools
+
+### AI Question Generator
+**Upload curriculum files and automatically generate questions!**
+
+**Supported file formats:**
+- PDF documents
+- Word documents (.docx)
+- Text files (.txt)
+- Markdown files (.md)
+
+**How it works:**
+1. Upload your curriculum document
+2. Specify topic, difficulty level, and question count
+3. AI analyzes the content and generates contextual questions
+4. Review and select questions to add to your question bank
+
+### AI Grading System
+**Intelligent answer evaluation for open-ended questions!**
+
+**Features:**
+- Semantic understanding of student answers
+- Confidence scoring
+- Detailed explanations for grading decisions
+- Customizable grading prompts
+- Test mode for fine-tuning
+
+**Configuration options:**
+- Choose AI model (GPT-3.5 or GPT-4)
+- Set confidence threshold
+- Custom grading prompts
+- Enable/disable AI grading
+
+## 🔧 Usage Instructions
+
+### Accessing the Teacher Portal
+1. Navigate to `/teacher/login`
+2. Use your configured credentials
+3. Access the dashboard at `/teacher/dashboard`
+
+### Generating Questions from Curriculum
+1. Go to "AI Generator" from the dashboard
+2. Upload your curriculum file (PDF, DOCX, TXT, or MD)
+3. Fill in the form:
+   - **Topic**: Subject area (e.g., "Medieval History")
+   - **Difficulty**: Easy, Medium, or Hard
+   - **Question Count**: Number of questions to generate (1-20)
+   - **Context**: Additional context for question generation
+4. Click "Generate Questions"
+5. Review the generated questions
+6. Select which questions to add to your question bank
+7. Click "Save Selected Questions"
+
+### Setting Up AI Grading
+1. Go to "AI Grading" from the dashboard
+2. Configure your settings:
+   - **AI Model**: Choose between GPT-3.5 (faster, cheaper) or GPT-4 (more accurate)
+   - **Confidence Threshold**: Minimum confidence level to auto-grade (0-100%)
+   - **Custom Prompt**: Optional custom instructions for the AI grader
+3. Test the system with sample questions
+4. Enable AI grading when satisfied with results
+
+### Managing Existing Questions
+- View all questions in the "Questions" section
+- Edit or delete questions as needed
+- Track which questions were AI-generated
+
+## 🧠 AI Integration Details
+
+### Question Generation Process
+1. **Text Extraction**: Content is extracted from uploaded files
+2. **Context Analysis**: AI analyzes the curriculum content
+3. **Question Creation**: AI generates diverse question types:
+   - Multiple choice
+   - Short answer
+   - True/false
+   - Fill-in-the-blank
+4. **Quality Control**: Each question includes feedback and difficulty rating
+
+### AI Grading Process
+1. **Answer Analysis**: AI compares student answer to expected answer
+2. **Semantic Understanding**: Goes beyond exact matches
+3. **Confidence Scoring**: Provides confidence level for each grade
+4. **Explanation**: Explains reasoning for the grade
+
+### Supported Question Types
+- **Multiple Choice**: Traditional A/B/C/D format
+- **Short Answer**: Open-ended responses
+- **True/False**: Binary choice questions
+- **Fill-in-the-blank**: Missing word/phrase questions
+
+## 🔒 Security & Privacy
+
+### Authentication
+- Session-based authentication
+- Password-protected access
+- Automatic session timeout
+
+### Data Protection
+- Uploaded files are temporarily stored and automatically deleted
+- No curriculum content is permanently stored
+- AI API calls are made securely
+
+### Access Control
+- Students cannot access teacher portal
+- Teachers can only access their authorized features
+- Separate authentication from student game
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**"OpenAI API Key not configured"**
+- Update `config.py` with your actual API key
+- Ensure the key has sufficient credits
+
+**"Error uploading file"**
+- Check file format (PDF, DOCX, TXT, MD only)
+- Ensure file size is under the limit
+- Verify upload directory exists
+
+**"AI grading not working"**
+- Check API key configuration
+- Verify internet connection
+- Check AI model availability
+
+**"Questions not saving"**
+- Ensure write permissions on data/questions.json
+- Check JSON format validity
+- Verify search index rebuild
+
+### Getting Help
+1. Check the error messages in the browser console
+2. Review the Flask application logs
+3. Verify all dependencies are installed
+4. Ensure config.py is properly configured
+
+## 📊 Analytics & Reporting
+
+### Student Performance Tracking
+- Average scores across all students
+- Question difficulty analysis
+- AI grading accuracy metrics
+
+### Question Bank Statistics
+- Total questions in database
+- AI-generated vs manually created questions
+- Most frequently missed questions
+
+## 🔄 Updates & Maintenance
+
+### Adding New Teachers
+1. Update `TEACHER_CREDENTIALS` in `config.py`
+2. Restart the application
+
+### Updating AI Models
+1. Modify `AI_MODEL` in `config.py`
+2. Test with sample questions
+3. Update confidence thresholds if needed
+
+### Backing Up Data
+- Regularly backup `data/questions.json`
+- Save `data/leaderboard.json` for student records
+- Keep config.py secure and backed up
+
+## 🎮 Integration with Game
+
+The teacher portal seamlessly integrates with the main game:
+- New questions appear immediately in gameplay
+- AI grading works for all question types
+- Student progress is tracked automatically
+- Leaderboard data informs teaching decisions
+
+## 📚 Best Practices
+
+### Question Generation Tips
+1. Use clear, well-structured curriculum documents
+2. Provide specific topics and contexts
+3. Review all generated questions before adding
+4. Mix difficulty levels for balanced gameplay
+
+### AI Grading Guidelines
+1. Start with high confidence thresholds (80%+)
+2. Test with known good/bad answers
+3. Adjust thresholds based on subject matter
+4. Use custom prompts for specialized topics
+
+### Curriculum Management
+1. Organize files by subject/topic
+2. Use descriptive filenames
+3. Update questions regularly
+4. Archive old content appropriately
+
+---
+
+**Happy Teaching! 🎓⚔️**
+
+For technical support or feature requests, please refer to the main project documentation or contact your system administrator.

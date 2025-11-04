@@ -6,9 +6,14 @@ import sys
 import os
 import json
 import time
-from flask import Flask, render_template, request, redirect, url_for, session
+import requests
+import hashlib
+from functools import wraps
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from whoosh.fields import Schema, TEXT, ID
 from whoosh import index
+from config import TEACHER_CREDENTIALS, OPENAI_API_KEY, AI_MODEL, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_CONTENT_LENGTH
 
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
@@ -54,6 +59,158 @@ app = Flask(__name__)
 import copy
 
 app.secret_key = "unix_rpg_secret"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+# Ensure upload directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Teacher authentication decorator
+def teacher_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('teacher_logged_in'):
+            return redirect(url_for('teacher_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Helper function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# AI Integration Functions
+def call_openai_api(prompt, max_tokens=1000):
+    """Call OpenAI API with error handling"""
+    try:
+        headers = {
+            'Authorization': f'Bearer {OPENAI_API_KEY}',
+            'Content-Type': 'application/json',
+        }
+        data = {
+            'model': AI_MODEL,
+            'messages': [{'role': 'user', 'content': prompt}],
+            'max_tokens': max_tokens,
+            'temperature': 0.7
+        }
+        response = requests.post('https://api.openai.com/v1/chat/completions', 
+                               headers=headers, json=data, timeout=60)
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Error calling AI API: {str(e)}"
+
+def extract_text_from_file(file_path):
+    """Extract text content from uploaded files"""
+    try:
+        if file_path.endswith('.txt') or file_path.endswith('.md'):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        elif file_path.endswith('.pdf'):
+            # You would need to install PyPDF2: pip install PyPDF2
+            try:
+                import PyPDF2
+                with open(file_path, 'rb') as f:
+                    reader = PyPDF2.PdfReader(f)
+                    text = ""
+                    for page in reader.pages:
+                        text += page.extract_text()
+                    return text
+            except ImportError:
+                return "PDF support requires PyPDF2. Install with: pip install PyPDF2"
+        elif file_path.endswith('.docx'):
+            # You would need to install python-docx: pip install python-docx
+            try:
+                from docx import Document
+                doc = Document(file_path)
+                text = ""
+                for paragraph in doc.paragraphs:
+                    text += paragraph.text + "\n"
+                return text
+            except ImportError:
+                return "DOCX support requires python-docx. Install with: pip install python-docx"
+        else:
+            return "Unsupported file format"
+    except Exception as e:
+        return f"Error reading file: {str(e)}"
+
+def generate_questions_with_ai(content, topic, difficulty, question_count, context=""):
+    """Generate questions using AI based on content"""
+    prompt = f"""
+    Based on the following educational content about {topic}, generate {question_count} {difficulty}-level questions.
+    
+    Content:
+    {content[:3000]}  # Limit content to avoid token limits
+    
+    Additional Context: {context}
+    
+    Please generate questions in this exact JSON format:
+    [
+        {{
+            "q": "Question text here?",
+            "answer": "correct answer",
+            "keywords": ["alternative1", "alternative2"],
+            "feedback": "Educational explanation of the answer"
+        }}
+    ]
+    
+    Requirements:
+    - Questions should be practical and test understanding
+    - Answers should be concise and specific
+    - Include 1-3 alternative acceptable answers in keywords
+    - Feedback should explain why the answer is correct
+    - Focus on {difficulty} level difficulty
+    - Make questions relevant to {topic}
+    
+    Return only the JSON array, no other text.
+    """
+    
+    response = call_openai_api(prompt, max_tokens=2000)
+    try:
+        # Try to parse the JSON response
+        questions_data = json.loads(response)
+        return questions_data
+    except json.JSONDecodeError:
+        # If not valid JSON, return error
+        return {"error": f"AI returned invalid JSON: {response[:200]}..."}
+
+def grade_answer_with_ai(question, correct_answer, student_answer, confidence_threshold=80):
+    """Use AI to grade student answers with semantic understanding"""
+    prompt = f"""
+    Grade this student answer using semantic understanding:
+    
+    Question: {question}
+    Expected Answer: {correct_answer}
+    Student Answer: {student_answer}
+    
+    Evaluate if the student answer is semantically correct, even if worded differently.
+    Consider synonyms, alternative phrasings, and equivalent commands/concepts.
+    
+    Respond in this JSON format:
+    {{
+        "correct": true/false,
+        "confidence": 0-100,
+        "explanation": "Brief explanation of your decision"
+    }}
+    
+    Be generous with partial credit for answers that show understanding.
+    """
+    
+    response = call_openai_api(prompt, max_tokens=200)
+    try:
+        result = json.loads(response)
+        # Apply confidence threshold
+        if result.get('confidence', 0) < confidence_threshold:
+            result['correct'] = False
+            result['explanation'] += f" (Below {confidence_threshold}% confidence threshold)"
+        return result
+    except json.JSONDecodeError:
+        return {
+            "correct": False,
+            "confidence": 0,
+            "explanation": "Error: Could not parse AI response"
+        }
 
 # Helper function to save leaderboard data
 def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers):
@@ -884,6 +1041,270 @@ def set_name():
     session['player_name'] = name
     # Return to the referring page (or index)
     return redirect(request.referrer or url_for('index'))
+
+# =============== TEACHER PORTAL ROUTES ===============
+
+@app.route('/teacher/login', methods=['GET', 'POST'])
+def teacher_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if username in TEACHER_CREDENTIALS and TEACHER_CREDENTIALS[username] == password:
+            session['teacher_logged_in'] = True
+            session['teacher_username'] = username
+            return redirect(url_for('teacher_dashboard'))
+        else:
+            return render_template('teacher_login.html', error='Invalid credentials')
+    
+    return render_template('teacher_login.html')
+
+@app.route('/teacher/logout')
+def teacher_logout():
+    session.pop('teacher_logged_in', None)
+    session.pop('teacher_username', None)
+    return redirect(url_for('index'))
+
+@app.route('/teacher/dashboard')
+@teacher_required
+def teacher_dashboard():
+    # Calculate statistics
+    stats = {
+        'total_questions': len(questions),
+        'total_students': len(get_leaderboard_data()),
+        'avg_score': calculate_average_score(),
+        'ai_questions': count_ai_generated_questions()
+    }
+    return render_template('teacher_dashboard.html', stats=stats)
+
+@app.route('/teacher/ai-generator', methods=['GET', 'POST'])
+@teacher_required
+def teacher_ai_generator():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return render_template('teacher_ai_generator.html', error='No file selected')
+        
+        file = request.files['file']
+        if file.filename == '':
+            return render_template('teacher_ai_generator.html', error='No file selected')
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Extract content from file
+            content = extract_text_from_file(file_path)
+            
+            # Get form data
+            topic = request.form.get('topic')
+            difficulty = request.form.get('difficulty')
+            question_count = int(request.form.get('question_count', 10))
+            context = request.form.get('context', '')
+            
+            # Generate questions with AI
+            generated_questions = generate_questions_with_ai(content, topic, difficulty, question_count, context)
+            
+            # Clean up uploaded file
+            os.remove(file_path)
+            
+            if isinstance(generated_questions, dict) and 'error' in generated_questions:
+                return render_template('teacher_ai_generator.html', error=generated_questions['error'])
+            
+            return render_template('teacher_ai_generator.html', generated_questions=generated_questions)
+        else:
+            return render_template('teacher_ai_generator.html', error='Invalid file type')
+    
+    return render_template('teacher_ai_generator.html')
+
+@app.route('/teacher/save-questions', methods=['POST'])
+@teacher_required
+def teacher_save_questions():
+    try:
+        questions_data = request.form.getlist('questions')
+        selected_indices = request.form.getlist('selected_questions')
+        
+        # Load existing questions
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
+            existing_questions = json.load(f)
+        
+        # Find the next available ID
+        next_id = max([q.get('id', 0) for q in existing_questions]) + 1
+        
+        # Add selected questions
+        for index_str in selected_indices:
+            index = int(index_str)
+            question_json = questions_data[index]
+            question_data = json.loads(question_json)
+            
+            # Assign ID and mark as AI generated
+            question_data['id'] = next_id
+            question_data['ai_generated'] = True
+            
+            existing_questions.append(question_data)
+            next_id += 1
+        
+        # Save updated questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(existing_questions, f, indent=2, ensure_ascii=False)
+        
+        # Recreate search index
+        recreate_search_index()
+        
+        flash(f'Successfully added {len(selected_indices)} questions to the question bank!')
+        return redirect(url_for('teacher_dashboard'))
+        
+    except Exception as e:
+        return render_template('teacher_ai_generator.html', error=f'Error saving questions: {str(e)}')
+
+@app.route('/teacher/ai-grading')
+@teacher_required
+def teacher_ai_grading():
+    config = {
+        'ai_model': session.get('ai_model', AI_MODEL),
+        'confidence_threshold': session.get('confidence_threshold', 80),
+        'custom_prompt': session.get('custom_prompt', '')
+    }
+    
+    ai_grading_enabled = session.get('ai_grading_enabled', False)
+    api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    
+    return render_template('teacher_ai_grading.html', 
+                         config=config, 
+                         ai_grading_enabled=ai_grading_enabled,
+                         api_key_configured=api_key_configured)
+
+@app.route('/teacher/toggle-ai-grading', methods=['POST'])
+@teacher_required
+def teacher_toggle_ai_grading():
+    enabled = 'ai_grading_enabled' in request.form
+    session['ai_grading_enabled'] = enabled
+    flash(f'AI Grading {"enabled" if enabled else "disabled"}!')
+    return redirect(url_for('teacher_ai_grading'))
+
+@app.route('/teacher/update-ai-config', methods=['POST'])
+@teacher_required
+def teacher_update_ai_config():
+    session['ai_model'] = request.form.get('ai_model', AI_MODEL)
+    session['confidence_threshold'] = int(request.form.get('confidence_threshold', 80))
+    session['custom_prompt'] = request.form.get('custom_prompt', '')
+    flash('AI configuration updated!')
+    return redirect(url_for('teacher_ai_grading'))
+
+@app.route('/teacher/test-ai-grading', methods=['POST'])
+@teacher_required
+def teacher_test_ai_grading():
+    question = request.form.get('test_question')
+    correct_answer = request.form.get('correct_answer')
+    student_answer = request.form.get('student_answer')
+    confidence_threshold = session.get('confidence_threshold', 80)
+    
+    # Test AI grading
+    result = grade_answer_with_ai(question, correct_answer, student_answer, confidence_threshold)
+    
+    test_result = {
+        'question': question,
+        'expected': correct_answer,
+        'student_answer': student_answer,
+        'correct': result.get('correct', False),
+        'confidence': result.get('confidence', 0),
+        'explanation': result.get('explanation', 'No explanation provided')
+    }
+    
+    config = {
+        'ai_model': session.get('ai_model', AI_MODEL),
+        'confidence_threshold': confidence_threshold,
+        'custom_prompt': session.get('custom_prompt', '')
+    }
+    
+    ai_grading_enabled = session.get('ai_grading_enabled', False)
+    api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    
+    return render_template('teacher_ai_grading.html', 
+                         config=config, 
+                         ai_grading_enabled=ai_grading_enabled,
+                         api_key_configured=api_key_configured,
+                         test_result=test_result)
+
+# Placeholder routes for other teacher features
+@app.route('/teacher/questions')
+@teacher_required
+def teacher_questions():
+    return "<h1>Question Management - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+
+@app.route('/teacher/analytics')
+@teacher_required
+def teacher_analytics():
+    return "<h1>Student Analytics - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+
+@app.route('/teacher/levels')
+@teacher_required
+def teacher_levels():
+    return "<h1>Level Configuration - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+
+@app.route('/teacher/settings')
+@teacher_required
+def teacher_settings():
+    return "<h1>Game Settings - Under Development</h1><a href='/teacher/dashboard'>Back to Dashboard</a>"
+
+# Helper functions for teacher portal
+def get_leaderboard_data():
+    try:
+        with open('data/leaderboard.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return []
+
+def calculate_average_score():
+    leaderboard = get_leaderboard_data()
+    if not leaderboard:
+        return 0
+    total_score = sum(entry.get('score', 0) for entry in leaderboard)
+    return round(total_score / len(leaderboard))
+
+def count_ai_generated_questions():
+    return sum(1 for q in questions if q.get('ai_generated', False))
+
+def recreate_search_index():
+    """Recreate the search index after adding new questions"""
+    global ix
+    try:
+        # Remove existing index
+        import shutil
+        if os.path.exists("indexdir"):
+            shutil.rmtree("indexdir")
+        
+        # Create new index
+        ix = create_or_open_index()
+        
+        # Reload questions
+        global questions
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
+            questions = json.load(f)
+        
+        # Rebuild index
+        from whoosh.writing import AsyncWriter
+        writer = AsyncWriter(ix)
+        for question in questions:
+            raw_keywords = question.get('keywords', [])
+            if isinstance(raw_keywords, str):
+                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+            else:
+                keywords = [str(k).strip().lower() for k in raw_keywords]
+            writer.add_document(
+                id=str(question.get("id", "")),
+                question=question.get("q", ""),
+                answer=question.get("answer", ""),
+                keywords=keywords
+            )
+        writer.commit()
+    except Exception as e:
+        print(f"Error recreating search index: {e}")
+
+# Add teacher portal link to main navigation
+@app.context_processor
+def inject_teacher_link():
+    return dict(show_teacher_link=True)
 
 # Run the Flask app
 if __name__ == "__main__":

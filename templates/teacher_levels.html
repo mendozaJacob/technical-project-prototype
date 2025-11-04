@@ -335,7 +335,12 @@
                     <strong>Questions:</strong> {{ level.questions|length }}<br>
                     <strong>Range:</strong> {{ enemy.range if enemy else 'Not Set' }}<br>
                     <strong>Difficulty:</strong> 
-                    {% set difficulties = level.questions|map('extract', questions_dict)|map(attribute='difficulty')|list %}
+                    {% set difficulties = [] %}
+                    {% for q_id in level.questions %}
+                        {% if questions_dict.get(q_id) and questions_dict.get(q_id).get('difficulty') %}
+                            {% set _ = difficulties.append(questions_dict.get(q_id).get('difficulty')) %}
+                        {% endif %}
+                    {% endfor %}
                     {% if difficulties %}
                         {{ difficulties|unique|join(', ')|title }}
                     {% else %}

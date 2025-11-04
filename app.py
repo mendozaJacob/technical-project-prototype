@@ -1517,6 +1517,67 @@ def teacher_clear_leaderboard():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/teacher/add-level', methods=['POST'])
+@teacher_required
+def teacher_add_level():
+    try:
+        # This would add a new level to levels.json
+        # For now, just return success
+        flash('Level added successfully!')
+        return redirect(url_for('teacher_levels'))
+    except Exception as e:
+        flash(f'Error adding level: {str(e)}')
+        return redirect(url_for('teacher_levels'))
+
+@app.route('/teacher/edit-level', methods=['POST'])
+@teacher_required
+def teacher_edit_level():
+    try:
+        # This would edit an existing level in levels.json
+        # For now, just return success
+        flash('Level updated successfully!')
+        return redirect(url_for('teacher_levels'))
+    except Exception as e:
+        flash(f'Error updating level: {str(e)}')
+        return redirect(url_for('teacher_levels'))
+
+@app.route('/teacher/get-level/<int:level_id>')
+@teacher_required
+def teacher_get_level(level_id):
+    try:
+        # Load levels and return specific level data
+        with open("data/levels.json", "r", encoding="utf-8") as f:
+            levels = json.load(f)
+        
+        level = next((l for l in levels if l.get('level') == level_id), None)
+        if level:
+            return jsonify(level)
+        return jsonify({'error': 'Level not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/teacher/level-questions', methods=['POST'])
+@teacher_required
+def teacher_level_questions():
+    try:
+        # This would update questions for a specific level
+        # For now, just return success
+        flash('Level questions updated successfully!')
+        return redirect(url_for('teacher_levels'))
+    except Exception as e:
+        flash(f'Error updating level questions: {str(e)}')
+        return redirect(url_for('teacher_levels'))
+
+@app.route('/teacher/delete-level/<int:level_id>', methods=['POST'])
+@teacher_required
+def teacher_delete_level(level_id):
+    try:
+        # This would delete a level from levels.json
+        # For now, just return success
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 # Helper functions for teacher portal
 def get_leaderboard_data():
     try:

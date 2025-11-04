@@ -5,9 +5,19 @@ TEACHER_CREDENTIALS = {
     "teacher2": "password2"
 }
 
-# AI API Configuration (you'll need to set these)
-OPENAI_API_KEY = "your-api-key-here"  # Set this in environment variables
-AI_MODEL = "gpt-3.5-turbo"  # or "gpt-4" for better results
+# AI API Configuration
+AI_PROVIDER = "gemini"  # Options: "openai" or "gemini"
+
+# OpenAI Configuration
+OPENAI_API_KEY = ""  # Set this if using OpenAI
+OPENAI_MODEL = "gpt-3.5-turbo"  # or "gpt-4" for better results
+
+# Gemini Configuration  
+GEMINI_API_KEY = "your-gemini-api-key-here"  # Set this if using Gemini
+GEMINI_MODEL = "gemini-1.5-flash"  # or "gemini-1.5-pro" for better results
+
+# Legacy support (will use the provider specified above)
+AI_MODEL = GEMINI_MODEL if AI_PROVIDER == "gemini" else OPENAI_MODEL
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads'

@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from whoosh.fields import Schema, TEXT, ID
 from whoosh import index
-from config import TEACHER_CREDENTIALS, OPENAI_API_KEY, AI_MODEL, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_CONTENT_LENGTH
+from config import TEACHER_CREDENTIALS, AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_KEY, OPENAI_MODEL, GEMINI_MODEL, AI_MODEL, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_CONTENT_LENGTH
 
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
@@ -79,6 +79,15 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # AI Integration Functions
+def call_ai_api(prompt, max_tokens=1000):
+    """Call AI API (OpenAI or Gemini) with error handling"""
+    if AI_PROVIDER == "gemini":
+        return call_gemini_api(prompt, max_tokens)
+    elif AI_PROVIDER == "openai":
+        return call_openai_api(prompt, max_tokens)
+    else:
+        return {"error": "Invalid AI provider configured"}
+
 def call_openai_api(prompt, max_tokens=1000):
     """Call OpenAI API with error handling"""
     try:
@@ -87,7 +96,7 @@ def call_openai_api(prompt, max_tokens=1000):
             'Content-Type': 'application/json',
         }
         data = {
-            'model': AI_MODEL,
+            'model': OPENAI_MODEL,
             'messages': [{'role': 'user', 'content': prompt}],
             'max_tokens': max_tokens,
             'temperature': 0.7
@@ -99,7 +108,41 @@ def call_openai_api(prompt, max_tokens=1000):
         else:
             return f"Error: {response.status_code} - {response.text}"
     except Exception as e:
-        return f"Error calling AI API: {str(e)}"
+        return f"Error calling OpenAI API: {str(e)}"
+
+def call_gemini_api(prompt, max_tokens=1000):
+    """Call Google Gemini API with error handling"""
+    try:
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        # Gemini API endpoint
+        url = f'https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}'
+        
+        data = {
+            'contents': [{
+                'parts': [{'text': prompt}]
+            }],
+            'generationConfig': {
+                'maxOutputTokens': max_tokens,
+                'temperature': 0.7
+            }
+        }
+        
+        response = requests.post(url, headers=headers, json=data, timeout=60)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if 'candidates' in result and len(result['candidates']) > 0:
+                return result['candidates'][0]['content']['parts'][0]['text']
+            else:
+                return "Gemini API Error: No response generated"
+        else:
+            return f"Gemini API Error: {response.status_code} - {response.text}"
+            
+    except Exception as e:
+        return f"Error calling Gemini API: {str(e)}"
 
 def extract_text_from_file(file_path):
     """Extract text content from uploaded files"""
@@ -166,7 +209,7 @@ def generate_questions_with_ai(content, topic, difficulty, question_count, conte
     Return only the JSON array, no other text.
     """
     
-    response = call_openai_api(prompt, max_tokens=2000)
+    response = call_ai_api(prompt, max_tokens=2000)
     try:
         # Try to parse the JSON response
         questions_data = json.loads(response)
@@ -197,7 +240,7 @@ def grade_answer_with_ai(question, correct_answer, student_answer, confidence_th
     Be generous with partial credit for answers that show understanding.
     """
     
-    response = call_openai_api(prompt, max_tokens=200)
+    response = call_ai_api(prompt, max_tokens=200)
     try:
         result = json.loads(response)
         # Apply confidence threshold
@@ -1167,7 +1210,14 @@ def teacher_ai_grading():
     }
     
     ai_grading_enabled = session.get('ai_grading_enabled', False)
-    api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    
+    # Check if AI API is properly configured based on provider
+    if AI_PROVIDER == "gemini":
+        api_key_configured = bool(GEMINI_API_KEY and GEMINI_API_KEY != 'your-gemini-api-key-here')
+    elif AI_PROVIDER == "openai":
+        api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    else:
+        api_key_configured = False
     
     return render_template('teacher_ai_grading.html', 
                          config=config, 
@@ -1218,7 +1268,14 @@ def teacher_test_ai_grading():
     }
     
     ai_grading_enabled = session.get('ai_grading_enabled', False)
-    api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    
+    # Check if AI API is properly configured based on provider
+    if AI_PROVIDER == "gemini":
+        api_key_configured = bool(GEMINI_API_KEY and GEMINI_API_KEY != 'your-gemini-api-key-here')
+    elif AI_PROVIDER == "openai":
+        api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    else:
+        api_key_configured = False
     
     return render_template('teacher_ai_grading.html', 
                          config=config, 

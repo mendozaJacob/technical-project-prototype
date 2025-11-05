@@ -80,30 +80,68 @@ def allowed_file(filename):
 
 # AI Integration Functions
 def extract_json_from_response(response):
-    """Extract JSON from AI response, handling markdown code blocks"""
+    """Extract JSON from AI response, handling markdown code blocks and truncation"""
     import re
     
     # If the response contains markdown code blocks, extract the JSON
-    json_pattern = r'```(?:json)?\s*(\[.*?\]|\{.*?\})\s*```'
+    json_pattern = r'```(?:json)?\s*(\[.*\]|\{.*\})\s*```'
     match = re.search(json_pattern, response, re.DOTALL)
     
     if match:
         return match.group(1).strip()
     
-    # If no code blocks, try to find JSON-like structure
-    json_array_pattern = r'\[.*?\]'
-    json_object_pattern = r'\{.*?\}'
+    # For JSON arrays, find the opening [ and matching closing ]
+    start_idx = response.find('[')
+    if start_idx != -1:
+        bracket_count = 0
+        for i, char in enumerate(response[start_idx:], start_idx):
+            if char == '[':
+                bracket_count += 1
+            elif char == ']':
+                bracket_count -= 1
+                if bracket_count == 0:
+                    return response[start_idx:i+1].strip()
     
-    array_match = re.search(json_array_pattern, response, re.DOTALL)
-    if array_match:
-        return array_match.group(0).strip()
-    
-    object_match = re.search(json_object_pattern, response, re.DOTALL)
-    if object_match:
-        return object_match.group(0).strip()
+    # For JSON objects, find the opening { and matching closing }
+    start_idx = response.find('{')
+    if start_idx != -1:
+        brace_count = 0
+        for i, char in enumerate(response[start_idx:], start_idx):
+            if char == '{':
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    return response[start_idx:i+1].strip()
     
     # If no JSON structure found, return the response as-is
     return response.strip()
+
+def fix_incomplete_json(json_str):
+    """Attempt to fix incomplete JSON by adding missing closing brackets/braces"""
+    json_str = json_str.strip()
+    
+    # Count opening and closing brackets/braces
+    open_brackets = json_str.count('[')
+    close_brackets = json_str.count(']')
+    open_braces = json_str.count('{')
+    close_braces = json_str.count('}')
+    
+    # Add missing closing brackets
+    while close_brackets < open_brackets:
+        json_str += ']'
+        close_brackets += 1
+    
+    # Add missing closing braces
+    while close_braces < open_braces:
+        json_str += '}'
+        close_braces += 1
+    
+    # If the JSON ends with a comma, try to remove it
+    if json_str.rstrip().endswith(','):
+        json_str = json_str.rstrip()[:-1]
+    
+    return json_str
 
 def call_ai_api(prompt, max_tokens=1000):
     """Call AI API (OpenAI or Gemini) with error handling"""
@@ -161,6 +199,7 @@ def call_gemini_api(prompt, max_tokens=1000):
         
         print(f"DEBUG: Calling Gemini API with model: {GEMINI_MODEL}")
         print(f"DEBUG: API Key configured: {bool(GEMINI_API_KEY and len(GEMINI_API_KEY) > 20)}")
+        print(f"DEBUG: Max tokens requested: {max_tokens}")
         
         response = requests.post(url, headers=headers, json=data, timeout=60)
         
@@ -170,7 +209,10 @@ def call_gemini_api(prompt, max_tokens=1000):
             result = response.json()
             if 'candidates' in result and len(result['candidates']) > 0:
                 if 'content' in result['candidates'][0] and 'parts' in result['candidates'][0]['content']:
-                    return result['candidates'][0]['content']['parts'][0]['text']
+                    response_text = result['candidates'][0]['content']['parts'][0]['text']
+                    print(f"DEBUG: Response length: {len(response_text)} characters")
+                    print(f"DEBUG: Response ends with: ...{response_text[-50:]}")
+                    return response_text
                 else:
                     return "Gemini API Error: Unexpected response format"
             else:
@@ -228,43 +270,64 @@ def extract_text_from_file(file_path):
 
 def generate_questions_with_ai(content, topic, difficulty, question_count, context=""):
     """Generate questions using AI based on content"""
-    prompt = f"""
-    Based on the following educational content about {topic}, generate {question_count} {difficulty}-level questions.
     
-    Content:
-    {content[:3000]}  # Limit content to avoid token limits
+    # Calculate appropriate content length based on question count
+    # More questions need more tokens for response, so reduce content accordingly
+    base_content_limit = 6000
+    content_limit = max(2000, base_content_limit - (question_count * 200))
     
-    Additional Context: {context}
+    # Truncate content if needed
+    if len(content) > content_limit:
+        content = content[:content_limit] + "\n[Content truncated for AI processing...]"
     
-    Please generate questions in this exact JSON format:
-    [
-        {{
-            "q": "Question text here?",
-            "answer": "correct answer",
-            "keywords": ["alternative1", "alternative2"],
-            "feedback": "Educational explanation of the answer"
-        }}
-    ]
+    prompt = f"""Based on the following educational content about {topic}, generate EXACTLY {question_count} {difficulty}-level questions.
+
+Content:
+{content}
+
+Additional Context: {context}
+
+Generate questions in this EXACT JSON format (no deviations):
+[
+    {{
+        "q": "Question text here?",
+        "answer": "correct answer",
+        "keywords": ["alternative1", "alternative2"],
+        "feedback": "Educational explanation"
+    }}
+]
+
+CRITICAL REQUIREMENTS:
+- Return EXACTLY {question_count} questions in the array
+- Each question must have all 4 fields: q, answer, keywords, feedback
+- Keep answers concise (under 50 words)
+- Keep feedback brief (under 100 words)
+- Focus on {difficulty} difficulty level
+- Questions should test understanding of {topic}
+- Return ONLY the JSON array, no other text
+- Do NOT use markdown code blocks
+- Ensure valid JSON with proper commas and brackets
+
+Start response with [ and end with ]"""
     
-    Requirements:
-    - Questions should be practical and test understanding
-    - Answers should be concise and specific
-    - Include 1-3 alternative acceptable answers in keywords
-    - Feedback should explain why the answer is correct
-    - Focus on {difficulty} level difficulty
-    - Make questions relevant to {topic}
-    
-    IMPORTANT: Return ONLY the JSON array. Do not use markdown code blocks (```json). Do not include any explanatory text. Just the raw JSON array starting with [ and ending with ].
-    """
-    
-    response = call_ai_api(prompt, max_tokens=2000)
+    response = call_ai_api(prompt, max_tokens=5000)
     try:
         # Extract JSON from response (handles markdown code blocks)
         clean_json = extract_json_from_response(response)
-        questions_data = json.loads(clean_json)
+        
+        # Try to fix incomplete JSON
+        fixed_json = fix_incomplete_json(clean_json)
+        
+        print(f"DEBUG: Original response length: {len(response)}")
+        print(f"DEBUG: Extracted JSON length: {len(clean_json)}")
+        print(f"DEBUG: Fixed JSON: {fixed_json[:200]}...")
+        
+        questions_data = json.loads(fixed_json)
         return questions_data
     except json.JSONDecodeError as e:
         # If not valid JSON, return error with more details
+        print(f"DEBUG: JSON Parse Error at position {e.pos}: {str(e)}")
+        print(f"DEBUG: Problematic JSON section: {response[max(0, e.pos-50):e.pos+50]}")
         return {"error": f"AI returned invalid JSON: {response[:500]}... | Parse error: {str(e)}"}
 
 def grade_answer_with_ai(question, correct_answer, student_answer, confidence_threshold=80):
@@ -1192,6 +1255,14 @@ def teacher_ai_generator():
             # Extract content from file
             content = extract_text_from_file(file_path)
             
+            # Truncate content if too long to prevent token issues
+            max_content_length = 8000  # Leave room for prompt and response
+            if len(content) > max_content_length:
+                content = content[:max_content_length] + "\n[Content truncated for processing...]"
+                print(f"DEBUG: Content truncated from {len(extract_text_from_file(file_path))} to {len(content)} characters")
+            
+            print(f"DEBUG: Processing file content of {len(content)} characters")
+            
             # Get form data
             topic = request.form.get('topic')
             difficulty = request.form.get('difficulty')
@@ -1216,43 +1287,85 @@ def teacher_ai_generator():
 @app.route('/teacher/save-questions', methods=['POST'])
 @teacher_required
 def teacher_save_questions():
+    print("DEBUG: teacher_save_questions function called!")
     try:
-        questions_data = request.form.getlist('questions')
+        # Get all questions as one JSON string and selected indices
+        all_questions_json = request.form.get('all_questions', '[]')
         selected_indices = request.form.getlist('selected_questions')
+        
+        print(f"DEBUG: Saving questions - {len(selected_indices)} selected")
+        print(f"DEBUG: Selected indices: {selected_indices}")
+        print(f"DEBUG: All questions JSON length: {len(all_questions_json)}")
+        print(f"DEBUG: First 200 chars of JSON: {repr(all_questions_json[:200])}")
+        print(f"DEBUG: Last 100 chars of JSON: {repr(all_questions_json[-100:])}")
+        
+        # Try to parse the questions JSON
+        try:
+            all_questions = json.loads(all_questions_json)
+            print(f"DEBUG: Successfully parsed {len(all_questions)} questions from JSON")
+        except json.JSONDecodeError as e:
+            print(f"DEBUG: JSON parse error: {e}")
+            print(f"DEBUG: Error at position {e.pos}")
+            print(f"DEBUG: Context around error: {repr(all_questions_json[max(0, e.pos-50):e.pos+50])}")
+            # Try to fix common HTML encoding issues
+            import html
+            decoded_json = html.unescape(all_questions_json)
+            print(f"DEBUG: Trying HTML decoded version: {repr(decoded_json[:200])}")
+            all_questions = json.loads(decoded_json)
+            print(f"DEBUG: Successfully parsed after HTML decode: {len(all_questions)} questions")
         
         # Load existing questions
         with open('data/questions.json', 'r', encoding='utf-8') as f:
             existing_questions = json.load(f)
         
+        print(f"DEBUG: Loaded {len(existing_questions)} existing questions")
+        
         # Find the next available ID
         next_id = max([q.get('id', 0) for q in existing_questions]) + 1
         
         # Add selected questions
+        saved_count = 0
         for index_str in selected_indices:
-            index = int(index_str)
-            question_json = questions_data[index]
-            # Extract JSON from response (handles markdown code blocks)
-            clean_json = extract_json_from_response(question_json)
-            question_data = json.loads(clean_json)
-            
-            # Assign ID and mark as AI generated
-            question_data['id'] = next_id
-            question_data['ai_generated'] = True
-            
-            existing_questions.append(question_data)
-            next_id += 1
+            try:
+                index = int(index_str)
+                if index < len(all_questions):
+                    question_data = all_questions[index]
+                    print(f"DEBUG: Processing question {index}: {question_data.get('q', 'No question text')[:50]}...")
+                    
+                    # Assign ID and mark as AI generated
+                    question_data['id'] = next_id
+                    question_data['ai_generated'] = True
+                    
+                    existing_questions.append(question_data)
+                    next_id += 1
+                    saved_count += 1
+                    print(f"DEBUG: Successfully processed question {index}")
+                else:
+                    print(f"DEBUG: Index {index} out of range (max: {len(all_questions)-1})")
+                
+            except Exception as e:
+                print(f"DEBUG: Error processing question {index}: {str(e)}")
+                continue
         
         # Save updated questions
         with open('data/questions.json', 'w', encoding='utf-8') as f:
             json.dump(existing_questions, f, indent=2, ensure_ascii=False)
         
+        print(f"DEBUG: Saved {saved_count} questions to file")
+        
+        # Reload global questions variable
+        global questions
+        questions = existing_questions
+        print(f"DEBUG: Reloaded global questions, now {len(questions)} total")
+        
         # Recreate search index
         recreate_search_index()
         
-        flash(f'Successfully added {len(selected_indices)} questions to the question bank!')
+        flash(f'Successfully added {saved_count} questions to the question bank!')
         return redirect(url_for('teacher_dashboard'))
         
     except Exception as e:
+        print(f"DEBUG: Error in save_questions: {str(e)}")
         return render_template('teacher_ai_generator.html', error=f'Error saving questions: {str(e)}')
 
 @app.route('/teacher/ai-grading')
@@ -1342,6 +1455,10 @@ def teacher_test_ai_grading():
 @app.route('/teacher/questions')
 @teacher_required
 def teacher_questions():
+    # Make sure we have the latest questions
+    global questions
+    print(f"DEBUG: teacher_questions - using {len(questions)} questions")
+    
     # Load questions and statistics
     stats = {
         'total_questions': len(questions),
@@ -1349,6 +1466,7 @@ def teacher_questions():
         'manual_questions': len(questions) - sum(1 for q in questions if q.get('ai_generated', False)),
         'levels_count': len(set(q.get('level', 1) for q in questions))
     }
+    print(f"DEBUG: Stats - Total: {stats['total_questions']}, AI: {stats['ai_questions']}, Manual: {stats['manual_questions']}")
     return render_template('teacher_questions.html', questions=questions, **stats)
 
 @app.route('/teacher/analytics')

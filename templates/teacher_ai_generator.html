@@ -257,9 +257,10 @@
             <h3 style="color: #4b2e05; margin-bottom: 25px;">✨ Generated Questions ({{ generated_questions|length }})</h3>
             
             <form method="POST" action="{{ url_for('teacher_save_questions') }}">
+                <!-- Store all questions as one JSON array in a textarea -->
+                <textarea name="all_questions" style="display: none;">{{ generated_questions|tojson }}</textarea>
                 {% for question in generated_questions %}
                 <div class="question-item">
-                    <input type="hidden" name="questions" value="{{ question|tojson }}">
                     <h4>Q{{ loop.index }}: {{ question.q }}</h4>
                     <div class="answer"><strong>Answer:</strong> {{ question.answer }}</div>
                     {% if question.keywords %}

@@ -79,6 +79,32 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # AI Integration Functions
+def extract_json_from_response(response):
+    """Extract JSON from AI response, handling markdown code blocks"""
+    import re
+    
+    # If the response contains markdown code blocks, extract the JSON
+    json_pattern = r'```(?:json)?\s*(\[.*?\]|\{.*?\})\s*```'
+    match = re.search(json_pattern, response, re.DOTALL)
+    
+    if match:
+        return match.group(1).strip()
+    
+    # If no code blocks, try to find JSON-like structure
+    json_array_pattern = r'\[.*?\]'
+    json_object_pattern = r'\{.*?\}'
+    
+    array_match = re.search(json_array_pattern, response, re.DOTALL)
+    if array_match:
+        return array_match.group(0).strip()
+    
+    object_match = re.search(json_object_pattern, response, re.DOTALL)
+    if object_match:
+        return object_match.group(0).strip()
+    
+    # If no JSON structure found, return the response as-is
+    return response.strip()
+
 def call_ai_api(prompt, max_tokens=1000):
     """Call AI API (OpenAI or Gemini) with error handling"""
     if AI_PROVIDER == "gemini":
@@ -113,6 +139,9 @@ def call_openai_api(prompt, max_tokens=1000):
 def call_gemini_api(prompt, max_tokens=1000):
     """Call Google Gemini API with error handling"""
     try:
+        if not GEMINI_API_KEY or GEMINI_API_KEY == 'your-gemini-api-key-here':
+            return "Gemini API Error: API key not configured. Please set GEMINI_API_KEY in config.py"
+        
         headers = {
             'Content-Type': 'application/json'
         }
@@ -130,18 +159,37 @@ def call_gemini_api(prompt, max_tokens=1000):
             }
         }
         
+        print(f"DEBUG: Calling Gemini API with model: {GEMINI_MODEL}")
+        print(f"DEBUG: API Key configured: {bool(GEMINI_API_KEY and len(GEMINI_API_KEY) > 20)}")
+        
         response = requests.post(url, headers=headers, json=data, timeout=60)
+        
+        print(f"DEBUG: Gemini API response status: {response.status_code}")
         
         if response.status_code == 200:
             result = response.json()
             if 'candidates' in result and len(result['candidates']) > 0:
-                return result['candidates'][0]['content']['parts'][0]['text']
+                if 'content' in result['candidates'][0] and 'parts' in result['candidates'][0]['content']:
+                    return result['candidates'][0]['content']['parts'][0]['text']
+                else:
+                    return "Gemini API Error: Unexpected response format"
             else:
-                return "Gemini API Error: No response generated"
+                return f"Gemini API Error: No response generated. Full response: {result}"
         else:
-            return f"Gemini API Error: {response.status_code} - {response.text}"
+            error_details = response.text
+            print(f"DEBUG: Gemini API Error Details: {error_details}")
+            
+            if response.status_code == 400:
+                return "Gemini API Error: Invalid API key or request format. Please check your API key and try again."
+            elif response.status_code == 403:
+                return "Gemini API Error: API key doesn't have permission or quota exceeded."
+            elif response.status_code == 429:
+                return "Gemini API Error: Rate limit exceeded. Please try again later."
+            else:
+                return f"Gemini API Error: {response.status_code} - {error_details}"
             
     except Exception as e:
+        print(f"DEBUG: Exception in call_gemini_api: {str(e)}")
         return f"Error calling Gemini API: {str(e)}"
 
 def extract_text_from_file(file_path):
@@ -206,17 +254,18 @@ def generate_questions_with_ai(content, topic, difficulty, question_count, conte
     - Focus on {difficulty} level difficulty
     - Make questions relevant to {topic}
     
-    Return only the JSON array, no other text.
+    IMPORTANT: Return ONLY the JSON array. Do not use markdown code blocks (```json). Do not include any explanatory text. Just the raw JSON array starting with [ and ending with ].
     """
     
     response = call_ai_api(prompt, max_tokens=2000)
     try:
-        # Try to parse the JSON response
-        questions_data = json.loads(response)
+        # Extract JSON from response (handles markdown code blocks)
+        clean_json = extract_json_from_response(response)
+        questions_data = json.loads(clean_json)
         return questions_data
-    except json.JSONDecodeError:
-        # If not valid JSON, return error
-        return {"error": f"AI returned invalid JSON: {response[:200]}..."}
+    except json.JSONDecodeError as e:
+        # If not valid JSON, return error with more details
+        return {"error": f"AI returned invalid JSON: {response[:500]}... | Parse error: {str(e)}"}
 
 def grade_answer_with_ai(question, correct_answer, student_answer, confidence_threshold=80):
     """Use AI to grade student answers with semantic understanding"""
@@ -238,17 +287,21 @@ def grade_answer_with_ai(question, correct_answer, student_answer, confidence_th
     }}
     
     Be generous with partial credit for answers that show understanding.
+    
+    IMPORTANT: Return ONLY the JSON object. Do not use markdown code blocks. Do not include any explanatory text. Just the raw JSON object.
     """
     
     response = call_ai_api(prompt, max_tokens=200)
     try:
-        result = json.loads(response)
+        # Extract JSON from response (handles markdown code blocks)
+        clean_json = extract_json_from_response(response)
+        result = json.loads(clean_json)
         # Apply confidence threshold
         if result.get('confidence', 0) < confidence_threshold:
             result['correct'] = False
             result['explanation'] += f" (Below {confidence_threshold}% confidence threshold)"
         return result
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         return {
             "correct": False,
             "confidence": 0,
@@ -1178,7 +1231,9 @@ def teacher_save_questions():
         for index_str in selected_indices:
             index = int(index_str)
             question_json = questions_data[index]
-            question_data = json.loads(question_json)
+            # Extract JSON from response (handles markdown code blocks)
+            clean_json = extract_json_from_response(question_json)
+            question_data = json.loads(clean_json)
             
             # Assign ID and mark as AI generated
             question_data['id'] = next_id

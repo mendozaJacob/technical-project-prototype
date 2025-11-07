@@ -13,7 +13,7 @@ from whoosh import index
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
 BASE_DAMAGE = 10
-BASE_ENEMY_HP = 50
+BASE_ENEMY_HP = 100
 LEVEL_TIME_LIMIT = 30
 
 # Define the schema for the Whoosh search index
@@ -114,27 +114,28 @@ def select_level():
         session["game_start_time"] = time.time()
         session['level_completed'] = False
         session['current_timer'] = 45  # Default timer is 45 seconds
-        # Initialize enemy progression index to the Novice Gnome every time a new
-        # game is started. This ensures each new game begins against the Novice Gnome
-        # regardless of previous session state.
-        try:
-            novice_idx = 0
+        # Initialize enemy progression index to the Novice Gnome only for a fresh
+        # session/new game. If an enemy_index already exists (e.g. advanced from
+        # the result page), preserve it so progression works across levels.
+        if 'enemy_index' not in session:
             try:
-                with open('data/enemies.json', encoding='utf-8') as ef:
-                    enemies_list = json.load(ef)
-                # Look for an enemy by name or level that indicates the novice gnome
-                for i, e in enumerate(enemies_list):
-                    name = str(e.get('name', '')).strip().lower()
-                    level = e.get('level')
-                    if name == 'novice gnome' or level == 1:
-                        novice_idx = i
-                        break
-            except Exception:
-                # If we can't read the file, default to index 0
                 novice_idx = 0
-            session['enemy_index'] = int(novice_idx)
-        except Exception:
-            session['enemy_index'] = 0
+                try:
+                    with open('data/enemies.json', encoding='utf-8') as ef:
+                        enemies_list = json.load(ef)
+                    # Look for an enemy by name or level that indicates the novice gnome
+                    for i, e in enumerate(enemies_list):
+                        name = str(e.get('name', '')).strip().lower()
+                        level = e.get('level')
+                        if name == 'novice gnome' or level == 1:
+                            novice_idx = i
+                            break
+                except Exception:
+                    # If we can't read the file, default to index 0
+                    novice_idx = 0
+                session['enemy_index'] = int(novice_idx)
+            except Exception:
+                session['enemy_index'] = 0
         # After the player selects a level, send them to choose their character
         return redirect(url_for('choose_character'))
 

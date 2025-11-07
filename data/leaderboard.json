@@ -96,5 +96,33 @@
         "time": 30.98,
         "correct_answers": 1,
         "wrong_answers": 9
+    },
+    {
+        "player": "Anonymous",
+        "score": 90,
+        "time": 118.17,
+        "correct_answers": 8,
+        "wrong_answers": 2
+    },
+    {
+        "player": "Anonymous",
+        "score": 85,
+        "time": 65.09,
+        "correct_answers": 7,
+        "wrong_answers": 3
+    },
+    {
+        "player": "Anonymous",
+        "score": 90,
+        "time": 134.15,
+        "correct_answers": 9,
+        "wrong_answers": 1
+    },
+    {
+        "player": "Anonymous",
+        "score": -5,
+        "time": 24.04,
+        "correct_answers": 1,
+        "wrong_answers": 9
     }
 ]

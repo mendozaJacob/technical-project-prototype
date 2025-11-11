@@ -1026,46 +1026,44 @@
     "feedback": "Boot into rescue mode from install media, chroot into the system, regenerate GRUB config and reinstall bootloader."
   },
   {
+    "id": 101,
+    "q": "What is the primary purpose of understanding the OSI and TCP/IP models in network communication?",
     "answer": "These models help us understand how network devices communicate and how data flows across a network.",
-    "feedback": "The OSI and TCP/IP models provide a standardized framework for understanding the functions of a network and the protocols involved in data transmission.",
     "keywords": [
       "network models",
       "communication",
       "data flow"
     ],
-    "q": "What is the primary purpose of understanding the OSI and TCP/IP models in network communication?",
-    "id": 101,
-    "ai_generated": true
+    "feedback": "The OSI and TCP/IP models provide a standardized framework for understanding the functions of a network and the protocols involved in data transmission."
   },
   {
+    "id": 102,
+    "q": "Name one essential concept mentioned for achieving robust cybersecurity.",
     "answer": "One essential concept is encryption (or firewalls, or intrusion detection systems).",
-    "feedback": "Encryption scrambles data to prevent unauthorized access, firewalls control network traffic, and intrusion detection systems monitor for malicious activity, all crucial for robust cybersecurity.",
     "keywords": [
       "encryption",
       "firewalls",
       "IDS",
       "cybersecurity concepts"
     ],
-    "q": "Name one essential concept mentioned for achieving robust cybersecurity.",
-    "id": 102,
-    "ai_generated": true
+    "feedback": "Encryption scrambles data to prevent unauthorized access, firewalls control network traffic, and intrusion detection systems monitor for malicious activity, all crucial for robust cybersecurity."
   },
   {
+    "id": 103,
+    "q": "What is a common type of network attack mentioned in the content?",
     "answer": "A common type of network attack is a DoS (Denial of Service) attack (or spoofing, or MITM - Man-in-the-Middle).",
-    "feedback": "DoS attacks aim to make a service unavailable by overwhelming it, while spoofing involves disguising as another entity, and MITM intercepts communication between two parties.",
     "keywords": [
       "DoS",
       "spoofing",
       "MITM",
       "network attacks"
     ],
-    "q": "What is a common type of network attack mentioned in the content?",
-    "id": 103,
-    "ai_generated": true
+    "feedback": "DoS attacks aim to make a service unavailable by overwhelming it, while spoofing involves disguising as another entity, and MITM intercepts communication between two parties."
   },
   {
+    "id": 104,
+    "q": "Which mechanism is mentioned for secure remote access and authentication?",
     "answer": "VPNs (Virtual Private Networks) are mentioned for secure remote access and authentication (also RADIUS or TACACS+).",
-    "feedback": "VPNs create a secure, encrypted connection over a less secure network, allowing users to safely access organizational resources from external locations.",
     "keywords": [
       "VPN",
       "remote access",
@@ -1073,13 +1071,12 @@
       "RADIUS",
       "TACACS+"
     ],
-    "q": "Which mechanism is mentioned for secure remote access and authentication?",
-    "id": 104,
-    "ai_generated": true
+    "feedback": "VPNs create a secure, encrypted connection over a less secure network, allowing users to safely access organizational resources from external locations."
   },
   {
+    "id": 105,
+    "q": "Why is cryptography important in securing communication channels?",
     "answer": "Cryptography is important because it protects the confidentiality, integrity, and authenticity of data transmitted over communication channels.",
-    "feedback": "Cryptography uses techniques like encryption and digital signatures to transform information, making it unreadable to unauthorized parties and verifying its origin and content.",
     "keywords": [
       "cryptography",
       "communication security",
@@ -1087,26 +1084,24 @@
       "integrity",
       "authenticity"
     ],
-    "q": "Why is cryptography important in securing communication channels?",
-    "id": 105,
-    "ai_generated": true
+    "feedback": "Cryptography uses techniques like encryption and digital signatures to transform information, making it unreadable to unauthorized parties and verifying its origin and content."
   },
   {
+    "id": 106,
+    "q": "At which OSI model layers does Link Encryption primarily operate?",
     "answer": "Link Encryption primarily operates at the Data Link and Physical layers of the OSI model.",
-    "feedback": "Link Encryption encrypts all data on a communication link at these lower layers, protecting against eavesdropping as data travels between network devices.",
     "keywords": [
       "Link Encryption",
       "OSI model",
       "Data Link layer",
       "Physical layer"
     ],
-    "q": "At which OSI model layers does Link Encryption primarily operate?",
-    "id": 106,
-    "ai_generated": true
+    "feedback": "Link Encryption encrypts all data on a communication link at these lower layers, protecting against eavesdropping as data travels between network devices."
   },
   {
+    "id": 107,
+    "q": "What part of communication does End-to-End Encryption typically leave unencrypted?",
     "answer": "End-to-End Encryption typically leaves routing information, such as headers and addresses, unencrypted.",
-    "feedback": "While End-to-End Encryption secures the payload (the actual message content), it deliberately leaves routing information visible so that network devices can properly direct the data.",
     "keywords": [
       "End-to-End Encryption",
       "unencrypted",
@@ -1114,13 +1109,12 @@
       "headers",
       "addresses"
     ],
-    "q": "What part of communication does End-to-End Encryption typically leave unencrypted?",
-    "id": 107,
-    "ai_generated": true
+    "feedback": "While End-to-End Encryption secures the payload (the actual message content), it deliberately leaves routing information visible so that network devices can properly direct the data."
   },
   {
+    "id": 108,
+    "q": "Why is email security considered critical for business communication?",
     "answer": "Email security is critical for business communication because email natively lacks security without encryption, digital signatures, or keys, making it vulnerable.",
-    "feedback": "Businesses rely heavily on email for sensitive exchanges, so implementing security measures is essential to protect against data breaches, phishing, and other cyber threats.",
     "keywords": [
       "email security",
       "business communication",
@@ -1128,13 +1122,12 @@
       "encryption",
       "digital signatures"
     ],
-    "q": "Why is email security considered critical for business communication?",
-    "id": 108,
-    "ai_generated": true
+    "feedback": "Businesses rely heavily on email for sensitive exchanges, so implementing security measures is essential to protect against data breaches, phishing, and other cyber threats."
   },
   {
+    "id": 109,
+    "q": "Name one key feature provided by PGP (Pretty Good Privacy).",
     "answer": "PGP provides confidentiality (or integrity, or authenticity).",
-    "feedback": "PGP is a comprehensive encryption program designed to ensure the privacy, integrity, and authenticity of data, particularly for email and file transfers, using various cryptographic methods.",
     "keywords": [
       "PGP",
       "Pretty Good Privacy",
@@ -1142,13 +1135,12 @@
       "integrity",
       "authenticity"
     ],
-    "q": "Name one key feature provided by PGP (Pretty Good Privacy).",
-    "id": 109,
-    "ai_generated": true
+    "feedback": "PGP is a comprehensive encryption program designed to ensure the privacy, integrity, and authenticity of data, particularly for email and file transfers, using various cryptographic methods."
   },
   {
+    "id": 110,
+    "q": "What is the main purpose of S/MIME (Secure MIME)?",
     "answer": "The main purpose of S/MIME is to encrypt and digitally sign messages and attachments for email security.",
-    "feedback": "S/MIME extends the MIME standard to add cryptographic security services, ensuring that email content is confidential, has integrity, and is authenticated through digital signatures and encryption.",
     "keywords": [
       "S/MIME",
       "Secure MIME",
@@ -1156,8 +1148,6 @@
       "encrypt",
       "digitally sign"
     ],
-    "q": "What is the main purpose of S/MIME (Secure MIME)?",
-    "id": 110,
-    "ai_generated": true
+    "feedback": "S/MIME extends the MIME standard to add cryptographic security services, ensuring that email content is confidential, has integrity, and is authenticated through digital signatures and encryption."
   }
 ]

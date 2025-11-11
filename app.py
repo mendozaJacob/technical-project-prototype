@@ -1332,11 +1332,16 @@ def teacher_save_questions():
                     question_data = all_questions[index]
                     print(f"DEBUG: Processing question {index}: {question_data.get('q', 'No question text')[:50]}...")
                     
-                    # Assign ID and mark as AI generated
-                    question_data['id'] = next_id
-                    question_data['ai_generated'] = True
+                    # Create properly formatted question (matching standard format)
+                    formatted_question = {
+                        "id": next_id,
+                        "q": question_data.get('q'),
+                        "answer": question_data.get('answer'),
+                        "keywords": question_data.get('keywords', []),
+                        "feedback": question_data.get('feedback', '')
+                    }
                     
-                    existing_questions.append(question_data)
+                    existing_questions.append(formatted_question)
                     next_id += 1
                     saved_count += 1
                     print(f"DEBUG: Successfully processed question {index}")
@@ -1751,9 +1756,34 @@ def teacher_clear_leaderboard():
 @teacher_required
 def teacher_add_level():
     try:
-        # This would add a new level to levels.json
-        # For now, just return success
-        flash('Level added successfully!')
+        # Get form data
+        difficulty = request.form.get('difficulty', 'Easy')
+        selected_questions = request.form.getlist('questions')
+        
+        # Load existing levels
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels = json.load(f)
+        
+        # Find the next level number
+        next_level = max([level['level'] for level in levels]) + 1
+        
+        # Convert question IDs to integers
+        question_ids = [int(qid) for qid in selected_questions]
+        
+        # Create new level
+        new_level = {
+            "level": next_level,
+            "difficulty": difficulty,
+            "questions": question_ids
+        }
+        
+        levels.append(new_level)
+        
+        # Save updated levels
+        with open('data/levels.json', 'w', encoding='utf-8') as f:
+            json.dump(levels, f, indent=2, ensure_ascii=False)
+        
+        flash(f'Level {next_level} added successfully with {len(question_ids)} questions!')
         return redirect(url_for('teacher_levels'))
     except Exception as e:
         flash(f'Error adding level: {str(e)}')
@@ -1763,9 +1793,43 @@ def teacher_add_level():
 @teacher_required
 def teacher_edit_level():
     try:
-        # This would edit an existing level in levels.json
-        # For now, just return success
-        flash('Level updated successfully!')
+        # Get form data
+        level_id = int(request.form.get('level_number'))  # HTML template uses 'level_number'
+        difficulty = request.form.get('difficulty', 'Easy')
+        selected_questions = request.form.getlist('questions')
+        
+        print(f"DEBUG: Edit level {level_id}")
+        print(f"DEBUG: New difficulty: {difficulty}")
+        print(f"DEBUG: Selected questions: {selected_questions}")
+        
+        # Load existing levels
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels = json.load(f)
+        
+        print(f"DEBUG: Loaded {len(levels)} levels")
+        
+        # Find and update the level
+        level_found = False
+        for level in levels:
+            if level['level'] == level_id:
+                print(f"DEBUG: Found level {level_id}, old questions: {level['questions']}")
+                level['difficulty'] = difficulty
+                level['questions'] = [int(qid) for qid in selected_questions]
+                level_found = True
+                print(f"DEBUG: Updated level {level_id}, new questions: {level['questions']}")
+                break
+        
+        if not level_found:
+            print(f"DEBUG: Level {level_id} not found in levels!")
+            flash(f'Level {level_id} not found!')
+            return redirect(url_for('teacher_levels'))
+        
+        # Save updated levels
+        with open('data/levels.json', 'w', encoding='utf-8') as f:
+            json.dump(levels, f, indent=2, ensure_ascii=False)
+        
+        print(f"DEBUG: Saved levels.json successfully")
+        flash(f'Level {level_id} updated successfully with {len(selected_questions)} questions!')
         return redirect(url_for('teacher_levels'))
     except Exception as e:
         flash(f'Error updating level: {str(e)}')
@@ -1790,9 +1854,31 @@ def teacher_get_level(level_id):
 @teacher_required
 def teacher_level_questions():
     try:
-        # This would update questions for a specific level
-        # For now, just return success
-        flash('Level questions updated successfully!')
+        # Get form data
+        level_id = int(request.form.get('level_number'))  # HTML template uses 'level_number'
+        selected_questions = request.form.getlist('questions')
+        
+        # Load existing levels
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels = json.load(f)
+        
+        # Find and update the level's questions
+        level_found = False
+        for level in levels:
+            if level['level'] == level_id:
+                level['questions'] = [int(qid) for qid in selected_questions]
+                level_found = True
+                break
+        
+        if not level_found:
+            flash(f'Level {level_id} not found!')
+            return redirect(url_for('teacher_levels'))
+        
+        # Save updated levels
+        with open('data/levels.json', 'w', encoding='utf-8') as f:
+            json.dump(levels, f, indent=2, ensure_ascii=False)
+        
+        flash(f'Questions for Level {level_id} updated successfully! Now has {len(selected_questions)} questions.')
         return redirect(url_for('teacher_levels'))
     except Exception as e:
         flash(f'Error updating level questions: {str(e)}')
@@ -1802,9 +1888,22 @@ def teacher_level_questions():
 @teacher_required
 def teacher_delete_level(level_id):
     try:
-        # This would delete a level from levels.json
-        # For now, just return success
-        return jsonify({'success': True})
+        # Load existing levels
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels = json.load(f)
+        
+        # Find and remove the level
+        original_count = len(levels)
+        levels = [level for level in levels if level['level'] != level_id]
+        
+        if len(levels) == original_count:
+            return jsonify({'success': False, 'error': f'Level {level_id} not found'})
+        
+        # Save updated levels
+        with open('data/levels.json', 'w', encoding='utf-8') as f:
+            json.dump(levels, f, indent=2, ensure_ascii=False)
+        
+        return jsonify({'success': True, 'message': f'Level {level_id} deleted successfully'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 

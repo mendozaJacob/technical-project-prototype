@@ -1,7 +1,24 @@
 {
-  "timeout_behavior": "fail",
   "base_player_hp": 100,
+  "base_enemy_hp": 100,
   "base_damage": 10,
+  "question_time_limit": 30,
+  "questions_per_level": 10,
+  "points_correct": 10,
+  "points_wrong": 5,
+  "speed_bonus": true,
+  "level_bonus": 20,
+  "adaptive_difficulty": false,
+  "min_accuracy": 70,
   "lives_system": false,
-  "question_time_limit": 30
+  "max_lives": 3,
+  "sound_effects": false,
+  "show_timer": true,
+  "show_progress": true,
+  "animation_speed": "normal",
+  "debug_mode": false,
+  "analytics_enabled": true,
+  "auto_save": true,
+  "session_timeout": 30,
+  "timeout_behavior": "fail"
 }

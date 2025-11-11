@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Battle — Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         /* Merge of home + index styles */
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Georgia', serif;
             /* Use the same gradient/color as the main stylesheet instead of an image */
             background: linear-gradient(135deg, #2e3d1f 0%, #1a2312 100%);
             color: #f8e5b3;
@@ -25,10 +26,10 @@
             font-size: 3em;
             color: #ffcc66;
             text-shadow: 2px 2px 10px #8b0000;
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'MedievalSharp', cursive;
         }
         .tagline {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'MedievalSharp', cursive;
             font-size: 1.2em;
             color: #f5deb3;
             margin-top: 6px;
@@ -100,6 +101,18 @@
             <a href="{{ url_for('test_yourself', new=1) }}" class="btn">🧪 Test Yourself</a>
             <a href="{{ url_for('endless') }}" class="btn">♾️ Endless Mode</a>
             <a href="{{ url_for('howto') }}" class="btn small">📜 How to Play</a>
+            
+            <!-- Auto-save Load Progress Section -->
+            <div id="auto-save-section" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid #b8860b;">
+                <div style="color: #f0d9b5; margin-bottom: 10px; font-size: 0.9em;">💾 Load Saved Progress</div>
+                <form onsubmit="loadProgress(event)" style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="text" id="player-name-input" placeholder="Enter your name..." 
+                           style="padding: 8px; border-radius: 4px; border: 1px solid #b8860b; background: #2a1a0f; color: #f0d9b5; text-align: center;">
+                    <button type="submit" class="btn small" style="margin: 0;">🔄 Load Progress</button>
+                </form>
+                <div id="save-status" style="margin-top: 8px; font-size: 0.8em; color: #d0d0d0;"></div>
+            </div>
+            
             <div style="margin-top:14px; font-size:0.9em; color:#e6d3b0;">Already have a level selected? Continue to play.</div>
         </div>
     </div>
@@ -112,5 +125,52 @@
             </a>
         </div>
     </footer>
+
+    <script>
+        // Auto-save functionality
+        function loadProgress(event) {
+            event.preventDefault();
+            const playerName = document.getElementById('player-name-input').value.trim();
+            if (!playerName) {
+                document.getElementById('save-status').textContent = 'Please enter your name first.';
+                return;
+            }
+
+            // Check if auto-save exists first
+            fetch(`/check_auto_save/${encodeURIComponent(playerName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        const saveDate = new Date(data.timestamp * 1000).toLocaleString();
+                        if (confirm(`Found saved progress!\nLevel: ${data.level}\nScore: ${data.score}\nSaved: ${saveDate}\n\nDo you want to load this progress?`)) {
+                            // Create form and submit to load progress
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/load_progress';
+                            
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'player_name';
+                            input.value = playerName;
+                            
+                            form.appendChild(input);
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    } else {
+                        document.getElementById('save-status').textContent = 'No saved progress found for this name.';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('save-status').textContent = 'Error checking for saved progress.';
+                    console.error('Error:', error);
+                });
+        }
+
+        // Check if player name input changes
+        document.getElementById('player-name-input').addEventListener('input', function() {
+            document.getElementById('save-status').textContent = '';
+        });
+    </script>
 </body>
 </html>

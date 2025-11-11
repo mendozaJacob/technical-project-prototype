@@ -463,6 +463,65 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
     with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
         json.dump(leaderboard, f, indent=4)
 
+# Auto-save functionality
+def auto_save_progress():
+    """Auto-save player progress if enabled in settings"""
+    settings = get_current_game_settings()
+    if not settings.get('auto_save', True):
+        return
+    
+    # Only save if we have meaningful progress to save
+    if not session.get('player_name') or not session.get('selected_level'):
+        return
+    
+    try:
+        progress_data = {
+            'player_name': session.get('player_name', 'Anonymous'),
+            'selected_level': session.get('selected_level'),
+            'score': session.get('score', 0),
+            'player_hp': session.get('player_hp', 100),
+            'enemy_hp': session.get('enemy_hp', 50),
+            'q_index': session.get('q_index', 0),
+            'correct_answers': session.get('correct_answers', 0),
+            'wrong_answers': session.get('wrong_answers', 0),
+            'highest_unlocked': session.get('highest_unlocked', 1),
+            'lives_remaining': session.get('lives_remaining'),
+            'lives_enabled': session.get('lives_enabled', False),
+            'level_completed': session.get('level_completed', False),
+            'timestamp': time.time()
+        }
+        
+        # Save to auto-save file
+        auto_save_file = f"data/autosave_{session.get('player_name', 'anonymous')}.json"
+        os.makedirs('data', exist_ok=True)
+        with open(auto_save_file, 'w', encoding='utf-8') as f:
+            json.dump(progress_data, f, indent=2)
+            
+        print(f"Auto-saved progress for {session.get('player_name')}")
+        
+    except Exception as e:
+        print(f"Auto-save failed: {e}")
+
+def load_auto_save_progress(player_name):
+    """Load auto-saved progress for a player"""
+    try:
+        auto_save_file = f"data/autosave_{player_name}.json"
+        if not os.path.exists(auto_save_file):
+            return None
+            
+        with open(auto_save_file, 'r', encoding='utf-8') as f:
+            progress_data = json.load(f)
+            
+        # Check if save is recent (within 24 hours)
+        if time.time() - progress_data.get('timestamp', 0) > 86400:
+            return None
+            
+        return progress_data
+        
+    except Exception as e:
+        print(f"Failed to load auto-save: {e}")
+        return None
+
 # Define the function to get questions for a specific level
 def get_questions_for_level(level_number, levels):
     level_info = next((lvl for lvl in levels if lvl["level"] == level_number), None)
@@ -530,6 +589,9 @@ def select_level():
             session['enemy_index'] = int(novice_idx)
         except Exception:
             session['enemy_index'] = 0
+        # Auto-save initial game state
+        auto_save_progress()
+        
         # After the player selects a level, send them to choose their character
         return redirect(url_for('choose_character'))
 
@@ -725,6 +787,10 @@ def game():
             session['q_index'] += 1
             session["level_start_time"] = time.time()  # Reset timer for the next question
             session["current_timer"] = max(10, session.get("current_timer", 55) - 5)  # Deduct 5s for next question, min 10s
+            
+            # Auto-save progress after timeout
+            auto_save_progress()
+            
             return redirect(url_for('feedback'))
 
     if request.method == 'POST':
@@ -800,6 +866,9 @@ def game():
                 session['feedback'] = f"❌ Incorrect!<br><br>💡 {question_feedback}"
                 session["current_timer"] = max(10, session.get("current_timer", 55) - 5)  # Deduct 5s from timer for next question, min 10s
                 session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
+
+        # Auto-save progress after each question
+        auto_save_progress()
 
         # Reset timer for the next question
         session['level_start_time'] = time.time()
@@ -891,6 +960,9 @@ def result():
         prev_highest = session.get('highest_unlocked', 1)
         if next_level > prev_highest:
             session['highest_unlocked'] = next_level
+
+        # Auto-save progress after level completion
+        auto_save_progress()
 
         # Advance the enemy_index so a new enemy appears after each completed level
         try:
@@ -1361,6 +1433,59 @@ def set_name():
     session['player_name'] = name
     # Return to the referring page (or index)
     return redirect(request.referrer or url_for('index'))
+
+@app.route('/load_progress', methods=['POST'])
+def load_progress():
+    """Load auto-saved progress for a player"""
+    player_name = request.form.get('player_name', '').strip()
+    if not player_name:
+        return redirect(url_for('index'))
+    
+    settings = get_current_game_settings()
+    if not settings.get('auto_save', True):
+        return redirect(url_for('index'))
+    
+    progress_data = load_auto_save_progress(player_name)
+    if progress_data:
+        # Restore session state from auto-save
+        session['player_name'] = progress_data['player_name']
+        session['selected_level'] = progress_data['selected_level']
+        session['score'] = progress_data['score']
+        session['player_hp'] = progress_data['player_hp']
+        session['enemy_hp'] = progress_data['enemy_hp']
+        session['q_index'] = progress_data['q_index']
+        session['correct_answers'] = progress_data['correct_answers']
+        session['wrong_answers'] = progress_data['wrong_answers']
+        session['highest_unlocked'] = progress_data['highest_unlocked']
+        session['lives_remaining'] = progress_data.get('lives_remaining')
+        session['lives_enabled'] = progress_data.get('lives_enabled', False)
+        session['level_completed'] = progress_data.get('level_completed', False)
+        
+        # Reset timing info for current session
+        session["level_start_time"] = time.time()
+        session["game_start_time"] = time.time()
+        session['current_timer'] = 55
+        
+        flash('Progress loaded successfully!', 'success')
+        return redirect(url_for('choose_character'))
+    else:
+        flash('No saved progress found or save file too old.', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/check_auto_save/<player_name>')
+def check_auto_save(player_name):
+    """Check if auto-save exists for a player (AJAX endpoint)"""
+    settings = get_current_game_settings()
+    if not settings.get('auto_save', True):
+        return jsonify({'exists': False})
+    
+    progress_data = load_auto_save_progress(player_name)
+    return jsonify({
+        'exists': progress_data is not None,
+        'level': progress_data['selected_level'] if progress_data else None,
+        'score': progress_data['score'] if progress_data else None,
+        'timestamp': progress_data['timestamp'] if progress_data else None
+    })
 
 # =============== TEACHER PORTAL ROUTES ===============
 

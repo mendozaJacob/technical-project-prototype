@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gamify RPG - Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body { 
@@ -114,7 +115,7 @@
             box-shadow: 0 2px 8px #0002; 
         }
         .btn { 
-            font-family: 'MedievalSharp', cursive;
+            font-family: 'Times New Roman', Times, serif;
             background: #4b2e05;
             color: #f3eac2;
             border: none;
@@ -128,7 +129,7 @@
             background: #6d4106;
         }
         input[type="text"] {
-            font-family: 'MedievalSharp', cursive;
+            font-family: 'Times New Roman', Times, serif;
             padding: 12px;
             border: 2px solid #4b2e05;
             border-radius: 8px;
@@ -144,11 +145,22 @@
         <!-- Game Title -->
         <h1 class="game-title">⚔️ Battle Arena</h1>
         
-        <!-- Timer -->
+        <!-- Timer (shown based on settings) -->
+        {% if settings.show_timer %}
         <div class="timer" id="timer">⏱️ Time Left: {{ time_left }} seconds</div>
-        
-        <!-- Questions Progress -->
+        {% endif %}
+
+        <!-- Questions Progress (shown based on settings) -->
+        {% if settings.show_progress %}
         <div class="questions-left">Question {{ q_number }} of {{ total }} | Level {{ level }}</div>
+        {% endif %}
+        
+        <!-- Lives System (if enabled) -->
+        {% if lives_enabled %}
+        <div class="lives-display" style="text-align: center; color: #4b2e05; font-weight: bold; margin: 10px 0;">
+            ❤️ Lives: {{ lives_remaining }} / {{ settings.max_lives }}
+        </div>
+        {% endif %}
         
         <!-- Character Stats Section -->
         <div class="character-stats">
@@ -201,11 +213,17 @@
             if (timeLeft > 0) {
                 // Decrease the time left and update the timer text
                 timeLeft--;
-                timerElement.innerText = "⏱️ Time Left: " + timeLeft + " seconds";
+                if (timerElement) {
+                    timerElement.innerText = "⏱️ Time Left: " + timeLeft + " seconds";
+                }
             } else {
                 // Stop the countdown when time reaches 0
                 clearInterval(countdown);
-                timerElement.innerText = "⏳ Time's up!";
+                if (timerElement) {
+                    timerElement.innerText = "⏳ Time's up!";
+                }
+                // Redirect to refresh the page and trigger server-side timeout logic
+                window.location.reload();
             }
         }, 1000); // Run the function every 1000ms (1 second)
     </script>

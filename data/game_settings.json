@@ -1,0 +1,7 @@
+{
+  "timeout_behavior": "fail",
+  "base_player_hp": 100,
+  "base_damage": 10,
+  "lives_system": false,
+  "question_time_limit": 30
+}

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <style>
         body, h1, h2, h3, h4, h5, h6, table, th, td, .btn, .score-banner, .result-pass, .result-fail, .review-answers-title {
-            font-family: 'MedievalSharp', cursive !important;
+            font-family: 'Times New Roman', Times, serif !important;
         }
         body {
             background: #2e3d1f;
@@ -38,7 +38,7 @@
             text-shadow: 1px 1px 0 #fff, 2px 2px 2px #cfcfcf;
         }
         .btn {
-            font-family: 'MedievalSharp', cursive;
+            font-family: 'Times New Roman', Times, serif;
             background: #4b2e05;
             color: #fffbe6;
             border: none;
@@ -130,7 +130,20 @@
                     <td style="text-align: left; max-width: 300px;">{{ entry.question }}</td>
                     <td>{{ entry.user_answer }}</td>
                     <td>{{ entry.correct_answer }}</td>
-                    <td>{{ '✅' if entry.correct else '❌' }}</td>
+                    <td>
+                        {% if entry.correct %}
+                            {% if entry.match_type and entry.similarity %}
+                                ✅ {{ entry.match_type }}
+                                {% if entry.similarity < 1.0 %}
+                                    ({{ (entry.similarity * 100)|int }}%)
+                                {% endif %}
+                            {% else %}
+                                ✅
+                            {% endif %}
+                        {% else %}
+                            ❌
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr style="{{ 'background-color: #d4edda;' if entry.correct else 'background-color: #f8d7da;' }}">
                     <td colspan="5" style="text-align: left; font-style: italic; padding: 8px 12px; border-top: 1px solid #ddd;">

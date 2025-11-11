@@ -534,6 +534,19 @@
                             <span class="current-value">minutes</span>
                         </div>
                     </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Timeout Behavior</div>
+                            <div class="setting-description">What happens when question timer expires</div>
+                        </div>
+                        <div class="setting-control">
+                            <select name="timeout_behavior">
+                                <option value="penalty" {{ 'selected' if settings.timeout_behavior == 'penalty' else '' }}>Apply Penalty & Continue</option>
+                                <option value="fail" {{ 'selected' if settings.timeout_behavior == 'fail' else '' }}>Immediate Failure</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -577,6 +590,7 @@
                 document.querySelector('input[name="min_accuracy"]').value = 70;
                 document.querySelector('input[name="max_lives"]').value = 3;
                 document.querySelector('input[name="session_timeout"]').value = 30;
+                document.querySelector('select[name="timeout_behavior"]').value = 'penalty';
                 
                 // Reset checkboxes
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');

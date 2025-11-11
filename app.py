@@ -8,6 +8,7 @@ import json
 import time
 import requests
 import hashlib
+import difflib
 from functools import wraps
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
@@ -17,9 +18,37 @@ from config import TEACHER_CREDENTIALS, AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_
 
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
-BASE_DAMAGE = 10
-BASE_ENEMY_HP = 50
-LEVEL_TIME_LIMIT = 30
+
+# Load game settings at startup
+def load_initial_settings():
+    """Load initial game settings or use defaults"""
+    try:
+        settings_file = 'data/game_settings.json'
+        with open(settings_file, 'r', encoding='utf-8') as f:
+            settings = json.load(f)
+        return settings
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Create default settings file if it doesn't exist
+        default_settings = {
+            'base_player_hp': 100,
+            'base_enemy_hp': 50,
+            'base_damage': 10,
+            'question_time_limit': 30,
+            'questions_per_level': 10
+        }
+        try:
+            os.makedirs('data', exist_ok=True)
+            with open('data/game_settings.json', 'w', encoding='utf-8') as f:
+                json.dump(default_settings, f, indent=2)
+        except Exception:
+            pass
+        return default_settings
+
+# Initialize settings
+initial_settings = load_initial_settings()
+BASE_DAMAGE = initial_settings.get('base_damage', 10)
+BASE_ENEMY_HP = initial_settings.get('base_enemy_hp', 50)
+LEVEL_TIME_LIMIT = initial_settings.get('question_time_limit', 30)
 
 # Define the schema for the Whoosh search index
 schema = Schema(
@@ -371,6 +400,48 @@ def grade_answer_with_ai(question, correct_answer, student_answer, confidence_th
             "explanation": "Error: Could not parse AI response"
         }
 
+# Helper function for fuzzy answer checking
+def check_answer_fuzzy(user_answer, question_data, similarity_threshold=0.8):
+    """
+    Check user answer against correct answer and alternatives with fuzzy matching.
+    Returns tuple: (is_correct, feedback_type, similarity_score)
+    """
+    user_answer = user_answer.lower().strip()
+    correct_answer = question_data.get("answer", "").lower().strip()
+    
+    # Check exact match with correct answer
+    if user_answer == correct_answer:
+        return True, "Exact match!", 1.0
+    
+    # Check exact match with keywords (alternatives)
+    keywords = question_data.get("keywords", [])
+    if isinstance(keywords, str):
+        keywords = [k.strip().lower() for k in keywords.split(',') if k.strip()]
+    else:
+        keywords = [str(k).strip().lower() for k in keywords]
+    
+    if user_answer in keywords:
+        return True, "Correct alternative!", 1.0
+    
+    # Fuzzy matching with correct answer
+    correct_similarity = difflib.SequenceMatcher(None, user_answer, correct_answer).ratio()
+    if correct_similarity > similarity_threshold:
+        return True, "Close enough to correct answer!", correct_similarity
+    
+    # Fuzzy matching with alternatives
+    best_similarity = 0
+    best_match = ""
+    for keyword in keywords:
+        similarity = difflib.SequenceMatcher(None, user_answer, keyword).ratio()
+        if similarity > best_similarity:
+            best_similarity = similarity
+            best_match = keyword
+    
+    if best_similarity > similarity_threshold:
+        return True, f"Close enough to '{best_match}'!", best_similarity
+    
+    return False, "Incorrect", 0
+
 # Helper function to save leaderboard data
 def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers):
     print("Saving leaderboard data...")  # Debugging
@@ -417,11 +488,19 @@ def select_level():
         selected_level = int(request.form.get('level', 1))
         session['selected_level'] = selected_level
         # Reset session variables for a new game
+        settings = get_current_game_settings()
         session['score'] = 0
-        session['player_hp'] = 100  # Set player HP to 100
+        session['player_hp'] = settings['base_player_hp']
         session['enemy_level'] = selected_level
-        # Set enemy HP to the base enemy HP constant
-        session['enemy_hp'] = BASE_ENEMY_HP
+        # Set enemy HP to the current setting
+        session['enemy_hp'] = settings['base_enemy_hp']
+        
+        # Initialize lives system if enabled
+        if settings.get('lives_system', False):
+            session['lives_remaining'] = settings.get('max_lives', 3)
+            session['lives_enabled'] = True
+        else:
+            session['lives_enabled'] = False
         session['q_index'] = 0
         session['feedback'] = None
         session['correct_answers'] = 0
@@ -429,7 +508,7 @@ def select_level():
         session["level_start_time"] = time.time()
         session["game_start_time"] = time.time()
         session['level_completed'] = False
-        session['current_timer'] = 45  # Default timer is 45 seconds
+        session['current_timer'] = 55  # Default timer is 55 seconds
         # Initialize enemy progression index to the Novice Gnome every time a new
         # game is started. This ensures each new game begins against the Novice Gnome
         # regardless of previous session state.
@@ -524,11 +603,14 @@ def game():
     if not level_questions:
         return "No questions available for this level. Please check levels.json."
 
-    # Only allow up to 10 questions per level
+    # Check if enemy is defeated (HP <= 0) or if we've exceeded max questions
     question_index = session['q_index'] % 10
-    if session['q_index'] >= 10:
-        # Level completed
+    if session.get('enemy_hp', BASE_ENEMY_HP) <= 0:
+        # Enemy defeated - level completed!
         session['level_completed'] = True
+        return redirect(url_for('result'))
+    elif session['q_index'] >= 10:
+        # Reached max questions but enemy not defeated - level failed
         return redirect(url_for('result'))
     question = level_questions[question_index]
 
@@ -609,16 +691,41 @@ def game():
 
     # Calculate remaining time
     elapsed = time.time() - session["level_start_time"]
-    time_left = max(0, session.get("current_timer", 45) - int(elapsed))
+    time_left = max(0, session.get("current_timer", 55) - int(elapsed))
 
     if time_left == 0:
-        # Time expired → apply penalty & move on
-        session['player_hp'] -= BASE_DAMAGE * current_level
-        session['feedback'] = "⏳ Time's up! You took too long."
-        session['q_index'] += 1
-        session["level_start_time"] = time.time()  # Reset timer for the next question
-        session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s for next question, min 10s
-        return redirect(url_for('feedback'))
+        # Time expired → check timeout behavior setting
+        settings = get_current_game_settings()
+        session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track timeouts as wrong answers
+        
+        # Check timeout behavior setting
+        timeout_behavior = settings.get('timeout_behavior', 'penalty')
+        
+        if timeout_behavior == 'fail':
+            # Immediate fail on timeout
+            session['feedback'] = "⏳ Time's up! Timeout results in immediate failure."
+            return redirect(url_for('you_lose'))
+        else:
+            # Apply penalty and continue (default behavior)
+            session['player_hp'] -= settings['base_damage'] * current_level
+            
+            # Check if player has failed due to low HP
+            if session.get('player_hp', 0) <= 0:
+                session['feedback'] = "⏳ Time's up! Your HP reached 0. Game Over!"
+                return redirect(url_for('you_lose'))
+            
+            # Check if lives system is enabled and player is out of lives
+            if session.get('lives_enabled', False):
+                session['lives_remaining'] = session.get('lives_remaining', settings.get('max_lives', 3)) - 1
+                if session.get('lives_remaining', 0) <= 0:
+                    session['feedback'] = "⏳ Time's up! No lives remaining. Game Over!"
+                    return redirect(url_for('you_lose'))
+            
+            session['feedback'] = "⏳ Time's up! You took too long."
+            session['q_index'] += 1
+            session["level_start_time"] = time.time()  # Reset timer for the next question
+            session["current_timer"] = max(10, session.get("current_timer", 55) - 5)  # Deduct 5s for next question, min 10s
+            return redirect(url_for('feedback'))
 
     if request.method == 'POST':
         user_answer = request.form.get('answer', '').strip().lower()
@@ -647,26 +754,51 @@ def game():
 
         # Only apply this block for the main game mode, not endless or test yourself
         if not session.get('endless_questions') and not session.get('test_questions'):
+            # Get current game settings
+            settings = get_current_game_settings()
+            base_damage = settings['base_damage']
+            points_correct = settings['points_correct']
+            points_wrong = settings['points_wrong']
+            
             # Get the question feedback
             question_feedback = question.get('feedback', 'No additional information available.')
             
-            if user_answer == correct_answer:
-                session['score'] += score  # Add score
-                session['enemy_hp'] -= (damage * 3)
-                session['feedback'] = f"🔥 Exact answer! Triple damage: {damage*3} and {score} points in {time_taken:.2f} seconds.<br><br>✅ {question_feedback}"
-                session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
-                session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
-            elif user_answer in keywords:
-                session['score'] += score  # Add score
-                session['enemy_hp'] -= damage
-                session['feedback'] = f"✅ Correct! You dealt {damage} damage and earned {score} points in {time_taken:.2f} seconds.<br><br>✅ {question_feedback}"
-                session["current_timer"] = min(60, session.get("current_timer", 45) + 5)  # Add 5s to timer for next question, max 60s
+            # Use fuzzy matching for answer checking
+            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            if is_correct:
+                # Calculate speed bonus if enabled
+                speed_multiplier = 1.0
+                speed_message = ""
+                if settings.get('speed_bonus', True) and time_taken <= 10:
+                    if time_taken <= 5:
+                        speed_multiplier = 2.0
+                        speed_message = " (🚀 Lightning bonus: x2 points!)"
+                    elif time_taken <= 10:
+                        speed_multiplier = 1.5
+                        speed_message = " (⚡ Speed bonus: x1.5 points!)"
+                
+                points_awarded = int(points_correct * speed_multiplier)
+                
+                if "Exact answer" in feedback_type or similarity_score == 1.0:
+                    # Exact match gets triple damage
+                    session['score'] += points_awarded
+                    session['enemy_hp'] -= (base_damage * 3)
+                    session['feedback'] = f"🔥 {feedback_type} Triple damage: {base_damage*3} and {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
+                else:
+                    # Fuzzy match gets regular damage
+                    session['score'] += points_awarded
+                    session['enemy_hp'] -= base_damage
+                    similarity_percent = int(similarity_score * 100)
+                    session['feedback'] = f"🎯 {feedback_type} ({similarity_percent}% match) You dealt {base_damage} damage and earned {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
+                
+                session["current_timer"] = min(70, session.get("current_timer", 55) + 5)  # Add 5s to timer for next question, max 70s
                 session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
             else:
-                session['player_hp'] -= BASE_DAMAGE * current_level
-                session['score'] -= 5  # Deduct points for wrong answer
+                session['player_hp'] -= base_damage * current_level
+                session['score'] -= points_wrong  # Deduct points for wrong answer
                 session['feedback'] = f"❌ Incorrect!<br><br>💡 {question_feedback}"
-                session["current_timer"] = max(10, session.get("current_timer", 45) - 5)  # Deduct 5s from timer for next question, min 10s
+                session["current_timer"] = max(10, session.get("current_timer", 55) - 5)  # Deduct 5s from timer for next question, min 10s
                 session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
 
         # Reset timer for the next question
@@ -676,6 +808,9 @@ def game():
         session['q_index'] += 1
         return redirect(url_for('feedback'))
 
+    # Get current settings for display options
+    settings = get_current_game_settings()
+    
     return render_template('game.html',
                            question=question,
                            score=session['score'],
@@ -686,7 +821,10 @@ def game():
                            level=current_level,
                            enemy=enemy,
                            enemy_image=enemy_image,
-                           time_left=time_left)
+                           time_left=time_left,
+                           settings=settings,
+                           lives_remaining=session.get('lives_remaining'),
+                           lives_enabled=session.get('lives_enabled', False))
 
 # Route for the feedback page
 @app.route('/feedback')
@@ -709,7 +847,8 @@ def feedback():
 @app.route('/result')
 def result():
     # Calculate the final score
-    bonus = 20 if session.get('level_completed', False) and session['player_hp'] > 0 else 0
+    settings = get_current_game_settings()
+    bonus = settings['level_bonus'] if session.get('level_completed', False) and session['player_hp'] > 0 else 0
     final_score = session['score'] + bonus
 
     # Save the player's performance to the leaderboard
@@ -734,9 +873,16 @@ def result():
     except Exception:
         levels = []
     max_level = max([lvl['level'] for lvl in levels], default=1)
+    
+    # Calculate required accuracy based on settings
+    settings = get_current_game_settings()
+    total_questions = session.get('correct_answers', 0) + session.get('wrong_answers', 0)
+    current_accuracy = (session.get('correct_answers', 0) / total_questions * 100) if total_questions > 0 else 0
+    required_accuracy = settings.get('min_accuracy', 70)
+    
     can_advance = (
         session.get('level_completed', False)
-        and session.get('correct_answers', 0) >= 7
+        and current_accuracy >= required_accuracy
         and next_level <= max_level
     )
 
@@ -813,8 +959,9 @@ def you_win():
     # Simple win page when all levels are completed
     # Reset enemy state to original when the player finishes the game
     try:
+        settings = get_current_game_settings()
         session['enemy_index'] = 0
-        session['enemy_hp'] = BASE_ENEMY_HP
+        session['enemy_hp'] = settings['base_enemy_hp']
         session.pop('enemy_level', None)
     except Exception:
         pass
@@ -826,8 +973,9 @@ def you_lose():
     # Simple lose page when player HP hits 0
     # Reset enemy state to original when the player loses
     try:
+        settings = get_current_game_settings()
         session['enemy_index'] = 0
-        session['enemy_hp'] = BASE_ENEMY_HP
+        session['enemy_hp'] = settings['base_enemy_hp']
         session.pop('enemy_level', None)
     except Exception:
         pass
@@ -896,14 +1044,19 @@ def test_yourself():
             keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
         else:
             keywords = [str(k).strip().lower() for k in raw_keywords]
+        # Use fuzzy matching for test mode
+        is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+        
         session['test_user_answers'].append({
             'question': question.get('q', ''),
             'user_answer': user_answer,
             'correct_answer': correct_answer,
-            'correct': user_answer == correct_answer or user_answer in keywords,
-            'feedback': question.get('feedback', 'No additional information available.')
+            'correct': is_correct,
+            'feedback': question.get('feedback', 'No additional information available.'),
+            'match_type': feedback_type,
+            'similarity': similarity_score
         })
-        if user_answer == correct_answer or user_answer in keywords:
+        if is_correct:
             session['test_correct'] = correct_count + 1
         session['test_q_index'] = q_index + 1
         print(f"[DEBUG] POST: test_q_index={session['test_q_index']}, test_questions={len(test_questions)}, test_user_answers={len(session['test_user_answers'])}")
@@ -1084,6 +1237,11 @@ def endless_game():
         session['endless_streak'] = 0
         session['endless_wrong'] = session.get('endless_wrong', 0) + 1
         session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
+        
+        # Check if HP reached 0 after timeout penalty
+        if session.get('endless_hp', 0) <= 0:
+            return redirect(url_for('endless_result'))
+        
         session['endless_question_start'] = time.time()
         session['endless_current_question'] = random.choice(questions)
         return redirect(url_for('endless_game'))
@@ -1097,7 +1255,8 @@ def endless_game():
             keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
         else:
             keywords = [str(k).strip().lower() for k in raw_keywords]
-        correct = user_answer == correct_answer or user_answer in keywords
+        # Use fuzzy matching for endless mode
+        is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
         
         # Store feedback for this question
         question_feedback = question.get('feedback', 'No additional information available.')
@@ -1108,13 +1267,15 @@ def endless_game():
             'question': question.get('q', ''),
             'user_answer': user_answer,
             'correct_answer': correct_answer,
-            'correct': correct,
-            'feedback': question_feedback
+            'correct': is_correct,
+            'feedback': question_feedback,
+            'match_type': feedback_type,
+            'similarity': similarity_score
         }
         session['endless_feedback_list'].append(feedback_entry)
         
         session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
-        if correct:
+        if is_correct:
             session['endless_score'] = session.get('endless_score', 0) + 10
             session['endless_streak'] = session.get('endless_streak', 0) + 1
             session['endless_correct'] = session.get('endless_correct', 0) + 1
@@ -1338,7 +1499,8 @@ def teacher_save_questions():
                         "q": question_data.get('q'),
                         "answer": question_data.get('answer'),
                         "keywords": question_data.get('keywords', []),
-                        "feedback": question_data.get('feedback', '')
+                        "feedback": question_data.get('feedback', ''),
+                        "ai_generated": True
                     }
                     
                     existing_questions.append(formatted_question)
@@ -1362,6 +1524,7 @@ def teacher_save_questions():
         global questions
         questions = existing_questions
         print(f"DEBUG: Reloaded global questions, now {len(questions)} total")
+        print(f"DEBUG: AI questions count: {sum(1 for q in questions if q.get('ai_generated', False))}")
         
         # Recreate search index
         recreate_search_index()
@@ -1589,31 +1752,8 @@ def teacher_levels():
 @app.route('/teacher/settings')
 @teacher_required
 def teacher_settings():
-    # Load current settings (mock data for now)
-    settings = {
-        'base_player_hp': 100,
-        'base_enemy_hp': 50,
-        'base_damage': 10,
-        'question_time_limit': 30,
-        'questions_per_level': 10,
-        'points_correct': 10,
-        'points_wrong': 5,
-        'speed_bonus': True,
-        'level_bonus': 20,
-        'adaptive_difficulty': False,
-        'min_accuracy': 70,
-        'lives_system': False,
-        'max_lives': 3,
-        'sound_effects': False,
-        'show_timer': True,
-        'show_progress': True,
-        'animation_speed': 'normal',
-        'debug_mode': False,
-        'analytics_enabled': True,
-        'auto_save': True,
-        'session_timeout': 30
-    }
-    
+    # Load current settings from file
+    settings = load_game_settings()
     return render_template('teacher_settings.html', settings=settings)
 
 # Additional teacher portal routes for full functionality
@@ -1724,8 +1864,43 @@ def teacher_delete_question(question_id):
 @teacher_required
 def teacher_update_settings():
     try:
-        # In a real app, you'd save these to a database or config file
-        # For now, just return success
+        # Get form data and create settings dictionary
+        settings = {
+            'base_player_hp': int(request.form.get('base_player_hp', 100)),
+            'base_enemy_hp': int(request.form.get('base_enemy_hp', 50)),
+            'base_damage': int(request.form.get('base_damage', 10)),
+            'question_time_limit': int(request.form.get('question_time_limit', 30)),
+            'questions_per_level': int(request.form.get('questions_per_level', 10)),
+            'points_correct': int(request.form.get('points_correct', 10)),
+            'points_wrong': int(request.form.get('points_wrong', 5)),
+            'speed_bonus': 'speed_bonus' in request.form,
+            'level_bonus': int(request.form.get('level_bonus', 20)),
+            'adaptive_difficulty': 'adaptive_difficulty' in request.form,
+            'min_accuracy': int(request.form.get('min_accuracy', 70)),
+            'lives_system': 'lives_system' in request.form,
+            'max_lives': int(request.form.get('max_lives', 3)),
+            'sound_effects': 'sound_effects' in request.form,
+            'show_timer': 'show_timer' in request.form,
+            'show_progress': 'show_progress' in request.form,
+            'animation_speed': request.form.get('animation_speed', 'normal'),
+            'debug_mode': 'debug_mode' in request.form,
+            'analytics_enabled': 'analytics_enabled' in request.form,
+            'auto_save': 'auto_save' in request.form,
+            'session_timeout': int(request.form.get('session_timeout', 30)),
+            'timeout_behavior': request.form.get('timeout_behavior', 'penalty')
+        }
+        
+        # Save settings to file
+        settings_file = 'data/game_settings.json'
+        with open(settings_file, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, indent=2, ensure_ascii=False)
+        
+        # Update global constants
+        global BASE_DAMAGE, BASE_ENEMY_HP, LEVEL_TIME_LIMIT
+        BASE_DAMAGE = settings['base_damage']
+        BASE_ENEMY_HP = settings['base_enemy_hp']
+        LEVEL_TIME_LIMIT = settings['question_time_limit']
+        
         flash('Settings updated successfully!')
         return jsonify({'success': True})
     except Exception as e:
@@ -1908,6 +2083,47 @@ def teacher_delete_level(level_id):
         return jsonify({'success': False, 'error': str(e)})
 
 # Helper functions for teacher portal
+def load_game_settings():
+    """Load game settings from JSON file or return defaults"""
+    default_settings = {
+        'base_player_hp': 100,
+        'base_enemy_hp': 50,
+        'base_damage': 10,
+        'question_time_limit': 30,
+        'questions_per_level': 10,
+        'points_correct': 10,
+        'points_wrong': 5,
+        'speed_bonus': True,
+        'level_bonus': 20,
+        'adaptive_difficulty': False,
+        'min_accuracy': 70,
+        'lives_system': False,
+        'max_lives': 3,
+        'sound_effects': False,
+        'show_timer': True,
+        'show_progress': True,
+        'animation_speed': 'normal',
+        'debug_mode': False,
+        'analytics_enabled': True,
+        'auto_save': True,
+        'session_timeout': 30,
+        'timeout_behavior': 'penalty'  # 'penalty' or 'fail'
+    }
+    
+    try:
+        settings_file = 'data/game_settings.json'
+        with open(settings_file, 'r', encoding='utf-8') as f:
+            saved_settings = json.load(f)
+        # Merge with defaults to ensure all keys exist
+        default_settings.update(saved_settings)
+        return default_settings
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default_settings
+
+def get_current_game_settings():
+    """Get current game settings for use in game logic"""
+    return load_game_settings()
+
 def get_leaderboard_data():
     try:
         with open('data/leaderboard.json', 'r', encoding='utf-8') as f:

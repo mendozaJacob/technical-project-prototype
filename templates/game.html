@@ -7,6 +7,22 @@
     <title>Gamify RPG - Game</title>
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    {% if settings.sound_effects %}
+    <!-- Sound Effects -->
+    <audio id="correctSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/correct.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/correct.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="wrongSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/wrong.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/wrong.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="tickSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/tick.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/tick.wav') }}" type="audio/wav">
+    </audio>
+    {% endif %}
     <style>
         body { 
             font-family: 'Times New Roman', Times, serif; 
@@ -141,9 +157,9 @@
 </head>
 <body>
     <!-- Main container for the game content -->
-    <div class="game-container">
+    <div class="game-container animation-{{ settings.animation_speed or 'normal' }} fade-in">
         <!-- Game Title -->
-        <h1 class="game-title">⚔️ Battle Arena</h1>
+        <h1 class="game-title slide-in">⚔️ Battle Arena</h1>
         
         <!-- Timer (shown based on settings) -->
         {% if settings.show_timer %}
@@ -196,6 +212,21 @@
         <!-- Question Section -->
         <div class="question">{{ question['q'] }}</div>
         
+        {% if settings.debug_mode %}
+        <!-- Debug Information -->
+        <div style="background: #ffeeee; border: 2px solid #ff0000; border-radius: 8px; padding: 10px; margin: 10px 0; font-size: 0.9em; color: #333;">
+            <strong>🐛 DEBUG MODE</strong><br>
+            <strong>Answer:</strong> {{ question.answer }}<br>
+            <strong>Keywords:</strong> {{ question.keywords }}<br>
+            <strong>Question ID:</strong> {{ question.id }}<br>
+            <strong>Session Timer:</strong> {{ session.get('current_timer', 'N/A') }}s<br>
+            <strong>Time Left:</strong> {{ time_left }}s<br>
+            <strong>Q Index:</strong> {{ session.get('q_index', 0) }}/{{ total }}<br>
+            <strong>Adaptive Difficulty:</strong> {{ settings.adaptive_difficulty }}<br>
+            <strong>Performance:</strong> {{ session.get('correct_answers', 0) }}C / {{ session.get('wrong_answers', 0) }}W
+        </div>
+        {% endif %}
+        
         <!-- Answer Form -->
         <form method="POST">
             <input type="text" name="answer" placeholder="Type your answer..." required>
@@ -225,7 +256,25 @@
                 // Redirect to refresh the page and trigger server-side timeout logic
                 window.location.reload();
             }
+            
+            {% if settings.sound_effects %}
+            // Play tick sound every 5 seconds when time is running low
+            if (timeLeft <= 10 && timeLeft % 5 === 0) {
+                const tickSound = document.getElementById('tickSound');
+                if (tickSound) {
+                    tickSound.play().catch(e => console.log('Could not play tick sound:', e));
+                }
+            }
+            {% endif %}
         }, 1000); // Run the function every 1000ms (1 second)
+        
+        {% if settings.sound_effects %}
+        // Add sound effects to form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Don't prevent form submission, just play sound
+            // We can't determine if answer is correct here, so we'll add sounds to feedback page
+        });
+        {% endif %}
     </script>
 </body>
 </html>

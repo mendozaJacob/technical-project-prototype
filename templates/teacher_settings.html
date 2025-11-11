@@ -222,13 +222,53 @@
             background: #8b0000;
         }
         .success-message {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #e8f5e8 100%);
             color: #155724;
-            border: 1px solid #c3e6cb;
-            border-radius: 6px;
-            padding: 12px;
+            border: 2px solid #28a745;
+            border-radius: 12px;
+            padding: 16px 24px;
             margin-bottom: 20px;
             display: none;
+            box-shadow: 0 4px 16px rgba(40, 167, 69, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .success-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .success-message:hover::before {
+            left: 100%;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
         }
     </style>
 </head>
@@ -650,13 +690,62 @@
             }
         }
 
-        function showSuccessMessage(message) {
+        function showSuccessMessage(message, changedSettings = null) {
             const msgEl = document.getElementById('successMessage');
-            msgEl.textContent = message;
+            
+            if (changedSettings && changedSettings.length > 0) {
+                const settingsNames = {
+                    'base_player_hp': 'Base Player HP',
+                    'base_enemy_hp': 'Base Enemy HP',
+                    'base_damage': 'Base Damage',
+                    'question_time_limit': 'Question Time Limit',
+                    'questions_per_level': 'Questions Per Level',
+                    'points_correct': 'Points for Correct Answer',
+                    'points_wrong': 'Points Lost for Wrong Answer',
+                    'speed_bonus': 'Speed Bonus',
+                    'level_bonus': 'Level Completion Bonus',
+                    'adaptive_difficulty': 'Adaptive Difficulty',
+                    'min_accuracy': 'Minimum Accuracy Required',
+                    'lives_system': 'Lives System',
+                    'max_lives': 'Maximum Lives',
+                    'sound_effects': 'Sound Effects',
+                    'show_timer': 'Show Timer',
+                    'show_progress': 'Show Progress Bar',
+                    'animation_speed': 'Animation Speed',
+                    'debug_mode': 'Debug Mode',
+                    'analytics_enabled': 'Analytics Tracking',
+                    'auto_save': 'Auto-Save Progress',
+                    'session_timeout': 'Session Timeout',
+                    'timeout_behavior': 'Timeout Behavior'
+                };
+                
+                const changedList = changedSettings.map(setting => 
+                    `• ${settingsNames[setting] || setting}`
+                ).join('<br>');
+                
+                msgEl.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 8px;">✅ Settings Saved Successfully!</div>
+                    <div style="font-size: 0.9em; color: #2d5016;">
+                        <div style="margin-bottom: 4px;">Changed settings:</div>
+                        <div style="margin-left: 10px;">${changedList}</div>
+                    </div>
+                `;
+            } else {
+                msgEl.innerHTML = `<div style="font-weight: bold;">✅ ${message}</div>`;
+            }
+            
             msgEl.style.display = 'block';
+            msgEl.style.animation = 'none';
+            msgEl.offsetHeight; // Trigger reflow
+            msgEl.style.animation = 'slideIn 0.3s ease-out';
+            
             setTimeout(() => {
-                msgEl.style.display = 'none';
-            }, 3000);
+                msgEl.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    msgEl.style.display = 'none';
+                    msgEl.style.animation = '';
+                }, 300);
+            }, 5000);
         }
 
         // Handle form submission
@@ -671,7 +760,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessMessage('Settings saved successfully!');
+                    showSuccessMessage('Settings saved successfully!', data.changed_settings);
                 } else {
                     alert('Error saving settings: ' + data.error);
                 }

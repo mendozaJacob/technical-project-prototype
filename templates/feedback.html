@@ -6,6 +6,16 @@
     <title>Gamify RPG - Feedback</title>
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Sound Effects -->
+    <audio id="correctSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/correct.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/correct.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="wrongSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/wrong.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/wrong.wav') }}" type="audio/wav">
+    </audio>
     <style>
         body { 
             font-family: 'Times New Roman', Times, serif; 
@@ -84,5 +94,27 @@
         
         <a href="{{ url_for('game') }}" class="btn">⚔️ Next Battle</a>
     </div>
+    
+    <script>
+        // Play sound effect based on feedback content
+        window.addEventListener('DOMContentLoaded', function() {
+            const feedback = "{{ feedback|safe }}";
+            const correctSound = document.getElementById('correctSound');
+            const wrongSound = document.getElementById('wrongSound');
+            
+            // Check if feedback indicates correct or wrong answer
+            if (feedback.includes('🔥') || feedback.includes('🎯') || feedback.includes('✅') || feedback.includes('Triple damage')) {
+                // Correct answer sound
+                if (correctSound) {
+                    correctSound.play().catch(e => console.log('Could not play correct sound:', e));
+                }
+            } else if (feedback.includes('❌') || feedback.includes('Incorrect') || feedback.includes('⏳ Time')) {
+                // Wrong answer or timeout sound
+                if (wrongSound) {
+                    wrongSound.play().catch(e => console.log('Could not play wrong sound:', e));
+                }
+            }
+        });
+    </script>
 </body>
 </html>

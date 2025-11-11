@@ -501,6 +501,7 @@ def you_win():
         session['enemy_index'] = 0
         session['enemy_hp'] = BASE_ENEMY_HP
         session.pop('enemy_level', None)
+        
     except Exception:
         pass
     return render_template('you_win.html')
@@ -514,6 +515,7 @@ def you_lose():
         session['enemy_index'] = 0
         session['enemy_hp'] = BASE_ENEMY_HP
         session.pop('enemy_level', None)
+        
     except Exception:
         pass
     return render_template('you_lose.html')

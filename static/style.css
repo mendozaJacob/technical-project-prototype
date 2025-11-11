@@ -10,6 +10,20 @@
     letter-spacing: 2px;
     text-shadow: 1px 2px 8px #000a;
 }
+/* Force Times New Roman across the entire site. This uses !important so it
+   overrides inline styles (e.g., templates that set other fonts). If you'd
+   prefer to remove the later inline font declarations (cleaner), I can do
+   that instead — this approach is the minimal, safe change. */
+*,
+*::before,
+*::after,
+input,
+textarea,
+select,
+button {
+    font-family: "Times New Roman", Times, serif !important;
+}
+
 .questions-left {
     margin: 18px 0 0 0;
     font-size: 1.4em;

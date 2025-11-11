@@ -124,5 +124,26 @@
         "time": 24.04,
         "correct_answers": 1,
         "wrong_answers": 9
+    },
+    {
+        "player": "Anonymous",
+        "score": 110,
+        "time": 65.76,
+        "correct_answers": 8,
+        "wrong_answers": 2
+    },
+    {
+        "player": "Anonymous",
+        "score": 105,
+        "time": 61.79,
+        "correct_answers": 7,
+        "wrong_answers": 3
+    },
+    {
+        "player": "Anonymous",
+        "score": -5,
+        "time": 30.41,
+        "correct_answers": 1,
+        "wrong_answers": 9
     }
 ]

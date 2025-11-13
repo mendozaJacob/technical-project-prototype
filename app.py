@@ -2485,4 +2485,7 @@ def inject_teacher_link():
 
 # Run the Flask app
 if __name__ == "__main__":
-    app.run(debug=True)
+    print("🎮 Starting Quiz Battle: Dungeons of Knowledge")
+    print("🌐 Server running at: http://127.0.0.1:5000")
+    print("🎯 Ready for educational adventures!")
+    app.run(debug=True, host='127.0.0.1', port=5000)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Battle: Dungeons of Knowledge - Leaderboard</title>
+    <title>Quiz Battle: Dungeons of Knowledge - Guest Leaderboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         body {
@@ -118,6 +118,14 @@
             text-align: center;
             margin-top: 30px;
         }
+        .guest-badge {
+            background: #8b0000;
+            color: #f3eac2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -133,7 +141,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 30px;">🏆 Student Leaderboards</h1>
+        <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 30px;">🏆 Guest Player Leaderboards <span class="guest-badge">GUEST</span></h1>
         
         <!-- Tab Navigation -->
         <div class="leaderboard-tabs">
@@ -144,13 +152,13 @@
         
         <!-- Adventure Mode Leaderboard -->
         <div id="adventure-leaderboard" class="leaderboard-section active">
-            <h2 class="section-title">⚔️ Adventure Mode Champions</h2>
+            <h2 class="section-title">⚔️ Adventure Mode Top Players</h2>
             {% if adventure_leaderboard %}
                 <table>
                     <thead>
                         <tr>
                             <th>Rank</th>
-                            <th>Student</th>
+                            <th>Player</th>
                             <th>Score</th>
                             <th>Time (s)</th>
                             <th>Correct</th>
@@ -173,19 +181,19 @@
                     </tbody>
                 </table>
             {% else %}
-                <div class="no-data">No adventure mode scores yet. Be the first to complete the adventure!</div>
+                <div class="no-data">No guest adventure scores yet. Play as a guest to appear on this leaderboard!</div>
             {% endif %}
         </div>
         
         <!-- Test Yourself Leaderboard -->
         <div id="test_yourself-leaderboard" class="leaderboard-section">
-            <h2 class="section-title">🧪 Test Yourself Champions</h2>
+            <h2 class="section-title">🧪 Test Yourself Top Players</h2>
             {% if test_yourself_leaderboard %}
                 <table>
                     <thead>
                         <tr>
                             <th>Rank</th>
-                            <th>Student</th>
+                            <th>Player</th>
                             <th>Score</th>
                             <th>Time (s)</th>
                             <th>Correct</th>
@@ -208,19 +216,19 @@
                     </tbody>
                 </table>
             {% else %}
-                <div class="no-data">No test yourself scores yet. Take the test to see your score here!</div>
+                <div class="no-data">No guest test scores yet. Take the test as a guest to see your score here!</div>
             {% endif %}
         </div>
         
         <!-- Endless Mode Leaderboard -->
         <div id="endless-leaderboard" class="leaderboard-section">
-            <h2 class="section-title">♾️ Endless Mode Champions</h2>
+            <h2 class="section-title">♾️ Endless Mode Top Players</h2>
             {% if endless_leaderboard %}
                 <table>
                     <thead>
                         <tr>
                             <th>Rank</th>
-                            <th>Student</th>
+                            <th>Player</th>
                             <th>Score</th>
                             <th>Time (s)</th>
                             <th>Correct</th>
@@ -243,21 +251,15 @@
                     </tbody>
                 </table>
             {% else %}
-                <div class="no-data">No endless mode scores yet. See how far you can go in endless mode!</div>
+                <div class="no-data">No guest endless scores yet. Challenge yourself in endless mode!</div>
             {% endif %}
         </div>
         
-        <!-- Back button - context aware -->
+        <!-- Back button -->
         <div class="back-section">
-            {% if is_student %}
-                <a href="{{ url_for('student_dashboard') }}" class="btn">
-                    ← Back to Student Portal
-                </a>
-            {% else %}
-                <a href="{{ url_for('index') }}" class="btn">
-                    🏰 Return Home
-                </a>
-            {% endif %}
+            <a href="{{ url_for('index') }}" class="btn">
+                🏰 Back to Home
+            </a>
         </div>
     </div>
 

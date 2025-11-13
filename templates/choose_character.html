@@ -37,7 +37,16 @@
   </style>
 </head>
 <body>
-  <h1>Choose Your Character</h1>
+  {% if student_name %}
+    <h1>{{ student_name }}'s Character</h1>
+    {% if current_character %}
+      <p style="color: #00eaff; margin-bottom: 20px;">Current Character: #{{ current_character }} | Select a different character below to change it</p>
+    {% else %}
+      <p style="color: #00eaff; margin-bottom: 20px;">Choose your character for all future games</p>
+    {% endif %}
+  {% else %}
+    <h1>Choose Your Character</h1>
+  {% endif %}
 
   <form method="post" id="chooseForm">
     <div class="character-grid" id="characterGrid">
@@ -49,13 +58,24 @@
     </div>
 
     <input type="hidden" name="character" id="characterInput" value="">
-    <button id="startGameBtn" disabled>Start Game</button>
+    <button id="startGameBtn" disabled>{% if student_name %}Save Character{% else %}Start Game{% endif %}</button>
   </form>
 
   <script>
     const grid = document.getElementById('characterGrid');
     const input = document.getElementById('characterInput');
     const startBtn = document.getElementById('startGameBtn');
+
+    // Pre-select current character if exists
+    {% if current_character %}
+    const currentChar = document.querySelector('[data-character="{{ current_character }}"]');
+    if (currentChar) {
+      currentChar.classList.add('selected');
+      input.value = '{{ current_character }}';
+      startBtn.disabled = false;
+      startBtn.textContent = '{% if student_name %}Save Character{% else %}Start Game{% endif %}';
+    }
+    {% endif %}
 
     grid.addEventListener('click', (e) => {
       const charDiv = e.target.closest('.character');
@@ -65,6 +85,7 @@
       const id = charDiv.dataset.character;
       input.value = id;
       startBtn.disabled = false;
+      startBtn.textContent = '{% if student_name %}Save Character{% else %}Start Game{% endif %}';
     });
   </script>
 </body>

@@ -110,7 +110,7 @@
         }
         .game-description {
             margin-bottom: 20px;
-            color: #666;
+            color: #333;
         }
         .recent-games {
             background: #fffbe6;
@@ -140,7 +140,7 @@
             border-bottom: none;
         }
         .game-date {
-            color: #666;
+            color: #333;
             font-size: 0.9em;
         }
         .game-score {
@@ -188,7 +188,13 @@
             <div class="user-info">
                 <div><strong>Student ID:</strong> {{ student.id }}</div>
                 <div><strong>Username:</strong> {{ student.username }}</div>
+                {% if selected_character %}
+                    <div><strong>Selected Character:</strong> #{{ selected_character }}</div>
+                {% else %}
+                    <div style="color: #b22222;"><strong>No Character Selected</strong></div>
+                {% endif %}
                 <div style="margin-top: 10px;">
+                    <a href="{{ url_for('choose_character') }}" class="btn">🎮 {% if selected_character %}Change{% else %}Choose{% endif %} Character</a>
                     <a href="{{ url_for('student_profile') }}" class="btn">👤 My Profile</a>
                     <a href="{{ url_for('student_logout') }}" class="btn">Logout</a>
                 </div>

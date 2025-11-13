@@ -8,7 +8,7 @@
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
-            color: #f3eac2; 
+            color: #333; 
             margin: 0;
             padding: 20px;
         }
@@ -97,7 +97,7 @@
             color: #4b2e05;
         }
         .stat-label {
-            color: #666;
+            color: #333;
             font-size: 0.9em;
         }
         .questions-table {
@@ -148,8 +148,18 @@
             color: white;
             padding: 2px 6px;
             border-radius: 3px;
-            font-size: 0.7em;
+            font-size: 0.8em;
         }
+        .type-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+        .type-short_answer { background: #4CAF50; }
+        .type-multiple_choice { background: #FF9800; }
+        .type-true_false { background: #9C27B0; }
         .pagination {
             display: flex;
             justify-content: center;
@@ -207,7 +217,7 @@
             cursor: pointer;
         }
         .close:hover {
-            color: #6d4106;
+            color: #333;
         }
         .filters {
             display: flex;
@@ -232,6 +242,29 @@
         .filter-group select {
             width: auto;
             min-width: 120px;
+        }
+        .mc-options {
+            margin-top: 10px;
+        }
+        .mc-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+        .mc-option label {
+            min-width: 25px;
+            font-weight: bold;
+            color: #4b2e05;
+        }
+        .mc-option input {
+            flex: 1;
+        }
+        .form-group small {
+            display: block;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -284,6 +317,15 @@
                     <option value="manual">Manual</option>
                 </select>
             </div>
+            <div class="filter-group">
+                <label for="typeFilter">Type:</label>
+                <select id="typeFilter" onchange="filterQuestions()">
+                    <option value="">All Types</option>
+                    <option value="short_answer">Short Answer</option>
+                    <option value="multiple_choice">Multiple Choice</option>
+                    <option value="true_false">True/False</option>
+                </select>
+            </div>
             <div class="search-bar">
                 <label for="searchInput">Search:</label>
                 <input type="text" id="searchInput" placeholder="Search questions..." onkeyup="filterQuestions()">
@@ -297,6 +339,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Question</th>
+                    <th>Type</th>
                     <th>Answer</th>
                     <th>Keywords</th>
                     <th>Difficulty</th>
@@ -306,9 +349,20 @@
             </thead>
             <tbody>
                 {% for question in questions %}
-                <tr data-difficulty="{{ question.get('difficulty', 'medium') }}" data-source="{{ 'ai' if question.get('ai_generated') else 'manual' }}">
+                <tr data-difficulty="{{ question.get('difficulty', 'medium') }}" data-source="{{ 'ai' if question.get('ai_generated') else 'manual' }}" data-type="{{ question.get('type', 'short_answer') }}">
                     <td>{{ question.get('id', 'N/A') }}</td>
                     <td class="question-text" title="{{ question.get('q', '') }}">{{ question.get('q', '')[:60] }}{% if question.get('q', '')|length > 60 %}...{% endif %}</td>
+                    <td>
+                        <span class="type-badge type-{{ question.get('type', 'short_answer') }}">
+                            {% if question.get('type') == 'multiple_choice' %}
+                                Multiple Choice
+                            {% elif question.get('type') == 'true_false' %}
+                                True/False
+                            {% else %}
+                                Short Answer
+                            {% endif %}
+                        </span>
+                    </td>
                     <td>{{ question.get('answer', '') }}</td>
                     <td>{{ question.get('keywords', [])|join(', ') if question.get('keywords') else 'None' }}</td>
                     <td>
@@ -350,14 +404,51 @@
                     <label for="question">Question:</label>
                     <textarea id="question" name="question" required placeholder="Enter the question text..."></textarea>
                 </div>
+                
+                <div class="form-group">
+                    <label for="question_type">Question Type:</label>
+                    <select id="question_type" name="question_type" required onchange="toggleQuestionTypeFields('add')">
+                        <option value="short_answer" selected>Short Answer</option>
+                        <option value="multiple_choice">Multiple Choice</option>
+                        <option value="true_false">True/False</option>
+                    </select>
+                </div>
+                
+                <!-- Multiple Choice Options (hidden by default) -->
+                <div id="add_mc_options" class="form-group" style="display: none;">
+                    <label>Answer Options:</label>
+                    <div class="mc-options">
+                        <div class="mc-option">
+                            <label>A)</label>
+                            <input type="text" name="option_1" placeholder="First option">
+                        </div>
+                        <div class="mc-option">
+                            <label>B)</label>
+                            <input type="text" name="option_2" placeholder="Second option">
+                        </div>
+                        <div class="mc-option">
+                            <label>C)</label>
+                            <input type="text" name="option_3" placeholder="Third option (optional)">
+                        </div>
+                        <div class="mc-option">
+                            <label>D)</label>
+                            <input type="text" name="option_4" placeholder="Fourth option (optional)">
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label for="answer">Correct Answer:</label>
                     <input type="text" id="answer" name="answer" required placeholder="Enter the correct answer">
+                    <small id="add_answer_help">For multiple choice, enter the exact text of the correct option. For true/false, enter 'true' or 'false'.</small>
                 </div>
-                <div class="form-group">
+                
+                <div class="form-group" id="add_keywords_group">
                     <label for="keywords">Keywords (comma-separated):</label>
                     <input type="text" id="keywords" name="keywords" placeholder="alternative1, alternative2, alternative3">
+                    <small>Alternative acceptable answers (for short answer questions only)</small>
                 </div>
+                
                 <div class="form-group">
                     <label for="difficulty">Difficulty:</label>
                     <select id="difficulty" name="difficulty" required>
@@ -389,14 +480,51 @@
                     <label for="editQuestion">Question:</label>
                     <textarea id="editQuestion" name="question" required></textarea>
                 </div>
+                
+                <div class="form-group">
+                    <label for="editQuestionType">Question Type:</label>
+                    <select id="editQuestionType" name="question_type" required onchange="toggleQuestionTypeFields('edit')">
+                        <option value="short_answer">Short Answer</option>
+                        <option value="multiple_choice">Multiple Choice</option>
+                        <option value="true_false">True/False</option>
+                    </select>
+                </div>
+                
+                <!-- Multiple Choice Options (hidden by default) -->
+                <div id="edit_mc_options" class="form-group" style="display: none;">
+                    <label>Answer Options:</label>
+                    <div class="mc-options">
+                        <div class="mc-option">
+                            <label>A)</label>
+                            <input type="text" id="editOption1" name="option_1" placeholder="First option">
+                        </div>
+                        <div class="mc-option">
+                            <label>B)</label>
+                            <input type="text" id="editOption2" name="option_2" placeholder="Second option">
+                        </div>
+                        <div class="mc-option">
+                            <label>C)</label>
+                            <input type="text" id="editOption3" name="option_3" placeholder="Third option (optional)">
+                        </div>
+                        <div class="mc-option">
+                            <label>D)</label>
+                            <input type="text" id="editOption4" name="option_4" placeholder="Fourth option (optional)">
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label for="editAnswer">Correct Answer:</label>
                     <input type="text" id="editAnswer" name="answer" required>
+                    <small id="edit_answer_help">For multiple choice, enter the exact text of the correct option. For true/false, enter 'true' or 'false'.</small>
                 </div>
-                <div class="form-group">
+                
+                <div class="form-group" id="edit_keywords_group">
                     <label for="editKeywords">Keywords (comma-separated):</label>
                     <input type="text" id="editKeywords" name="keywords">
+                    <small>Alternative acceptable answers (for short answer questions only)</small>
                 </div>
+                
                 <div class="form-group">
                     <label for="editDifficulty">Difficulty:</label>
                     <select id="editDifficulty" name="difficulty" required>
@@ -441,15 +569,18 @@
         function filterQuestions() {
             const difficulty = document.getElementById('difficultyFilter').value;
             const source = document.getElementById('sourceFilter').value;
+            const type = document.getElementById('typeFilter').value;
             const search = document.getElementById('searchInput').value.toLowerCase();
 
             filteredRows = allRows.filter(row => {
                 const rowDifficulty = row.dataset.difficulty;
                 const rowSource = row.dataset.source;
+                const rowType = row.dataset.type || 'short_answer';
                 const rowText = row.textContent.toLowerCase();
 
                 return (!difficulty || rowDifficulty === difficulty) &&
                        (!source || rowSource === source) &&
+                       (!type || rowType === type) &&
                        (!search || rowText.includes(search));
             });
 
@@ -490,6 +621,35 @@
             }
         }
 
+        function toggleQuestionTypeFields(modalPrefix) {
+            const questionType = document.getElementById(modalPrefix + 'QuestionType') ? 
+                document.getElementById(modalPrefix + 'QuestionType').value : 
+                document.getElementById('question_type').value;
+            
+            const mcOptionsId = modalPrefix === 'add' ? 'add_mc_options' : 'edit_mc_options';
+            const keywordsGroupId = modalPrefix === 'add' ? 'add_keywords_group' : 'edit_keywords_group';
+            const answerHelpId = modalPrefix === 'add' ? 'add_answer_help' : 'edit_answer_help';
+            
+            const mcOptions = document.getElementById(mcOptionsId);
+            const keywordsGroup = document.getElementById(keywordsGroupId);
+            const answerHelp = document.getElementById(answerHelpId);
+            
+            if (questionType === 'multiple_choice') {
+                if (mcOptions) mcOptions.style.display = 'block';
+                if (keywordsGroup) keywordsGroup.style.display = 'none';
+                if (answerHelp) answerHelp.textContent = 'Enter the exact text of the correct option from the choices above.';
+            } else if (questionType === 'true_false') {
+                if (mcOptions) mcOptions.style.display = 'none';
+                if (keywordsGroup) keywordsGroup.style.display = 'none';
+                if (answerHelp) answerHelp.textContent = "Enter 'true' or 'false'.";
+            } else {
+                // short_answer
+                if (mcOptions) mcOptions.style.display = 'none';
+                if (keywordsGroup) keywordsGroup.style.display = 'block';
+                if (answerHelp) answerHelp.textContent = 'Enter the correct answer. Keywords below can provide alternative acceptable answers.';
+            }
+        }
+
         function editQuestion(questionId) {
             // Find question data (in a real app, this would come from the server)
             fetch(`/teacher/get-question/${questionId}`)
@@ -501,6 +661,20 @@
                     document.getElementById('editKeywords').value = Array.isArray(data.keywords) ? data.keywords.join(', ') : data.keywords;
                     document.getElementById('editDifficulty').value = data.difficulty || 'medium';
                     document.getElementById('editFeedback').value = data.feedback || '';
+                    
+                    // Set question type and toggle fields
+                    const questionType = data.type || 'short_answer';
+                    document.getElementById('editQuestionType').value = questionType;
+                    
+                    // Populate multiple choice options if they exist
+                    if (questionType === 'multiple_choice' && data.options) {
+                        document.getElementById('editOption1').value = data.options[0] || '';
+                        document.getElementById('editOption2').value = data.options[1] || '';
+                        document.getElementById('editOption3').value = data.options[2] || '';
+                        document.getElementById('editOption4').value = data.options[3] || '';
+                    }
+                    
+                    toggleQuestionTypeFields('edit');
                     openModal('editModal');
                 })
                 .catch(error => {

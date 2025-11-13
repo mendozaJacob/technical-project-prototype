@@ -87,9 +87,10 @@ mkdir uploads
    - **Topic**: Subject area (e.g., "Medieval History")
    - **Difficulty**: Easy, Medium, or Hard
    - **Question Count**: Number of questions to generate (1-20)
+   - **Question Types**: Select which types to generate (Short Answer, Multiple Choice, True/False)
    - **Context**: Additional context for question generation
 4. Click "Generate Questions"
-5. Review the generated questions
+5. Review the generated questions (including options for multiple choice)
 6. Select which questions to add to your question bank
 7. Click "Save Selected Questions"
 
@@ -103,21 +104,26 @@ mkdir uploads
 4. Enable AI grading when satisfied with results
 
 ### Managing Existing Questions
-- View all questions in the "Questions" section
-- Edit or delete questions as needed
-- Track which questions were AI-generated
+- **Question Library**: View all questions with type-specific indicators
+- **Type-based Filtering**: Filter questions by Short Answer, Multiple Choice, or True/False
+- **Visual Type Badges**: Color-coded badges for easy identification
+- **Edit Capabilities**: Modify question text, answers, options, and feedback
+- **Type Conversion**: Change question types while preserving content
+- **AI Generation Tracking**: Track which questions were AI-generated vs manual
+- **Bulk Operations**: Select and manage multiple questions simultaneously
 
 ## 🧠 AI Integration Details
 
 ### Question Generation Process
 1. **Text Extraction**: Content is extracted from uploaded files
-2. **Context Analysis**: AI analyzes the curriculum content
-3. **Question Creation**: AI generates diverse question types:
-   - Multiple choice
-   - Short answer
-   - True/false
-   - Fill-in-the-blank
-4. **Quality Control**: Each question includes feedback and difficulty rating
+2. **Context Analysis**: AI analyzes the curriculum content for key concepts
+3. **Question Type Selection**: Teachers choose which types to generate
+4. **Intelligent Question Creation**: AI generates contextually appropriate questions:
+   - **Short Answer**: With alternative keywords for flexible grading
+   - **Multiple Choice**: With plausible distractors and correct answers
+   - **True/False**: With definitively true or false statements
+5. **Answer Validation**: AI ensures answers match question types correctly
+6. **Quality Control**: Each question includes comprehensive feedback and difficulty rating
 
 ### AI Grading Process
 1. **Answer Analysis**: AI compares student answer to expected answer
@@ -126,10 +132,19 @@ mkdir uploads
 4. **Explanation**: Explains reasoning for the grade
 
 ### Supported Question Types
-- **Multiple Choice**: Traditional A/B/C/D format
-- **Short Answer**: Open-ended responses
-- **True/False**: Binary choice questions
-- **Fill-in-the-blank**: Missing word/phrase questions
+- **Short Answer**: Open-ended text responses with enhanced fuzzy matching
+  - Supports alternative keywords and partial matches
+  - Word-based similarity analysis with configurable thresholds
+  - Intelligent semantic understanding for natural responses
+- **Multiple Choice**: Interactive A/B/C/D format questions
+  - 2-4 customizable answer options
+  - Students can click buttons or type letter choices
+  - Visual feedback for selected answers
+  - AI generates appropriate distractors automatically
+- **True/False**: Binary choice questions with flexible input
+  - Accepts multiple input formats (true/t/yes/y/1, false/f/no/n/0)
+  - Interactive true/false buttons with visual confirmation
+  - Perfect for concept verification and quick assessments
 
 ## 🔒 Security & Privacy
 
@@ -216,10 +231,18 @@ The teacher portal seamlessly integrates with the main game:
 ## 📚 Best Practices
 
 ### Question Generation Tips
-1. Use clear, well-structured curriculum documents
-2. Provide specific topics and contexts
-3. Review all generated questions before adding
-4. Mix difficulty levels for balanced gameplay
+1. **Content Preparation**: Use clear, well-structured curriculum documents
+2. **Type Selection**: Choose question types appropriate for your content:
+   - Short Answer for complex concepts requiring explanation
+   - Multiple Choice for factual recall and concept identification
+   - True/False for verification of key principles
+3. **Context Specificity**: Provide specific topics and learning objectives
+4. **Quality Review**: Always review generated questions, especially:
+   - Multiple choice options for clarity and plausibility
+   - True/false statements for accuracy and definitiveness
+   - Short answer keywords for comprehensive coverage
+5. **Balanced Mix**: Combine different question types for engaging gameplay
+6. **Difficulty Progression**: Mix difficulty levels within each question type
 
 ### AI Grading Guidelines
 1. Start with high confidence thresholds (80%+)

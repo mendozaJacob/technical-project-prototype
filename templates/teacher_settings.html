@@ -8,7 +8,7 @@
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
-            color: #f3eac2; 
+            color: #333; 
             margin: 0;
             padding: 20px;
         }
@@ -96,7 +96,7 @@
             margin-bottom: 5px;
         }
         .setting-description {
-            color: #666;
+            color: #333;
             font-size: 0.9em;
             line-height: 1.4;
         }
@@ -145,7 +145,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background-color: #777;
             transition: .4s;
             border-radius: 34px;
         }
@@ -189,7 +189,7 @@
             border-radius: 8px;
             padding: 20px;
             text-align: center;
-            color: #666;
+            color: #333;
             margin: 15px 0;
         }
         .color-picker {
@@ -430,30 +430,6 @@
                             <span class="current-value" id="accuracyValue">{{ settings.min_accuracy or 70 }}%</span>
                         </div>
                     </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-label">Lives System</div>
-                            <div class="setting-description">Enable limited lives/attempts per level</div>
-                        </div>
-                        <div class="setting-control">
-                            <label class="toggle-switch">
-                                <input type="checkbox" name="lives_system" {{ 'checked' if settings.lives_system else '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-label">Number of Lives</div>
-                            <div class="setting-description">Total lives available (if lives system enabled)</div>
-                        </div>
-                        <div class="setting-control">
-                            <input type="number" name="max_lives" value="{{ settings.max_lives or 3 }}" min="1" max="10" step="1">
-                            <span class="current-value">lives</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -654,7 +630,6 @@
                 document.querySelector('input[name="points_wrong"]').value = 5;
                 document.querySelector('input[name="level_bonus"]').value = 20;
                 document.querySelector('input[name="min_accuracy"]').value = 70;
-                document.querySelector('input[name="max_lives"]').value = 3;
                 document.querySelector('input[name="session_timeout"]').value = 30;
                 document.querySelector('select[name="timeout_behavior"]').value = 'penalty';
                 
@@ -732,8 +707,6 @@
                     'level_bonus': 'Level Completion Bonus',
                     'adaptive_difficulty': 'Adaptive Difficulty',
                     'min_accuracy': 'Minimum Accuracy Required',
-                    'lives_system': 'Lives System',
-                    'max_lives': 'Maximum Lives',
                     'sound_effects': 'Sound Effects',
                     'show_timer': 'Show Timer',
                     'show_progress': 'Show Progress Bar',

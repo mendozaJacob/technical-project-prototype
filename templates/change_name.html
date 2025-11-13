@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Change Guest Name</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .change-name-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 40px;
+            background: #f3eac2;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            text-align: center;
+        }
+        .change-name-container h2 {
+            color: #4b2e05;
+            margin-bottom: 20px;
+        }
+        .change-name-container p {
+            color: #4b2e05;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+        .name-form {
+            margin: 25px 0;
+        }
+        .name-form input {
+            padding: 12px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            border: 2px solid #4b2e05;
+            width: 250px;
+            margin: 10px 0;
+            font-family: 'Times New Roman', Times, serif;
+            color: #4b2e05;
+            background: #f8f5e8;
+        }
+        .name-form input:focus {
+            outline: none;
+            border-color: #2d5016;
+            box-shadow: 0 0 8px rgba(45, 80, 22, 0.3);
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="change-name-container">
+        <h2>🎯 Change Your Guest Name</h2>
+        <p>Current name: <strong>{{ current_name }}</strong></p>
+        <p>Enter a new name to appear on the guest leaderboard:</p>
+        
+        <form method="POST" class="name-form">
+            <div>
+                <input type="text" name="player_name" placeholder="Enter your name..." 
+                       value="{{ current_name if current_name != 'Anonymous' else '' }}" 
+                       maxlength="20" required>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="btn">Update Name</button>
+                <a href="{{ url_for('index') }}" class="btn" style="background: #8b7355;">Cancel</a>
+            </div>
+        </form>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="margin-top: 20px;">
+                    {% for message in messages %}
+                        <div style="color: #2d5016; font-weight: bold; margin: 10px 0;">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>

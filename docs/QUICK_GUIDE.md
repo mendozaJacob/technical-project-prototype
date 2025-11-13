@@ -4,17 +4,44 @@
 
 ### 1. 📝 Add New Questions (5 minutes)
 1. Open `data/questions.json`
-2. Add new question at the end:
+2. Add new question at the end. Choose the appropriate type:
+
+**Short Answer Question:**
 ```json
 {
   "id": 101,
   "q": "Your question here?",
   "answer": "correct answer",
+  "type": "short_answer",
   "keywords": ["alternative", "answers"],
   "feedback": "Explanation of the answer"
 }
 ```
-3. Update `data/levels.json` to include question ID 101
+
+**Multiple Choice Question:**
+```json
+{
+  "id": 102,
+  "q": "Which option is correct?",
+  "answer": "Option A",
+  "type": "multiple_choice",
+  "options": ["Option A", "Option B", "Option C", "Option D"],
+  "feedback": "Explanation why Option A is correct"
+}
+```
+
+**True/False Question:**
+```json
+{
+  "id": 103,
+  "q": "This statement is true.",
+  "answer": "true",
+  "type": "true_false",
+  "feedback": "Explanation of why this is true/false"
+}
+```
+
+3. Update `data/levels.json` to include the new question ID
 
 ### 2. 🎨 Change Font (2 minutes)
 **In ALL template files**, replace:
@@ -88,8 +115,13 @@ In `templates/index.html`, find and modify:
 
 ### Testing Checklist:
 - ✅ App starts without errors
-- ✅ All game modes work
-- ✅ Questions display correctly
+- ✅ All game modes work (Adventure, Test Yourself, Endless)
+- ✅ Questions display with correct input types
+- ✅ Multiple choice options are clickable
+- ✅ True/False buttons work properly
+- ✅ Short answer accepts similar spellings (fuzzy matching)
+- ✅ Teacher portal question management works
+- ✅ AI generator creates different question types
 - ✅ Styling looks good
 - ✅ Images load properly
 
@@ -101,7 +133,11 @@ In `templates/index.html`, find and modify:
 2. **Use Browser Tools** - F12 to inspect CSS issues
 3. **Keep Backups** - Before major changes
 4. **Test Thoroughly** - Play through the game after changes
-5. **Ask for Help** - Check the full DOCUMENTATION.md for details
+5. **Question Types Best Practices:**
+   - Use **Short Answer** for open-ended questions (benefits from fuzzy matching)
+   - Use **Multiple Choice** for clear options (2-4 choices recommended)
+   - Use **True/False** for binary questions (accepts many input formats)
+6. **Ask for Help** - Check the full DOCUMENTATION.md for details
 
 ---
 

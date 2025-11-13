@@ -19,6 +19,7 @@ from config import TEACHER_CREDENTIALS, AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_
 
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
+GUEST_LEADERBOARD_FILE = "data/guest_leaderboard.json"
 
 # Load game settings at startup
 def load_initial_settings():
@@ -324,8 +325,12 @@ def extract_text_from_file(file_path):
     except Exception as e:
         return f"Error reading file: {str(e)}"
 
-def generate_questions_with_ai(content, topic, difficulty, question_count, context=""):
+def generate_questions_with_ai(content, topic, difficulty, question_count, context="", question_types=None):
     """Generate questions using AI based on content"""
+    
+    # Default question types if none specified
+    if question_types is None:
+        question_types = ["short_answer", "multiple_choice", "true_false"]
     
     # Calculate appropriate content length based on question count
     # More questions need more tokens for response, so reduce content accordingly
@@ -336,6 +341,8 @@ def generate_questions_with_ai(content, topic, difficulty, question_count, conte
     if len(content) > content_limit:
         content = content[:content_limit] + "\n[Content truncated for AI processing...]"
     
+    question_types_str = ", ".join(question_types)
+    
     prompt = f"""Based on the following educational content about {topic}, generate EXACTLY {question_count} {difficulty}-level questions.
 
 Content:
@@ -343,19 +350,26 @@ Content:
 
 Additional Context: {context}
 
+Generate a mix of question types from: {question_types_str}
+
 Generate questions in this EXACT JSON format (no deviations):
 [
     {{
         "q": "Question text here?",
         "answer": "correct answer",
         "keywords": ["alternative1", "alternative2"],
-        "feedback": "Educational explanation"
+        "feedback": "Educational explanation",
+        "type": "short_answer|multiple_choice|true_false",
+        "options": ["option1", "option2", "option3", "option4"]
     }}
 ]
 
 CRITICAL REQUIREMENTS:
 - Return EXACTLY {question_count} questions in the array
-- Each question must have all 4 fields: q, answer, keywords, feedback
+- Each question must have fields: q, answer, keywords, feedback, type
+- For multiple_choice questions: include "options" array with 2-4 choices, answer must match one option exactly
+- For true_false questions: answer must be "true" or "false", no options needed
+- For short_answer questions: include keywords array for alternative answers, no options needed
 - Keep answers concise (under 50 words)
 - Keep feedback brief (under 100 words)
 - Focus on {difficulty} difficulty level
@@ -433,62 +447,172 @@ def check_answer_fuzzy(user_answer, question_data, similarity_threshold=0.8):
     Check user answer against correct answer and alternatives with fuzzy matching.
     Returns tuple: (is_correct, feedback_type, similarity_score)
     """
-    user_answer = user_answer.lower().strip()
-    correct_answer = question_data.get("answer", "").lower().strip()
+    question_type = question_data.get('type', 'short_answer')
+    user_answer = user_answer.strip()
+    correct_answer = question_data.get("answer", "").strip()
     
-    # Check exact match with correct answer
-    if user_answer == correct_answer:
-        return True, "Exact match!", 1.0
+    # Handle different question types
+    if question_type == 'true_false':
+        # Normalize true/false answers
+        user_normalized = normalize_true_false_answer(user_answer)
+        correct_normalized = normalize_true_false_answer(correct_answer)
+        
+        if user_normalized == correct_normalized:
+            return True, "Correct!", 1.0
+        else:
+            return False, "Incorrect", 0
     
-    # Check exact match with keywords (alternatives)
-    keywords = question_data.get("keywords", [])
-    if isinstance(keywords, str):
-        keywords = [k.strip().lower() for k in keywords.split(',') if k.strip()]
-    else:
-        keywords = [str(k).strip().lower() for k in keywords]
+    elif question_type == 'multiple_choice':
+        # For multiple choice, check exact match with correct answer or option labels
+        user_answer_lower = user_answer.lower().strip()
+        correct_answer_lower = correct_answer.lower().strip()
+        
+        # Check exact match
+        if user_answer_lower == correct_answer_lower:
+            return True, "Correct choice!", 1.0
+        
+        # Check if user entered option letter (a, b, c, d)
+        options = question_data.get('options', [])
+        if len(user_answer) == 1 and user_answer.lower() in 'abcd':
+            option_index = ord(user_answer.lower()) - ord('a')
+            if 0 <= option_index < len(options):
+                if options[option_index].lower().strip() == correct_answer_lower:
+                    return True, "Correct choice!", 1.0
+        
+        # Check if user typed the full option text
+        for option in options:
+            if option.lower().strip() == user_answer_lower:
+                if option.lower().strip() == correct_answer_lower:
+                    return True, "Correct choice!", 1.0
+        
+        return False, "Incorrect choice", 0
     
-    if user_answer in keywords:
-        return True, "Correct alternative!", 1.0
+    else:  # short_answer (default) - use enhanced fuzzy matching
+        user_answer = user_answer.lower().strip()
+        correct_answer = correct_answer.lower().strip()
+        
+        # Check exact match with correct answer
+        if user_answer == correct_answer:
+            return True, "Exact match!", 1.0
+        
+        # Check exact match with keywords (alternatives)
+        keywords = question_data.get("keywords", [])
+        if isinstance(keywords, str):
+            keywords = [k.strip().lower() for k in keywords.split(',') if k.strip()]
+        else:
+            keywords = [str(k).strip().lower() for k in keywords]
+        
+        if user_answer in keywords:
+            return True, "Correct alternative!", 1.0
+        
+        # Enhanced fuzzy matching for short answers
+        # 1. Check for partial matches (substring)
+        if len(user_answer) > 3:  # Only for longer answers
+            if user_answer in correct_answer or correct_answer in user_answer:
+                return True, "Partial match!", 0.9
+            
+            # Check partial matches with keywords
+            for keyword in keywords:
+                if user_answer in keyword or keyword in user_answer:
+                    return True, f"Partial match with '{keyword}'!", 0.9
+        
+        # 2. Fuzzy matching with correct answer
+        correct_similarity = difflib.SequenceMatcher(None, user_answer, correct_answer).ratio()
+        if correct_similarity > similarity_threshold:
+            return True, "Close enough to correct answer!", correct_similarity
+        
+        # 3. Fuzzy matching with alternatives
+        best_similarity = 0
+        best_match = ""
+        for keyword in keywords:
+            similarity = difflib.SequenceMatcher(None, user_answer, keyword).ratio()
+            if similarity > best_similarity:
+                best_similarity = similarity
+                best_match = keyword
+        
+        if best_similarity > similarity_threshold:
+            return True, f"Close enough to '{best_match}'!", best_similarity
+        
+        # 4. Word-based fuzzy matching (split into words)
+        user_words = set(user_answer.split())
+        correct_words = set(correct_answer.split())
+        
+        if user_words and correct_words:
+            word_overlap = len(user_words.intersection(correct_words)) / len(correct_words)
+            if word_overlap >= 0.7:  # 70% word overlap
+                return True, "Word-based match!", word_overlap
+        
+        return False, "Incorrect", 0
+
+def normalize_true_false_answer(answer):
+    """Normalize true/false answers to handle various inputs"""
+    answer_lower = answer.lower().strip()
     
-    # Fuzzy matching with correct answer
-    correct_similarity = difflib.SequenceMatcher(None, user_answer, correct_answer).ratio()
-    if correct_similarity > similarity_threshold:
-        return True, "Close enough to correct answer!", correct_similarity
+    # True variations
+    if answer_lower in ['true', 't', 'yes', 'y', '1', 'correct', 'right']:
+        return 'true'
     
-    # Fuzzy matching with alternatives
-    best_similarity = 0
-    best_match = ""
-    for keyword in keywords:
-        similarity = difflib.SequenceMatcher(None, user_answer, keyword).ratio()
-        if similarity > best_similarity:
-            best_similarity = similarity
-            best_match = keyword
+    # False variations
+    if answer_lower in ['false', 'f', 'no', 'n', '0', 'incorrect', 'wrong']:
+        return 'false'
     
-    if best_similarity > similarity_threshold:
-        return True, f"Close enough to '{best_match}'!", best_similarity
-    
-    return False, "Incorrect", 0
+    return answer_lower
 
 # Helper function to save leaderboard data
-def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers):
-    print("Saving leaderboard data...")  # Debugging
-    record = {
-        "player": player_name,
-        "score": score,
-        "time": round(total_time, 2),
-        "correct_answers": correct_answers,
-        "wrong_answers": wrong_answers
-    }
-    try:
-        with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
-            leaderboard = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        leaderboard = []
+def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure"):
+    # Save to student leaderboard if it's a logged-in student
+    if session.get('is_student') and session.get('student_id'):
+        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
+        
+        # Get student information for better leaderboard display
+        student_id = session.get('student_id')
+        
+        record = {
+            "player": player_name,
+            "student_id": student_id,
+            "score": score,
+            "time": round(total_time, 2),
+            "correct_answers": correct_answers,
+            "wrong_answers": wrong_answers,
+            "game_mode": game_mode,
+            "date": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        try:
+            with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
+                leaderboard = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            leaderboard = []
 
-    leaderboard.append(record)
+        leaderboard.append(record)
 
-    with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
-        json.dump(leaderboard, f, indent=4)
+        with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
+            json.dump(leaderboard, f, indent=4)
+    
+    # Save to guest leaderboard if it's a guest player (not a student)
+    else:
+        print(f"Saving guest leaderboard data: {player_name}, mode: {game_mode}")
+        
+        record = {
+            "player": player_name,
+            "score": score,
+            "time": round(total_time, 2),
+            "correct_answers": correct_answers,
+            "wrong_answers": wrong_answers,
+            "game_mode": game_mode,
+            "date": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        try:
+            with open(GUEST_LEADERBOARD_FILE, "r", encoding="utf-8") as f:
+                guest_leaderboard = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            guest_leaderboard = []
+
+        guest_leaderboard.append(record)
+
+        with open(GUEST_LEADERBOARD_FILE, "w", encoding="utf-8") as f:
+            json.dump(guest_leaderboard, f, indent=4)
 
 # Auto-save functionality
 def log_analytics_event(event_type, data=None):
@@ -552,9 +676,8 @@ def auto_save_progress():
             'correct_answers': session.get('correct_answers', 0),
             'wrong_answers': session.get('wrong_answers', 0),
             'highest_unlocked': session.get('highest_unlocked', 1),
-            'lives_remaining': session.get('lives_remaining'),
-            'lives_enabled': session.get('lives_enabled', False),
             'level_completed': session.get('level_completed', False),
+            'character': session.get('character'),
             'timestamp': time.time()
         }
         
@@ -689,12 +812,7 @@ def select_level():
             'enemy_hp': settings['base_enemy_hp']
         })
         
-        # Initialize lives system if enabled
-        if settings.get('lives_system', False):
-            session['lives_remaining'] = settings.get('max_lives', 3)
-            session['lives_enabled'] = True
-        else:
-            session['lives_enabled'] = False
+
         session['q_index'] = 0
         session['feedback'] = None
         session['correct_answers'] = 0
@@ -727,8 +845,26 @@ def select_level():
         # Auto-save initial game state
         auto_save_progress()
         
-        # After the player selects a level, send them to choose their character
-        return redirect(url_for('choose_character'))
+        # Check if student is logged in and has a character
+        if session.get('is_student') and 'student_id' in session:
+            students = load_students()
+            student = next((s for s in students if s['id'] == session['student_id']), None)
+            if student and 'selected_character' in student:
+                # Student has a character, use it and go to game
+                session['character'] = student['selected_character']
+                return redirect(url_for('game'))
+            else:
+                # Student needs to choose a character
+                session['redirect_after_character'] = 'game'
+                return redirect(url_for('choose_character'))
+        else:
+            # Non-student user (guest) - check if they already have a character
+            if session.get('character'):
+                # Guest already has a character, go directly to game
+                return redirect(url_for('game'))
+            else:
+                # Guest needs to choose a character first
+                return redirect(url_for('choose_character'))
 
     # Pass unlocked info to template (GET request)
     return render_template('select_level.html', levels=levels, highest_unlocked=highest_unlocked)
@@ -755,12 +891,49 @@ def home():
 # How-to-play route (ensure it exists)
 @app.route('/howto')
 def howto():
-    return render_template('howto.html')
+    # Check if student is logged in to provide proper navigation context
+    is_student = session.get('is_student', False)
+    return render_template('howto.html', is_student=is_student)
 
 
 @app.route('/choose_character', methods=['GET', 'POST'])
 def choose_character():
     total_characters = 16
+    
+    # Check if student is logged in
+    if session.get('is_student') and 'student_id' in session:
+        student_id = session['student_id']
+        students = load_students()
+        student = next((s for s in students if s['id'] == student_id), None)
+        
+        if request.method == 'POST':
+            char = request.form.get('character') or request.form.get('character_id')
+            try:
+                char_id = int(char)
+            except (TypeError, ValueError):
+                char_id = None
+            if char_id and 1 <= char_id <= total_characters:
+                # Save character to student profile
+                if student:
+                    student['selected_character'] = char_id
+                    save_students(students)
+                session['character'] = char_id
+                flash(f'Character {char_id} selected!', 'success')
+                # After choosing a character, redirect based on where they came from
+                next_url = request.args.get('next') or session.get('redirect_after_character') or 'student_dashboard'
+                session.pop('redirect_after_character', None)
+                return redirect(url_for(next_url))
+        
+        # Check if student already has a character
+        if student and 'selected_character' in student:
+            session['character'] = student['selected_character']
+            # Show current character selection
+            return render_template('choose_character.html', 
+                                 total_characters=total_characters,
+                                 current_character=student['selected_character'],
+                                 student_name=student['full_name'])
+    
+    # For non-logged in users or new character selection
     if request.method == 'POST':
         char = request.form.get('character') or request.form.get('character_id')
         try:
@@ -771,6 +944,7 @@ def choose_character():
             session['character'] = char_id
             # After choosing a character, start the game
             return redirect(url_for('game'))
+    
     return render_template('choose_character.html', total_characters=total_characters)
 
 # Route for the game page
@@ -915,13 +1089,6 @@ def game():
                 session['feedback'] = "⏳ Time's up! Your HP reached 0. Game Over!"
                 return redirect(url_for('you_lose'))
             
-            # Check if lives system is enabled and player is out of lives
-            if session.get('lives_enabled', False):
-                session['lives_remaining'] = session.get('lives_remaining', settings.get('max_lives', 3)) - 1
-                if session.get('lives_remaining', 0) <= 0:
-                    session['feedback'] = "⏳ Time's up! No lives remaining. Game Over!"
-                    return redirect(url_for('you_lose'))
-            
             session['feedback'] = "⏳ Time's up! You took too long."
             session['q_index'] += 1
             session["level_start_time"] = time.time()  # Reset timer for the next question
@@ -1047,9 +1214,7 @@ def game():
                            enemy=enemy,
                            enemy_image=enemy_image,
                            time_left=time_left,
-                           settings=settings,
-                           lives_remaining=session.get('lives_remaining'),
-                           lives_enabled=session.get('lives_enabled', False))
+                           settings=settings)
 
 # Route for the feedback page
 @app.route('/feedback')
@@ -1083,7 +1248,8 @@ def result():
         score=final_score,
         total_time=total_time,
         correct_answers=session.get('correct_answers', 0),
-        wrong_answers=session.get('wrong_answers', 0)
+        wrong_answers=session.get('wrong_answers', 0),
+        game_mode="adventure"
     )
     
     # Save student progress if logged in
@@ -1190,11 +1356,40 @@ from whoosh.qparser import QueryParser
 
 @app.route('/search', methods=['GET'])
 def search():
-    query_text = request.args.get('q', '').strip().lower()  # Get the search query
+    query_text = request.args.get('q', '').strip()
     results = []
-    with ix.searcher() as searcher:
-        query = QueryParser("keywords", ix.schema).parse(query_text)
-        results = searcher.search(query)  # Perform the search
+    
+    if query_text:
+        query_lower = query_text.lower()
+        # Search through questions using multiple criteria
+        for question in questions:
+            match_found = False
+            
+            # Search in question text
+            if query_lower in question.get('q', '').lower():
+                match_found = True
+            
+            # Search in answer
+            elif query_lower in question.get('answer', '').lower():
+                match_found = True
+            
+            # Search in keywords
+            elif question.get('keywords'):
+                keywords = question['keywords']
+                if isinstance(keywords, str):
+                    if query_lower in keywords.lower():
+                        match_found = True
+                elif isinstance(keywords, list):
+                    if any(query_lower in keyword.lower() for keyword in keywords):
+                        match_found = True
+            
+            # Search in feedback/explanation
+            elif question.get('feedback') and query_lower in question.get('feedback', '').lower():
+                match_found = True
+            
+            if match_found:
+                results.append(question)
+    
     return render_template('search.html', results=results)
 
 # Route for the leaderboard page
@@ -1202,14 +1397,52 @@ def search():
 def leaderboard():
     try:
         with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
-            leaderboard = json.load(f)
+            all_data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        leaderboard = []
+        all_data = []
 
-    # Sort by score (highest first), then by time (lowest first)
-    leaderboard = sorted(leaderboard, key=lambda x: (-x["score"], x["time"]))
+    # Separate leaderboards by game mode
+    adventure_data = [entry for entry in all_data if entry.get("game_mode", "adventure") == "adventure"]
+    test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
+    endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
+    
+    # Sort each category by score (highest first), then by time (lowest first)
+    adventure_leaderboard = sorted(adventure_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    test_yourself_leaderboard = sorted(test_yourself_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    endless_leaderboard = sorted(endless_data, key=lambda x: (-x["score"], x["time"]))[:10]
 
-    return render_template("leaderboard.html", leaderboard=leaderboard)
+    # Check if student is logged in to provide proper navigation context
+    is_student = session.get('is_student', False)
+
+    return render_template("leaderboard.html", 
+                         adventure_leaderboard=adventure_leaderboard,
+                         test_yourself_leaderboard=test_yourself_leaderboard,
+                         endless_leaderboard=endless_leaderboard,
+                         is_student=is_student)
+
+
+@app.route('/guest_leaderboard')
+def guest_leaderboard():
+    try:
+        with open(GUEST_LEADERBOARD_FILE, "r", encoding="utf-8") as f:
+            all_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        all_data = []
+
+    # Separate guest leaderboards by game mode
+    adventure_data = [entry for entry in all_data if entry.get("game_mode", "adventure") == "adventure"]
+    test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
+    endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
+    
+    # Sort each category by score (highest first), then by time (lowest first)
+    adventure_leaderboard = sorted(adventure_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    test_yourself_leaderboard = sorted(test_yourself_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    endless_leaderboard = sorted(endless_data, key=lambda x: (-x["score"], x["time"]))[:10]
+
+    return render_template("guest_leaderboard.html", 
+                         adventure_leaderboard=adventure_leaderboard,
+                         test_yourself_leaderboard=test_yourself_leaderboard,
+                         endless_leaderboard=endless_leaderboard)
 
 
 @app.route('/you_win')
@@ -1223,7 +1456,10 @@ def you_win():
         session.pop('enemy_level', None)
     except Exception:
         pass
-    return render_template('you_win.html')
+    
+    # Check if student is logged in to provide proper navigation context
+    is_student = session.get('is_student', False)
+    return render_template('you_win.html', is_student=is_student)
 
 
 @app.route('/you_lose')
@@ -1259,7 +1495,13 @@ def test_yourself():
         session.pop('test_time_limit', None)
         session['test_user_answers'] = []
         print(f"[DEBUG] questions list length at test start: {len(questions)}")
-        valid_questions = [q for q in questions if q.get('q') and str(q.get('q')).strip()]
+        
+        # Use questions from test_yourself pool
+        test_pool_questions = get_questions_for_pool('test_yourself')
+        if not test_pool_questions:
+            test_pool_questions = questions  # Fallback to all questions
+        
+        valid_questions = [q for q in test_pool_questions if q.get('q') and str(q.get('q')).strip()]
         if not valid_questions:
             session['test_question_ids'] = []
         elif len(valid_questions) >= 40:
@@ -1352,12 +1594,22 @@ def test_yourself_result():
     # Get user answers for review
     user_answers = session.get('test_user_answers', [])
     
-    # Save student progress if logged in
+    # Save student progress and leaderboard if logged in
     if session.get('is_student') and session.get('student_id'):
         student_id = session.get('student_id')
         test_start_time = session.get('test_start_time', time.time())
         time_taken = time.time() - test_start_time
         score = correct * 10  # Simple scoring system
+        
+        # Save to leaderboard
+        save_leaderboard(
+            player_name=session.get("player_name", "Anonymous"),
+            score=score,
+            total_time=time_taken,
+            correct_answers=correct,
+            wrong_answers=total - correct,
+            game_mode="test_yourself"
+        )
         
         update_student_progress(
             student_id=student_id,
@@ -1497,7 +1749,15 @@ def endless_start():
     session['endless_wrong'] = 0
     session['endless_start_time'] = time.time()
     session['endless_question_start'] = time.time()
-    session['endless_current_question'] = random.choice(questions)
+    
+    # Use questions from endless mode pool
+    endless_questions = get_questions_for_pool('endless_mode')
+    if endless_questions:
+        session['endless_current_question'] = random.choice(endless_questions)
+    else:
+        # Fallback to all questions if pool is empty
+        session['endless_current_question'] = random.choice(questions)
+    
     session['endless_score_initialized'] = True
     
     return redirect(url_for('endless_game'))
@@ -1525,7 +1785,11 @@ def endless_game():
     
     # Pick or keep the current question
     if 'endless_current_question' not in session:
-        session['endless_current_question'] = random.choice(questions)
+        endless_questions = get_questions_for_pool('endless_mode')
+        if endless_questions:
+            session['endless_current_question'] = random.choice(endless_questions)
+        else:
+            session['endless_current_question'] = random.choice(questions)
     question = session['endless_current_question']
     
     # Get session variables
@@ -1547,7 +1811,11 @@ def endless_game():
             return redirect(url_for('endless_result'))
         
         session['endless_question_start'] = time.time()
-        session['endless_current_question'] = random.choice(questions)
+        endless_questions = get_questions_for_pool('endless_mode')
+        if endless_questions:
+            session['endless_current_question'] = random.choice(endless_questions)
+        else:
+            session['endless_current_question'] = random.choice(questions)
         return redirect(url_for('endless_game'))
     
     # Handle answer submission
@@ -1593,7 +1861,11 @@ def endless_game():
             session['endless_streak'] = 0
             session['endless_wrong'] = session.get('endless_wrong', 0) + 1
         session['endless_question_start'] = time.time()
-        session['endless_current_question'] = random.choice(questions)
+        endless_questions = get_questions_for_pool('endless_mode')
+        if endless_questions:
+            session['endless_current_question'] = random.choice(endless_questions)
+        else:
+            session['endless_current_question'] = random.choice(questions)
         return redirect(url_for('endless_game'))
     
     return render_template('endless.html',
@@ -1627,7 +1899,7 @@ def endless_result():
         if not player_name:
             player_name = request.form.get('player_name', 'Anonymous')
             session['player_name'] = player_name
-        save_leaderboard(player_name, score, total_time, correct, wrong)
+        save_leaderboard(player_name, score, total_time, correct, wrong, "endless")
         
         # Save student progress if logged in
         if session.get('is_student') and session.get('student_id'):
@@ -1686,6 +1958,33 @@ def set_name():
     # Return to the referring page (or index)
     return redirect(request.referrer or url_for('index'))
 
+@app.route('/check_guest_name')
+def check_guest_name():
+    """Check if guest player already has a name stored in session"""
+    # If user is a student, they don't need a guest name
+    if session.get('is_student'):
+        return jsonify({'has_name': True})
+    
+    # Check if guest has a name stored (and it's not just "Anonymous")
+    player_name = session.get('player_name', '')
+    has_name = bool(player_name and player_name.strip() and player_name.strip() != 'Anonymous')
+    
+    return jsonify({'has_name': has_name, 'name': player_name if has_name else None})
+
+@app.route('/change_guest_name', methods=['GET', 'POST'])
+def change_guest_name():
+    """Allow guest players to change their name"""
+    if request.method == 'POST':
+        name = request.form.get('player_name', '').strip()
+        if not name:
+            name = 'Anonymous'
+        session['player_name'] = name
+        flash(f'Name updated to: {name}', 'success')
+        return redirect(url_for('index'))
+    
+    current_name = session.get('player_name', 'Anonymous')
+    return render_template('change_name.html', current_name=current_name)
+
 @app.route('/load_progress', methods=['POST'])
 def load_progress():
     """Load auto-saved progress for a player"""
@@ -1709,9 +2008,10 @@ def load_progress():
         session['correct_answers'] = progress_data['correct_answers']
         session['wrong_answers'] = progress_data['wrong_answers']
         session['highest_unlocked'] = progress_data['highest_unlocked']
-        session['lives_remaining'] = progress_data.get('lives_remaining')
-        session['lives_enabled'] = progress_data.get('lives_enabled', False)
         session['level_completed'] = progress_data.get('level_completed', False)
+        # Restore character selection if it was saved
+        if progress_data.get('character'):
+            session['character'] = progress_data['character']
         
         # Reset timing info for current session
         session["level_start_time"] = time.time()
@@ -1720,7 +2020,27 @@ def load_progress():
         session['current_timer'] = settings.get('question_time_limit', 30)
         
         flash('Progress loaded successfully!', 'success')
-        return redirect(url_for('choose_character'))
+        
+        # Check if student is logged in and has a character
+        if session.get('is_student') and 'student_id' in session:
+            students = load_students()
+            student = next((s for s in students if s['id'] == session['student_id']), None)
+            if student and 'selected_character' in student:
+                # Student has a character, use it and go to game
+                session['character'] = student['selected_character']
+                return redirect(url_for('game'))
+            else:
+                # Student needs to choose a character
+                session['redirect_after_character'] = 'game'
+                return redirect(url_for('choose_character'))
+        else:
+            # Non-student user (guest) - check if they already have a character
+            if session.get('character'):
+                # Guest already has a character, go directly to game
+                return redirect(url_for('game'))
+            else:
+                # Guest needs to choose a character first
+                return redirect(url_for('choose_character'))
     else:
         flash('No saved progress found or save file too old.', 'error')
         return redirect(url_for('index'))
@@ -1808,8 +2128,13 @@ def teacher_ai_generator():
             question_count = int(request.form.get('question_count', 10))
             context = request.form.get('context', '')
             
+            # Get selected question types
+            selected_question_types = request.form.getlist('question_types')
+            if not selected_question_types:
+                selected_question_types = ["short_answer", "multiple_choice", "true_false"]
+            
             # Generate questions with AI
-            generated_questions = generate_questions_with_ai(content, topic, difficulty, question_count, context)
+            generated_questions = generate_questions_with_ai(content, topic, difficulty, question_count, context, selected_question_types)
             
             # Clean up uploaded file
             os.remove(file_path)
@@ -1878,6 +2203,9 @@ def teacher_save_questions():
                         "answer": question_data.get('answer'),
                         "keywords": question_data.get('keywords', []),
                         "feedback": question_data.get('feedback', ''),
+                        "type": question_data.get('type', 'short_answer'),
+                        "options": question_data.get('options', []),
+                        "difficulty": question_data.get('difficulty', 'medium'),
                         "ai_generated": True
                     }
                     
@@ -2021,18 +2349,28 @@ def teacher_analytics():
     # Load leaderboard and calculate analytics
     leaderboard = get_leaderboard_data()
     
-    # Calculate statistics
-    total_students = len(set(entry.get('player', 'Anonymous') for entry in leaderboard))
-    total_attempts = len(leaderboard)
+    # Load registered students
+    registered_students = load_students()
+    registered_usernames = set(student.get('username', '') for student in registered_students)
     
-    if leaderboard:
-        avg_score = sum(entry.get('score', 0) for entry in leaderboard) / len(leaderboard)
-        avg_time = sum(entry.get('time', 0) for entry in leaderboard) / len(leaderboard) / 60  # in minutes
+    # Filter leaderboard to only include registered students
+    registered_leaderboard = [
+        entry for entry in leaderboard 
+        if entry.get('player', 'Anonymous') in registered_usernames
+    ]
+    
+    # Calculate statistics for registered students only
+    total_students = len(set(entry.get('player', 'Anonymous') for entry in registered_leaderboard))
+    total_attempts = len(registered_leaderboard)
+    
+    if registered_leaderboard:
+        avg_score = sum(entry.get('score', 0) for entry in registered_leaderboard) / len(registered_leaderboard)
+        avg_time = sum(entry.get('time', 0) for entry in registered_leaderboard) / len(registered_leaderboard) / 60  # in minutes
         
         # Performance distribution
-        excellent_students = len([e for e in leaderboard if e.get('score', 0) >= 80])
-        good_students = len([e for e in leaderboard if 60 <= e.get('score', 0) < 80])
-        poor_students = len([e for e in leaderboard if e.get('score', 0) < 60])
+        excellent_students = len([e for e in registered_leaderboard if e.get('score', 0) >= 80])
+        good_students = len([e for e in registered_leaderboard if 60 <= e.get('score', 0) < 80])
+        poor_students = len([e for e in registered_leaderboard if e.get('score', 0) < 60])
     else:
         avg_score = avg_time = 0
         excellent_students = good_students = poor_students = 0
@@ -2046,6 +2384,23 @@ def teacher_analytics():
     hard_success = 45
     easy_attempts = medium_attempts = hard_attempts = 150
     
+    # Question Pool Analytics
+    pools_data = load_question_pools()
+    pool_analytics = {}
+    
+    for pool_name, pool in pools_data["pools"].items():
+        pool_questions = get_questions_for_pool(pool_name)
+        pool_analytics[pool_name] = {
+            "name": pool["name"],
+            "enabled": pool.get("enabled", True),
+            "total_questions": len(pool_questions),
+            "assigned_questions": len(pool.get("question_ids", [])),
+            "usage_stats": {
+                "total_attempts": len([e for e in registered_leaderboard if e.get('game_mode') == pool_name]),
+                "avg_performance": sum([e.get('score', 0) for e in registered_leaderboard if e.get('game_mode') == pool_name]) / max(1, len([e for e in registered_leaderboard if e.get('game_mode') == pool_name]))
+            }
+        }
+    
     # Mock challenging questions
     challenging_questions = []
     for i, question in enumerate(questions[:5]):
@@ -2057,9 +2412,9 @@ def teacher_analytics():
             'total_attempts': 25 - i * 2
         })
     
-    # Recent activity (mock data)
+    # Recent activity (only registered students)
     recent_activity = []
-    for i, entry in enumerate(leaderboard[-10:]):
+    for i, entry in enumerate(registered_leaderboard[-10:]):
         recent_activity.append({
             'date': '2025-11-04',
             'player': entry.get('player', 'Anonymous'),
@@ -2071,9 +2426,10 @@ def teacher_analytics():
     
     analytics_data = {
         'total_students': total_students,
-        'avg_score': int(avg_score),
+        'total_registered_students': len(registered_students),
+        'avg_score': int(avg_score) if avg_score else 0,
         'total_attempts': total_attempts,
-        'avg_time': int(avg_time),
+        'avg_time': int(avg_time) if avg_time else 0,
         'completion_rate': completion_rate,
         'engagement_score': engagement_score,
         'excellent_students': excellent_students,
@@ -2085,9 +2441,11 @@ def teacher_analytics():
         'easy_attempts': easy_attempts,
         'medium_attempts': medium_attempts,
         'hard_attempts': hard_attempts,
-        'leaderboard': sorted(leaderboard, key=lambda x: x.get('score', 0), reverse=True),
+        'leaderboard': sorted(registered_leaderboard, key=lambda x: x.get('score', 0), reverse=True),
         'challenging_questions': challenging_questions,
-        'recent_activity': recent_activity
+        'recent_activity': recent_activity,
+        'pool_analytics': pool_analytics,
+        'show_registered_only': True
     }
     
     return render_template('teacher_analytics.html', **analytics_data)
@@ -2153,6 +2511,16 @@ def teacher_add_question():
         # Find next ID
         next_id = max([q.get('id', 0) for q in existing_questions]) + 1
         
+        # Get question type and options
+        question_type = request.form.get('question_type', 'short_answer')
+        options = []
+        if question_type == 'multiple_choice':
+            # Get multiple choice options
+            for i in range(1, 5):  # Support up to 4 options
+                option = request.form.get(f'option_{i}', '').strip()
+                if option:
+                    options.append(option)
+        
         # Create new question
         new_question = {
             'id': next_id,
@@ -2161,6 +2529,8 @@ def teacher_add_question():
             'keywords': [k.strip() for k in keywords.split(',') if k.strip()],
             'difficulty': difficulty,
             'feedback': feedback,
+            'type': question_type,
+            'options': options if question_type == 'multiple_choice' else [],
             'ai_generated': False
         }
         
@@ -2195,6 +2565,16 @@ def teacher_edit_question():
         with open('data/questions.json', 'r', encoding='utf-8') as f:
             all_questions = json.load(f)
         
+        # Get question type and options for editing
+        question_type = request.form.get('question_type', 'short_answer')
+        options = []
+        if question_type == 'multiple_choice':
+            # Get multiple choice options
+            for i in range(1, 5):  # Support up to 4 options
+                option = request.form.get(f'option_{i}', '').strip()
+                if option:
+                    options.append(option)
+        
         # Find and update question
         for i, q in enumerate(all_questions):
             if q.get('id') == question_id:
@@ -2203,7 +2583,9 @@ def teacher_edit_question():
                     'answer': request.form.get('answer'),
                     'keywords': [k.strip() for k in request.form.get('keywords', '').split(',') if k.strip()],
                     'difficulty': request.form.get('difficulty', 'medium'),
-                    'feedback': request.form.get('feedback', '')
+                    'feedback': request.form.get('feedback', ''),
+                    'type': question_type,
+                    'options': options if question_type == 'multiple_choice' else []
                 })
                 break
         
@@ -2258,8 +2640,6 @@ def teacher_update_settings():
             'level_bonus': int(request.form.get('level_bonus', 20)),
             'adaptive_difficulty': 'adaptive_difficulty' in request.form,
             'min_accuracy': int(request.form.get('min_accuracy', 70)),
-            'lives_system': 'lives_system' in request.form,
-            'max_lives': int(request.form.get('max_lives', 3)),
             'sound_effects': 'sound_effects' in request.form,
             'show_timer': 'show_timer' in request.form,
             'show_progress': 'show_progress' in request.form,
@@ -2600,6 +2980,11 @@ def student_login():
             session['student_username'] = student['username']
             session['student_name'] = student['full_name']
             session['is_student'] = True
+            
+            # Load their saved character if they have one
+            if 'selected_character' in student:
+                session['character'] = student['selected_character']
+            
             flash(f'Welcome back, {student["full_name"]}!', 'success')
             return redirect(url_for('student_dashboard'))
         else:
@@ -2638,7 +3023,14 @@ def student_dashboard():
     # Get settings to check available game modes
     settings = get_current_game_settings()
     
-    return render_template('student_dashboard.html', student=student, progress=progress, settings=settings)
+    # Get selected character info
+    selected_character = student.get('selected_character') if student else None
+    
+    return render_template('student_dashboard.html', 
+                         student=student, 
+                         progress=progress, 
+                         settings=settings,
+                         selected_character=selected_character)
 
 @app.route('/student/profile', methods=['GET', 'POST'])
 def student_profile():
@@ -2709,8 +3101,6 @@ def load_game_settings():
         'level_bonus': 20,
         'adaptive_difficulty': False,
         'min_accuracy': 70,
-        'lives_system': False,
-        'max_lives': 3,
         'sound_effects': False,
         'show_timer': True,
         'show_progress': True,
@@ -2957,6 +3347,222 @@ def recreate_search_index():
 @app.context_processor
 def inject_teacher_link():
     return dict(show_teacher_link=True)
+
+# ------------------- QUESTION POOL MANAGEMENT -------------------
+
+def load_question_pools():
+    """Load question pools configuration"""
+    try:
+        pools_file = os.path.join(os.path.dirname(__file__), 'data', 'question_pools.json')
+        with open(pools_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Return default pools if file doesn't exist
+        return {
+            "pools": {
+                "endless_mode": {
+                    "name": "Endless Mode Questions",
+                    "description": "Questions used in endless survival mode",
+                    "enabled": True,
+                    "question_ids": [],
+                    "settings": {
+                        "difficulty_range": ["easy", "medium", "hard"],
+                        "topics": ["all"],
+                        "exclude_level_questions": False,
+                        "randomize": True
+                    }
+                },
+                "test_yourself": {
+                    "name": "Test Yourself Questions",
+                    "description": "Questions used in 40-question assessment mode", 
+                    "enabled": True,
+                    "question_ids": [],
+                    "settings": {
+                        "question_count": 40,
+                        "difficulty_distribution": {"easy": 50, "medium": 35, "hard": 15},
+                        "topics": ["all"],
+                        "time_limit": 3600,
+                        "randomize": True
+                    }
+                },
+                "level_based": {
+                    "name": "Level-Based Questions",
+                    "description": "Questions organized by difficulty levels 1-10",
+                    "enabled": True, 
+                    "question_ids": [],
+                    "settings": {
+                        "questions_per_level": 10,
+                        "adaptive_difficulty": True,
+                        "unlock_progression": True
+                    }
+                }
+            },
+            "metadata": {
+                "last_updated": datetime.now().isoformat(),
+                "version": "1.0.0", 
+                "total_pools": 3
+            }
+        }
+
+def save_question_pools(pools_data):
+    """Save question pools configuration"""
+    pools_file = os.path.join(os.path.dirname(__file__), 'data', 'question_pools.json')
+    pools_data["metadata"]["last_updated"] = datetime.now().isoformat()
+    with open(pools_file, 'w', encoding='utf-8') as f:
+        json.dump(pools_data, f, indent=2, ensure_ascii=False)
+
+def get_questions_for_pool(pool_name):
+    """Get questions assigned to a specific pool"""
+    pools_data = load_question_pools()
+    pool = pools_data["pools"].get(pool_name, {})
+    
+    if not pool.get("enabled", True):
+        return []
+    
+    question_ids = pool.get("question_ids", [])
+    
+    # If no specific questions assigned, use all questions based on settings
+    if not question_ids:
+        pool_questions = []
+        settings = pool.get("settings", {})
+        
+        for question in questions:
+            # Apply difficulty filter if specified
+            difficulty_range = settings.get("difficulty_range", ["easy", "medium", "hard"])
+            question_difficulty = question.get("difficulty", "medium")
+            
+            if question_difficulty not in difficulty_range:
+                continue
+                
+            # Apply topic filter if specified  
+            topics = settings.get("topics", ["all"])
+            if "all" not in topics:
+                question_keywords = question.get("keywords", [])
+                if isinstance(question_keywords, str):
+                    question_keywords = [k.strip() for k in question_keywords.split(',')]
+                
+                if not any(topic.lower() in [k.lower() for k in question_keywords] for topic in topics):
+                    continue
+                    
+            pool_questions.append(question)
+            
+        return pool_questions
+    else:
+        # Return questions with specific IDs
+        id_to_question = {q['id']: q for q in questions}
+        return [id_to_question[qid] for qid in question_ids if qid in id_to_question]
+
+def initialize_question_pools():
+    """Initialize question pools with existing questions if not already configured"""
+    pools_data = load_question_pools()
+    modified = False
+    
+    # Auto-assign questions to pools if they're empty
+    for pool_name, pool in pools_data["pools"].items():
+        if not pool.get("question_ids"):
+            # Auto-assign based on question difficulty and level
+            assigned_questions = []
+            
+            if pool_name == "endless_mode":
+                # Assign questions from levels 1-8 (easier questions for endless mode)
+                assigned_questions = [q["id"] for q in questions if q.get("id", 0) <= 80]
+            elif pool_name == "test_yourself": 
+                # Assign all questions for comprehensive testing
+                assigned_questions = [q["id"] for q in questions]
+            elif pool_name == "level_based":
+                # Assign all questions (will be filtered by level system)
+                assigned_questions = [q["id"] for q in questions]
+                
+            pool["question_ids"] = assigned_questions
+            modified = True
+    
+    if modified:
+        save_question_pools(pools_data)
+    
+    return pools_data
+
+# Load question pools on startup
+question_pools = initialize_question_pools()
+
+# ------------------- TEACHER POOL MANAGEMENT ROUTES -------------------
+
+@app.route('/teacher/question-pools')
+@teacher_required
+def teacher_question_pools():
+    
+    pools_data = load_question_pools()
+    
+    # Get statistics for each pool
+    for pool_name, pool in pools_data["pools"].items():
+        pool_questions = get_questions_for_pool(pool_name)
+        pool["stats"] = {
+            "total_questions": len(pool_questions),
+            "assigned_questions": len(pool.get("question_ids", [])),
+            "enabled": pool.get("enabled", True)
+        }
+    
+    return render_template('teacher_question_pools.html', 
+                         pools=pools_data["pools"], 
+                         metadata=pools_data["metadata"],
+                         all_questions=questions)
+
+@app.route('/teacher/update-pool-settings', methods=['POST'])
+@teacher_required
+def teacher_update_pool_settings():
+    
+    try:
+        pool_name = request.form.get('pool_name')
+        pools_data = load_question_pools()
+        
+        if pool_name not in pools_data["pools"]:
+            return jsonify({"error": "Pool not found"}), 404
+            
+        pool = pools_data["pools"][pool_name]
+        
+        # Update basic settings
+        pool["enabled"] = request.form.get('enabled') == 'true'
+        pool["name"] = request.form.get('name', pool["name"])
+        pool["description"] = request.form.get('description', pool["description"])
+        
+        # Update pool-specific settings
+        if pool_name == "test_yourself":
+            pool["settings"]["question_count"] = int(request.form.get('question_count', 40))
+            pool["settings"]["time_limit"] = int(request.form.get('time_limit', 3600))
+        elif pool_name == "level_based":
+            pool["settings"]["questions_per_level"] = int(request.form.get('questions_per_level', 10))
+            pool["settings"]["adaptive_difficulty"] = request.form.get('adaptive_difficulty') == 'true'
+        
+        save_question_pools(pools_data)
+        flash(f'Pool settings updated successfully for {pool["name"]}!', 'success')
+        
+    except Exception as e:
+        flash(f'Error updating pool settings: {str(e)}', 'error')
+    
+    return redirect(url_for('teacher_question_pools'))
+
+@app.route('/teacher/assign-questions-to-pool', methods=['POST'])
+@teacher_required
+def teacher_assign_questions_to_pool():
+    
+    try:
+        pool_name = request.form.get('pool_name')
+        question_ids = request.form.getlist('question_ids')
+        question_ids = [int(qid) for qid in question_ids if qid.isdigit()]
+        
+        pools_data = load_question_pools()
+        
+        if pool_name not in pools_data["pools"]:
+            return jsonify({"error": "Pool not found"}), 404
+        
+        pools_data["pools"][pool_name]["question_ids"] = question_ids
+        save_question_pools(pools_data)
+        
+        flash(f'Successfully assigned {len(question_ids)} questions to {pools_data["pools"][pool_name]["name"]}!', 'success')
+        
+    except Exception as e:
+        flash(f'Error assigning questions to pool: {str(e)}', 'error')
+    
+    return redirect(url_for('teacher_question_pools'))
 
 # Run the Flask app
 if __name__ == "__main__":

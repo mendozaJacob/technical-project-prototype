@@ -144,6 +144,112 @@
         .btn:hover {
             background: #6d4106;
         }
+        
+        /* Question Type Styles */
+        .answer-options {
+            margin: 20px 0;
+        }
+        
+        .option-button {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .option-button:hover {
+            background: #ffeebc;
+            transform: scale(1.02);
+        }
+        
+        .option-button.selected {
+            background: #4b2e05;
+            color: #f3eac2;
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            font-size: 1.2em;
+            min-width: 30px;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .tf-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .tf-button {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 20px 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 120px;
+        }
+        
+        .tf-button:hover {
+            background: #ffeebc;
+            transform: scale(1.05);
+        }
+        
+        .tf-button.selected {
+            background: #4b2e05;
+            color: #f3eac2;
+        }
+        
+        .tf-icon {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .tf-text {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .selected-answer {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .short-answer-input {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            background: #ccc;
+            transform: none;
+        }
         input[type="text"] {
             font-family: 'Times New Roman', Times, serif;
             padding: 12px;
@@ -171,12 +277,7 @@
         <div class="questions-left">Question {{ q_number }} of {{ total }} | Level {{ level }}</div>
         {% endif %}
         
-        <!-- Lives System (if enabled) -->
-        {% if lives_enabled %}
-        <div class="lives-display" style="text-align: center; color: #4b2e05; font-weight: bold; margin: 10px 0;">
-            ❤️ Lives: {{ lives_remaining }} / {{ settings.max_lives }}
-        </div>
-        {% endif %}
+
         
         <!-- Character Stats Section -->
         <div class="character-stats">
@@ -219,6 +320,7 @@
             <strong>Answer:</strong> {{ question.answer }}<br>
             <strong>Keywords:</strong> {{ question.keywords }}<br>
             <strong>Question ID:</strong> {{ question.id }}<br>
+            <strong>Question Type:</strong> {{ question.get('type', 'short_answer') }}<br>
             <strong>Session Timer:</strong> {{ session.get('current_timer', 'N/A') }}s<br>
             <strong>Time Left:</strong> {{ time_left }}s<br>
             <strong>Q Index:</strong> {{ session.get('q_index', 0) }}/{{ total }}<br>
@@ -228,9 +330,49 @@
         {% endif %}
         
         <!-- Answer Form -->
-        <form method="POST">
-            <input type="text" name="answer" placeholder="Type your answer..." required>
-            <button type="submit" class="btn">Attack!</button>
+        <form method="POST" id="answerForm">
+            {% set question_type = question.get('type', 'short_answer') %}
+            
+            {% if question_type == 'multiple_choice' %}
+                <!-- Multiple Choice Options -->
+                <div class="answer-options">
+                    {% for i in range(question.options|length) %}
+                    {% set option_letter = ['A', 'B', 'C', 'D'][i] %}
+                    <div class="option-button" onclick="selectOption('{{ option_letter|lower }}', '{{ question.options[i] }}')">
+                        <span class="option-letter">{{ option_letter }})</span>
+                        <span class="option-text">{{ question.options[i] }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="answer" id="selectedAnswer" required>
+                <div class="selected-answer" id="selectedAnswerDisplay" style="display: none;">
+                    Selected: <span id="selectedAnswerText"></span>
+                </div>
+                <button type="submit" class="btn" id="submitButton" disabled>Attack!</button>
+                
+            {% elif question_type == 'true_false' %}
+                <!-- True/False Buttons -->
+                <div class="tf-buttons">
+                    <div class="tf-button" onclick="selectTrueFalse('True')">
+                        <span class="tf-icon">✓</span>
+                        <span class="tf-text">True</span>
+                    </div>
+                    <div class="tf-button" onclick="selectTrueFalse('False')">
+                        <span class="tf-icon">✗</span>
+                        <span class="tf-text">False</span>
+                    </div>
+                </div>
+                <input type="hidden" name="answer" id="tfAnswer" required>
+                <div class="selected-answer" id="tfSelectedDisplay" style="display: none;">
+                    Selected: <span id="tfSelectedText"></span>
+                </div>
+                <button type="submit" class="btn" id="tfSubmitButton" disabled>Attack!</button>
+                
+            {% else %}
+                <!-- Short Answer Input -->
+                <input type="text" name="answer" placeholder="Type your answer..." required class="short-answer-input">
+                <button type="submit" class="btn">Attack!</button>
+            {% endif %}
         </form>
     </div>
 
@@ -238,6 +380,43 @@
         // Initialize the remaining time from the backend
         let timeLeft = {{ time_left }};
         const timerElement = document.getElementById("timer");
+        
+        // Question type interaction functions
+        function selectOption(letter, optionText) {
+            // Clear previous selections
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select current option
+            event.target.closest('.option-button').classList.add('selected');
+            
+            // Set the answer values
+            document.getElementById('selectedAnswer').value = optionText;
+            document.getElementById('selectedAnswerDisplay').style.display = 'block';
+            document.getElementById('selectedAnswerText').textContent = letter.toUpperCase() + ') ' + optionText;
+            
+            // Enable submit button
+            document.getElementById('submitButton').disabled = false;
+        }
+        
+        function selectTrueFalse(answer) {
+            // Clear previous selections
+            document.querySelectorAll('.tf-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select current option
+            event.target.closest('.tf-button').classList.add('selected');
+            
+            // Set the answer values
+            document.getElementById('tfAnswer').value = answer;
+            document.getElementById('tfSelectedDisplay').style.display = 'block';
+            document.getElementById('tfSelectedText').textContent = answer;
+            
+            // Enable submit button
+            document.getElementById('tfSubmitButton').disabled = false;
+        }
 
         // Countdown logic to update the timer every second
         const countdown = setInterval(() => {

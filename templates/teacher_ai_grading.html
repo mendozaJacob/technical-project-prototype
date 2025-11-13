@@ -8,7 +8,7 @@
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
-            color: #f3eac2; 
+            color: #333; 
             margin: 0;
             padding: 20px;
         }
@@ -52,7 +52,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background-color: #777;
             transition: .4s;
             border-radius: 34px;
         }
@@ -149,7 +149,7 @@
             background-color: #4a7c59;
         }
         .status-inactive {
-            background-color: #ccc;
+            background-color: #777;
         }
         .info-box {
             background: #e6f3ff;
@@ -237,14 +237,14 @@
                     <div style="text-align: center; margin-top: 5px; font-weight: bold;">
                         <span id="threshold_value">{{ config.confidence_threshold or 80 }}%</span>
                     </div>
-                    <small style="color: #666;">Higher values require more certainty for correct answers</small>
+                    <small style="color: #333;">Higher values require more certainty for correct answers</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="custom_prompt">Custom Grading Prompt (Optional):</label>
                     <textarea id="custom_prompt" name="custom_prompt" 
                               placeholder="Add specific instructions for the AI grader...">{{ config.custom_prompt or '' }}</textarea>
-                    <small style="color: #666;">Leave empty to use default prompt</small>
+                    <small style="color: #333;">Leave empty to use default prompt</small>
                 </div>
                 
                 <button type="submit" class="btn btn-success">💾 Save Configuration</button>
@@ -315,7 +315,7 @@
             </p>
             
             {% if not api_key_configured %}
-            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; color: #856404;">
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; color: #333;">
                 <strong>⚠️ Setup Required:</strong><br>
                 <strong>For OpenAI:</strong><br>
                 1. Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a><br>

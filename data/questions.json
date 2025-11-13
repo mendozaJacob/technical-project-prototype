@@ -1159,5 +1159,57 @@
     ],
     "feedback": "S/MIME extends the MIME standard to add cryptographic security services, ensuring that email content is confidential, has integrity, and is authenticated through digital signatures and encryption.",
     "ai_generated": true
+  },
+  {
+    "id": 111,
+    "q": "Which command is used to list directory contents in Linux?",
+    "answer": "ls",
+    "options": ["ls", "dir", "list", "show"],
+    "type": "multiple_choice",
+    "keywords": ["ls"],
+    "feedback": "The 'ls' command is the standard Unix/Linux command for listing directory contents.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 112,
+    "q": "Linux is an open-source operating system.",
+    "answer": "true",
+    "type": "true_false",
+    "keywords": [],
+    "feedback": "Linux is indeed an open-source operating system, meaning its source code is freely available and can be modified.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 113,
+    "q": "What does the 'cd' command do in Linux?",
+    "answer": "change directory",
+    "type": "short_answer",
+    "keywords": ["changes directory", "navigate", "move to directory"],
+    "feedback": "The 'cd' command stands for 'change directory' and is used to navigate between directories in the filesystem.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 114,
+    "q": "Which symbol is used to redirect output to a file in Linux?",
+    "answer": ">",
+    "options": [">", "<", "|", "&"],
+    "type": "multiple_choice",
+    "keywords": [">"],
+    "feedback": "The '>' symbol is used to redirect output from a command to a file, overwriting the file if it exists.",
+    "difficulty": "medium",
+    "ai_generated": false
+  },
+  {
+    "id": 115,
+    "q": "The root directory in Linux is represented by a forward slash (/).",
+    "answer": "true",
+    "type": "true_false",
+    "keywords": [],
+    "feedback": "The root directory in Linux is indeed represented by a single forward slash (/), which is the top-most directory in the filesystem hierarchy.",
+    "difficulty": "easy",
+    "ai_generated": false
   }
 ]

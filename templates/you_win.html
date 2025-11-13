@@ -13,8 +13,13 @@
         <p>Your final score: <strong>{{ session.get('score', 0) }}</strong></p>
         <p>Time played: <strong>{{ (time.time() - session.get('game_start_time', time.time()))|round(2) }}s</strong></p>
         <div style="margin-top:20px;">
-            <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
-            <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
+            {% if is_student %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn">← Back to Student Portal</a>
+                <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
+                <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
+            {% endif %}
         </div>
     </div>
 </body>

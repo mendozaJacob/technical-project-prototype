@@ -85,7 +85,12 @@
     </ul>
   </div>
 
-  <a href="{{ url_for('index') }}" class="btn">🏰 Return Home</a>
-  <a href="{{ url_for('select_level') }}" class="btn">⚔️ Begin Battle</a>
+  {% if is_student %}
+    <a href="{{ url_for('student_dashboard') }}" class="btn">← Back to Student Portal</a>
+    <a href="{{ url_for('select_level') }}" class="btn">⚔️ Begin Battle</a>
+  {% else %}
+    <a href="{{ url_for('index') }}" class="btn">🏰 Return Home</a>
+    <a href="{{ url_for('select_level') }}" class="btn">⚔️ Begin Battle</a>
+  {% endif %}
 </body>
 </html>

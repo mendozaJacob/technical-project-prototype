@@ -15,14 +15,40 @@ This is a medieval-themed educational RPG game built with Flask that teaches Lin
 Contains all game data in JSON format:
 
 #### `questions.json` 📝
-Contains all the questions used in the game.
+Contains all the questions used in the game. Supports three question types:
+
+**Short Answer Question (with fuzzy matching):**
 ```json
 {
   "id": 1,
   "q": "Configure your Host Name to server1.example.com",
   "answer": "hostnamectl set-hostname server1.example.com",
+  "type": "short_answer",
   "keywords": ["hostname", "hostnamectl"],
   "feedback": "hostnamectl is the systemd command for managing the system hostname..."
+}
+```
+
+**Multiple Choice Question:**
+```json
+{
+  "id": 2,
+  "q": "Which command lists directory contents?",
+  "answer": "ls",
+  "type": "multiple_choice",
+  "options": ["ls", "cd", "mkdir", "rm"],
+  "feedback": "The 'ls' command lists files and directories."
+}
+```
+
+**True/False Question:**
+```json
+{
+  "id": 3,
+  "q": "The 'sudo' command gives administrator privileges.",
+  "answer": "true",
+  "type": "true_false",
+  "feedback": "Correct! sudo allows users to run commands with elevated privileges."
 }
 ```
 
@@ -100,23 +126,56 @@ Contains all HTML templates:
 ### 📝 Adding/Modifying Questions
 
 #### 1. Edit `data/questions.json`
-Each question follows this structure:
+Each question supports three types with different structures:
+
+**Short Answer Questions (with fuzzy matching):**
 ```json
 {
   "id": 101,
   "q": "Your question text here",
   "answer": "exact answer expected",
+  "type": "short_answer",
   "keywords": ["alternative", "answers", "accepted"],
   "feedback": "Educational explanation shown after answering"
 }
 ```
 
-**Required Fields:**
+**Multiple Choice Questions:**
+```json
+{
+  "id": 102,
+  "q": "Which option is correct?",
+  "answer": "Option A",
+  "type": "multiple_choice",
+  "options": ["Option A", "Option B", "Option C", "Option D"],
+  "feedback": "Explanation of why Option A is correct"
+}
+```
+
+**True/False Questions:**
+```json
+{
+  "id": 103,
+  "q": "This statement is true.",
+  "answer": "true",
+  "type": "true_false",
+  "feedback": "Explanation of why this is true or false"
+}
+```
+
+**Required Fields (All Types):**
 - `id`: Unique number for the question
 - `q`: The question text
-- `answer`: Primary correct answer (case-insensitive)
-- `keywords`: Array of alternative acceptable answers
+- `answer`: Correct answer
+- `type`: Question type ("short_answer", "multiple_choice", or "true_false")
 - `feedback`: Explanation shown after answering
+
+**Additional Fields:**
+- `keywords`: (Short answer only) Array of alternative acceptable answers
+- `options`: (Multiple choice only) Array of 2-4 answer choices
+
+**Fuzzy Matching for Short Answers:**
+The system automatically handles similar answers like "four" = "4", "T" = "True", partial matches, and typos.
 
 #### 2. Update `data/levels.json`
 Assign questions to levels:
@@ -247,6 +306,8 @@ python app.py
 
 ### 💪 Game Mechanics
 - **HP System**: Players and enemies have health points
+- **Question Types**: Short answer (with fuzzy matching), Multiple choice, True/False
+- **Smart Answer Matching**: Fuzzy matching accepts similar answers, typos, and variations
 - **Timer**: Questions have time limits
 - **Scoring**: Based on speed and accuracy
 - **Feedback**: Educational explanations for each question

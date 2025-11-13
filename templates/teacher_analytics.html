@@ -8,7 +8,7 @@
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
-            color: #f3eac2; 
+            color: #333; 
             margin: 0;
             padding: 20px;
         }
@@ -69,12 +69,12 @@
             margin-bottom: 10px;
         }
         .stat-label {
-            color: #666;
+            color: #333;
             font-size: 1.1em;
             font-weight: bold;
         }
         .stat-description {
-            color: #888;
+            color: #444;
             font-size: 0.9em;
             margin-top: 5px;
         }
@@ -229,8 +229,8 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number">{{ total_students }}</div>
-                <div class="stat-label">Total Students</div>
-                <div class="stat-description">Unique players who attempted the game</div>
+                <div class="stat-label">Registered Students</div>
+                <div class="stat-description">{{ total_registered_students }} registered, {{ total_students }} with game attempts</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">{{ avg_score }}%</div>
@@ -265,7 +265,7 @@
             <div class="chart-container">
                 <h3 class="chart-title">Performance Distribution</h3>
                 <div style="margin: 20px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #333;">
                         <span>Excellent (80-100%)</span>
                         <span>{{ excellent_students }} students</span>
                     </div>
@@ -274,7 +274,7 @@
                     </div>
                 </div>
                 <div style="margin: 20px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #333;">
                         <span>Good (60-79%)</span>
                         <span>{{ good_students }} students</span>
                     </div>
@@ -283,13 +283,53 @@
                     </div>
                 </div>
                 <div style="margin: 20px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #333;">
                         <span>Needs Improvement (&lt;60%)</span>
                         <span>{{ poor_students }} students</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: {{ (poor_students / total_students * 100) if total_students > 0 else 0 }}%; background: #e74c3c;"></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Question Pool Analytics -->
+            <div class="chart-container">
+                <h3 class="chart-title">🎯 Question Pool Performance</h3>
+                {% for pool_name, pool_data in pool_analytics.items() %}
+                <div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid {{ '#4a7c59' if pool_data.enabled else '#e74c3c' }};">
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: #4b2e05;">
+                            {% if pool_name == 'endless_mode' %}🐉
+                            {% elif pool_name == 'test_yourself' %}📝
+                            {% elif pool_name == 'level_based' %}🏰
+                            {% endif %}
+                            {{ pool_data.name }}
+                        </h4>
+                        <span style="padding: 3px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; {{ 'background: #d4edda; color: #155724;' if pool_data.enabled else 'background: #f8d7da; color: #721c24;' }}">
+                            {{ 'Active' if pool_data.enabled else 'Disabled' }}
+                        </span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #4b2e05;">{{ pool_data.total_questions }}</div>
+                            <div style="font-size: 0.9em; color: #333;">Available Questions</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #4b2e05;">{{ pool_data.usage_stats.total_attempts }}</div>
+                            <div style="font-size: 0.9em; color: #333;">Total Attempts</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #4b2e05;">{{ "%.1f"|format(pool_data.usage_stats.avg_performance) }}%</div>
+                            <div style="font-size: 0.9em; color: #333;">Avg Performance</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{{ url_for('teacher_question_pools') }}" class="btn" style="background: #4a7c59; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px;">
+                        🎯 Manage Question Pools
+                    </a>
                 </div>
             </div>
 
@@ -319,6 +359,9 @@
         <!-- Top Performers -->
         <div class="chart-container">
             <h3 class="chart-title">🏆 Leaderboard - Top Performers</h3>
+            <p style="color: #333; font-size: 0.9em; margin-bottom: 15px;">
+                📝 <strong>Note:</strong> Only showing data for registered students. Anonymous players are excluded from analytics.
+            </p>
             <table class="leaderboard-table">
                 <thead>
                     <tr>
@@ -363,7 +406,7 @@
         <!-- Most Challenging Questions -->
         <div class="chart-container">
             <h3 class="chart-title">🎯 Most Challenging Questions</h3>
-            <p style="color: #666; margin-bottom: 20px;">Questions with lowest success rates - consider reviewing these topics</p>
+            <p style="color: #333; margin-bottom: 20px;">Questions with lowest success rates - consider reviewing these topics</p>
             {% for question in challenging_questions[:5] %}
             <div class="question-analysis">
                 <h4 style="color: #4b2e05;">Question ID: {{ question.id }}</h4>
@@ -396,6 +439,9 @@
         <!-- Recent Activity -->
         <div class="chart-container">
             <h3 class="chart-title">📈 Recent Activity (Last 7 Days)</h3>
+            <p style="color: #333; font-size: 0.9em; margin-bottom: 15px;">
+                📝 <strong>Note:</strong> Only showing activity from registered students.
+            </p>
             <table class="leaderboard-table">
                 <thead>
                     <tr>

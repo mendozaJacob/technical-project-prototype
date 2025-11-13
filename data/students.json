@@ -6,7 +6,8 @@
     "full_name": "John Doe",
     "email": "",
     "created_date": "2025-11-13T00:25:31.377167",
-    "last_login": "2025-11-13T01:17:23.919276",
-    "active": true
+    "last_login": "2025-11-13T02:30:45.825761",
+    "active": true,
+    "selected_character": 1
   }
 ]

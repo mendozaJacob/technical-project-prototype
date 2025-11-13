@@ -42,6 +42,8 @@ Quiz Battle: Dungeons of Knowledge is a comprehensive educational platform that 
 
 ### 🎮 For Students
 - **Multiple Game Modes**: Adventure Mode, Endless Mode, Test Yourself
+- **Diverse Question Types**: Short Answer, Multiple Choice, True/False questions
+- **Intelligent Answer Matching**: Enhanced fuzzy matching for flexible responses
 - **Character Customization**: Choose from 16 different avatars
 - **Real-time Combat**: HP-based battle system with enemies
 - **Progress Tracking**: Save and load game progress
@@ -51,17 +53,21 @@ Quiz Battle: Dungeons of Knowledge is a comprehensive educational platform that 
 
 ### 👨‍🏫 For Teachers
 - **Complete Student Management**: Add, edit, and monitor students
-- **AI-Powered Question Generation**: Upload curriculum and generate questions automatically
+- **Multi-Type Question Creation**: Create Short Answer, Multiple Choice, and True/False questions
+- **AI-Powered Question Generation**: Upload curriculum and generate mixed question types automatically
+- **Enhanced Answer Evaluation**: Advanced fuzzy matching with multiple validation methods
 - **Advanced Settings Control**: Configure 22+ game parameters
 - **Performance Analytics**: Track student progress and performance
-- **Intelligent Grading**: AI-powered answer evaluation
-- **Content Management**: Manage questions, levels, and enemies
+- **Intelligent Grading**: AI-powered answer evaluation with semantic understanding
+- **Content Management**: Manage questions, levels, and enemies with type-based filtering
 
 ### 🤖 AI Integration
-- **OpenAI GPT Integration** for question generation
+- **OpenAI GPT Integration** for intelligent question generation
+- **Multi-Type Question Creation**: Automatically generates Short Answer, Multiple Choice, and True/False questions
 - **Curriculum Processing** from PDF, DOCX, TXT, and MD files
-- **Semantic Answer Evaluation** for open-ended questions
-- **Adaptive Difficulty** based on student performance
+- **Question Type Selection**: Choose which types of questions to generate
+- **Semantic Answer Evaluation** with enhanced fuzzy matching algorithms
+- **Adaptive Difficulty** based on student performance and question type complexity
 
 ## 🚀 Quick Start
 
@@ -105,6 +111,38 @@ Open your browser to `http://localhost:5000`
 3. **Game Configuration**: Adjust settings in the teacher dashboard
 4. **Content Review**: Check questions and levels are appropriate
 
+## 🎯 Question Types System
+
+### 📝 Supported Question Types
+
+**Short Answer Questions**
+- Traditional text input with enhanced fuzzy matching
+- Supports alternative keywords and partial matches
+- Word-based similarity matching (70% overlap threshold)
+- Sequence similarity matching using advanced algorithms
+
+**Multiple Choice Questions** 
+- 2-4 answer options with letter selection (A, B, C, D)
+- Students can select by clicking options or typing letters
+- Visual feedback for selected answers
+- Supports both letter and full text matching
+
+**True/False Questions**
+- Simple boolean questions with flexible input recognition
+- Accepts multiple formats: true/t/yes/y/1 and false/f/no/n/0
+- Interactive true/false buttons with visual feedback
+- Ideal for concept verification and quick assessments
+
+### 🤖 Enhanced Fuzzy Matching
+
+The advanced answer evaluation system includes:
+- **Exact matching** for precise answers
+- **Partial substring matching** for incomplete but correct responses
+- **Word-based analysis** with configurable similarity thresholds
+- **Sequence similarity** using difflib algorithms
+- **Flexible input recognition** for true/false and multiple choice
+- **Semantic understanding** for natural language responses
+
 ## 🎮 Game Modes
 
 ### 🗡️ Adventure Mode
@@ -140,9 +178,11 @@ Open your browser to `http://localhost:5000`
 
 ### 🤖 AI Question Generator
 - **File Upload**: Support for PDF, DOCX, TXT, and MD files
+- **Question Type Selection**: Choose Short Answer, Multiple Choice, True/False, or mixed
 - **Content Analysis**: AI extracts key concepts from curriculum
-- **Question Generation**: Creates diverse question types automatically
-- **Quality Control**: Review and approve generated questions
+- **Intelligent Generation**: Creates appropriate options for Multiple Choice, proper True/False statements
+- **Quality Control**: Review and approve generated questions with type-specific validation
+- **Bulk Creation**: Generate multiple question types in a single operation
 
 ### ⚙️ Advanced Settings
 **22 Configurable Parameters**:
@@ -200,13 +240,33 @@ Open your browser to `http://localhost:5000`
 
 **1. Add New Questions**
 ```json
-// In data/questions.json
+// Short Answer Question
 {
   "id": 101,
   "q": "Which command shows disk usage?",
   "answer": "df -h",
+  "type": "short_answer",
   "keywords": ["df", "du", "disk usage"],
   "feedback": "The 'df -h' command displays filesystem disk space usage."
+}
+
+// Multiple Choice Question
+{
+  "id": 102,
+  "q": "Which command lists directory contents?",
+  "answer": "ls",
+  "type": "multiple_choice",
+  "options": ["ls", "dir", "list", "show"],
+  "feedback": "The 'ls' command lists directory contents in Linux."
+}
+
+// True/False Question
+{
+  "id": 103,
+  "q": "Linux is an open-source operating system.",
+  "answer": "true",
+  "type": "true_false",
+  "feedback": "Linux is indeed open-source and freely available."
 }
 ```
 
@@ -247,9 +307,12 @@ Open your browser to `http://localhost:5000`
 
 **Question Guidelines**:
 - Keep questions under 200 characters
-- Provide comprehensive feedback
-- Include alternative answer keywords
-- Test with actual students
+- Choose appropriate question type for the content
+- For Multiple Choice: Provide 2-4 clear, distinct options
+- For True/False: Ensure statements are definitively true or false
+- For Short Answer: Include alternative answer keywords for fuzzy matching
+- Provide comprehensive feedback for all question types
+- Test with actual students across different question types
 
 **Level Organization**:
 - 10 questions per level recommended
@@ -324,10 +387,14 @@ Open your browser to `http://localhost:5000`
     "id": 1,                    // Required: Unique integer ID
     "q": "Question text?",      // Required: The actual question
     "answer": "correct answer", // Required: Primary correct answer
-    "keywords": [               // Required: Alternative answers
+    "type": "short_answer",     // Required: Question type (short_answer|multiple_choice|true_false)
+    "options": ["A", "B", "C"], // Required for multiple_choice: Array of answer options
+    "keywords": [               // Optional: Alternative answers (mainly for short_answer)
       "keyword1", "keyword2"
     ],
-    "feedback": "Explanation"   // Required: Educational feedback
+    "difficulty": "medium",     // Optional: Difficulty level (easy|medium|hard)
+    "feedback": "Explanation",  // Required: Educational feedback
+    "ai_generated": false       // Optional: Whether question was AI-generated
   }
 ]
 ```
@@ -411,6 +478,8 @@ Open your browser to `http://localhost:5000`
 - Validate JSON syntax in data files
 - Check question IDs match between files
 - Verify file permissions for read/write
+- Ensure question type field is valid (short_answer, multiple_choice, true_false)
+- For multiple choice questions, verify options array is properly formatted
 
 **Images Not Loading**
 - Confirm image files exist in static directories

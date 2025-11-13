@@ -257,6 +257,24 @@ body {
     line-height: 1.4;
 }
 
+.name-input-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.name-input-section input {
+    font-family: 'Times New Roman', Times, serif;
+    color: #4b2e05;
+    background: #f8f5e8;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.name-input-section input:focus {
+    border-color: #2d5016 !important;
+    box-shadow: 0 0 8px rgba(45, 80, 22, 0.3);
+}
+
 .login-modal-buttons {
     display: flex;
     gap: 15px;

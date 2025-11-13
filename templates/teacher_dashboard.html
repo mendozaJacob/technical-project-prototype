@@ -8,7 +8,7 @@
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
-            color: #f3eac2; 
+            color: #333; 
             margin: 0;
             padding: 20px;
         }
@@ -47,7 +47,7 @@
             margin-bottom: 15px;
         }
         .feature-card p {
-            color: #666;
+            color: #333;
             margin-bottom: 20px;
             line-height: 1.5;
         }
@@ -97,7 +97,7 @@
             color: #4b2e05;
         }
         .stat-label {
-            color: #666;
+            color: #333;
             font-size: 0.9em;
         }
         .header-controls {
@@ -160,6 +160,13 @@
                 <h3>📝 Question Management</h3>
                 <p>Manually add, edit, or remove questions from the question bank.</p>
                 <a href="{{ url_for('teacher_questions') }}" class="btn">Manage Questions</a>
+            </div>
+            
+            <!-- Question Pool Management -->
+            <div class="feature-card">
+                <h3>🎯 Question Pools</h3>
+                <p>Configure separate question sets for different game modes (Endless, Test Yourself, Levels).</p>
+                <a href="{{ url_for('teacher_question_pools') }}" class="btn">Manage Pools</a>
             </div>
             
             <!-- AI Grading Setup -->

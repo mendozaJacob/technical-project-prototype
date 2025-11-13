@@ -94,11 +94,19 @@
 <body>
     <div class="level-select-container">
         <div style="text-align: left; margin-bottom: 10px;">
-            <a href="{{ url_for('index') }}" style="text-decoration: none;">
-                <button type="button" style="font-family: 'Times New Roman', Times, serif; background: #4b2e05; color: #f3eac2; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1em;">
-                    ← Back to Home
-                </button>
-            </a>
+            {% if session.get('is_student') %}
+                <a href="{{ url_for('student_dashboard') }}" style="text-decoration: none;">
+                    <button type="button" style="font-family: 'Times New Roman', Times, serif; background: #4b2e05; color: #f3eac2; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1em;">
+                        ← Back to Student Portal
+                    </button>
+                </a>
+            {% else %}
+                <a href="{{ url_for('index') }}" style="text-decoration: none;">
+                    <button type="button" style="font-family: 'Times New Roman', Times, serif; background: #4b2e05; color: #f3eac2; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1em;">
+                        ← Back to Home
+                    </button>
+                </a>
+            {% endif %}
         </div>
         <div class="level-title">🛡️ Select Your Dungeon 🐉</div>
         <form method="post">

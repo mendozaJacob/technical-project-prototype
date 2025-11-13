@@ -15,7 +15,11 @@
         <p>Enemy HP: {{ enemy_hp }}</p>
         <p>Level Reached: {{ level }}</p>
         <p>Enemy Faced: {{ enemy['name'] }} {{ enemy['avatar'] }}</p>
-        <a href="{{ url_for('index') }}" class="btn">Play Again</a>
+        {% if session.get('is_student') %}
+            <a href="{{ url_for('student_dashboard') }}" class="btn">Back to Student Portal</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn">Play Again</a>
+        {% endif %}
         {% if can_advance %}
             <form method="post" action="{{ url_for('select_level') }}">
                 <input type="hidden" name="level" value="{{ next_level }}">

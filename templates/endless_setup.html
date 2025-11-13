@@ -76,9 +76,15 @@
         </form>
 
         <div style="margin-top: 30px;">
-            <a href="{{ url_for('index') }}" class="btn" style="background: #8b7355; text-decoration: none; display: inline-block;">
-                🏠 Back to Home
-            </a>
+            {% if session.get('is_student') %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn" style="background: #8b7355; text-decoration: none; display: inline-block;">
+                    🏠 Back to Student Portal
+                </a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn" style="background: #8b7355; text-decoration: none; display: inline-block;">
+                    🏠 Back to Home
+                </a>
+            {% endif %}
         </div>
     </div>
 </body>

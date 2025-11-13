@@ -21,7 +21,11 @@
         {% else %}
             <p>No results found for your query.</p>
         {% endif %}
-        <a href="{{ url_for('index') }}" class="btn">Back to Home</a>
+        {% if session.get('is_student') %}
+            <a href="{{ url_for('student_dashboard') }}" class="btn">Back to Student Portal</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn">Back to Home</a>
+        {% endif %}
     </div>
 </body>
 </html>

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "0001",
+    "username": "Student1",
+    "password": "password123",
+    "full_name": "John Doe",
+    "email": "",
+    "created_date": "2025-11-13T00:25:31.377167",
+    "last_login": "2025-11-13T00:26:07.846647",
+    "active": true
+  }
+]

@@ -587,6 +587,32 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Test Yourself Mode</div>
+                            <div class="setting-description">Enable/disable the Test Yourself game mode</div>
+                        </div>
+                        <div class="setting-control">
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="test_yourself_enabled" {{ 'checked' if settings.test_yourself_enabled else '' }}>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Endless Mode</div>
+                            <div class="setting-description">Enable/disable the Endless Mode game option</div>
+                        </div>
+                        <div class="setting-control">
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="endless_mode_enabled" {{ 'checked' if settings.endless_mode_enabled else '' }}>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -635,7 +661,7 @@
                 // Reset checkboxes
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => {
-                    cb.checked = ['show_timer', 'show_progress', 'analytics_enabled', 'auto_save'].includes(cb.name);
+                    cb.checked = ['show_timer', 'show_progress', 'analytics_enabled', 'auto_save', 'test_yourself_enabled', 'endless_mode_enabled'].includes(cb.name);
                 });
                 
                 // Reset select
@@ -716,7 +742,9 @@
                     'analytics_enabled': 'Analytics Tracking',
                     'auto_save': 'Auto-Save Progress',
                     'session_timeout': 'Session Timeout',
-                    'timeout_behavior': 'Timeout Behavior'
+                    'timeout_behavior': 'Timeout Behavior',
+                    'test_yourself_enabled': 'Test Yourself Mode',
+                    'endless_mode_enabled': 'Endless Mode'
                 };
                 
                 const changedList = changedSettings.map(setting => 

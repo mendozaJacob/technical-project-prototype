@@ -18,7 +18,7 @@
   "animation_speed": "normal",
   "debug_mode": false,
   "analytics_enabled": true,
-  "auto_save": true,
+  "auto_save": false,
   "session_timeout": 30,
   "timeout_behavior": "fail"
 }

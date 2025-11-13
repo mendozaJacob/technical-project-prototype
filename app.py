@@ -9,6 +9,7 @@ import time
 import requests
 import hashlib
 import difflib
+from datetime import datetime
 from functools import wraps
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
@@ -735,13 +736,14 @@ def select_level():
 # Route for the home page
 @app.route('/')
 def index():
+    # Get settings to control feature visibility
+    settings = get_current_game_settings()
     # Always redirect to level selection if no level is selected
     # If no selected level, show the merged landing page
     if 'selected_level' not in session:
-        return render_template('index.html')
+        return render_template('index.html', settings=settings)
     # If a selected level exists, render the index page
-    return render_template('index.html')
-    return render_template('index.html')
+    return render_template('index.html', settings=settings)
 
 
 # Home route (explicit)
@@ -1083,6 +1085,24 @@ def result():
         correct_answers=session.get('correct_answers', 0),
         wrong_answers=session.get('wrong_answers', 0)
     )
+    
+    # Save student progress if logged in
+    if session.get('is_student') and session.get('student_id'):
+        student_id = session.get('student_id')
+        level = session.get('selected_level')
+        correct_answers = session.get('correct_answers', 0)
+        wrong_answers = session.get('wrong_answers', 0)
+        total_questions = correct_answers + wrong_answers
+        
+        update_student_progress(
+            student_id=student_id,
+            game_type='adventure_mode',
+            level=level,
+            score=final_score,
+            correct_answers=correct_answers,
+            total_questions=total_questions,
+            time_taken=total_time
+        )
 
     # If the player died, show lose page
     if session.get('player_hp', 0) <= 0:
@@ -1224,6 +1244,12 @@ import random
 
 @app.route('/test_yourself', methods=['GET', 'POST'])
 def test_yourself():
+    # Check if Test Yourself mode is enabled
+    settings = get_current_game_settings()
+    if not settings.get('test_yourself_enabled', True):
+        flash('Test Yourself mode is currently disabled.', 'error')
+        return redirect(url_for('index'))
+    
     # Only reset test state for a true new start (GET with ?new=1)
     if request.method == 'GET' and request.args.get('new') == '1':
         session.pop('test_question_ids', None)
@@ -1312,6 +1338,12 @@ def test_yourself():
 
 @app.route('/test_yourself_result')
 def test_yourself_result():
+    # Check if Test Yourself mode is enabled
+    settings = get_current_game_settings()
+    if not settings.get('test_yourself_enabled', True):
+        flash('Test Yourself mode is currently disabled.', 'error')
+        return redirect(url_for('index'))
+    
     # Use the question IDs to determine total
     total = len(session.get('test_question_ids', []))
     correct = session.get('test_correct', 0)
@@ -1319,6 +1351,24 @@ def test_yourself_result():
     passed = percent >= 75
     # Get user answers for review
     user_answers = session.get('test_user_answers', [])
+    
+    # Save student progress if logged in
+    if session.get('is_student') and session.get('student_id'):
+        student_id = session.get('student_id')
+        test_start_time = session.get('test_start_time', time.time())
+        time_taken = time.time() - test_start_time
+        score = correct * 10  # Simple scoring system
+        
+        update_student_progress(
+            student_id=student_id,
+            game_type='test_yourself',
+            level=None,
+            score=score,
+            correct_answers=correct,
+            total_questions=total,
+            time_taken=time_taken
+        )
+    
     # Clear session state for test mode
     session.pop('test_question_ids', None)
     session.pop('test_q_index', None)
@@ -1405,6 +1455,12 @@ import random
 
 @app.route('/endless')
 def endless():
+    # Check if Endless Mode is enabled
+    settings = get_current_game_settings()
+    if not settings.get('endless_mode_enabled', True):
+        flash('Endless Mode is currently disabled.', 'error')
+        return redirect(url_for('index'))
+    
     # Show setup page if no player name is set or if this is a fresh start
     if not session.get('player_name') or not session.get('endless_score_initialized'):
         return render_template('endless_setup.html')
@@ -1418,6 +1474,11 @@ def endless():
 
 @app.route('/endless/start', methods=['POST'])
 def endless_start():
+    # Check if Endless Mode is enabled
+    settings = get_current_game_settings()
+    if not settings.get('endless_mode_enabled', True):
+        flash('Endless Mode is currently disabled.', 'error')
+        return redirect(url_for('index'))
     # Get player name from form
     player_name = request.form.get('player_name', '').strip()
     if not player_name:
@@ -1443,6 +1504,11 @@ def endless_start():
 
 @app.route('/endless/game', methods=['GET', 'POST'])
 def endless_game():
+    # Check if Endless Mode is enabled
+    settings = get_current_game_settings()
+    if not settings.get('endless_mode_enabled', True):
+        flash('Endless Mode is currently disabled.', 'error')
+        return redirect(url_for('index'))
     # Check if player name is set, if not redirect to setup
     if not session.get('player_name'):
         return redirect(url_for('endless'))
@@ -1542,6 +1608,12 @@ def endless_game():
 
 @app.route('/endless_result', methods=['GET', 'POST'])
 def endless_result():
+    # Check if Endless Mode is enabled
+    settings = get_current_game_settings()
+    if not settings.get('endless_mode_enabled', True):
+        flash('Endless Mode is currently disabled.', 'error')
+        return redirect(url_for('index'))
+    
     score = session.get('endless_score', 0)
     highest_streak = session.get('endless_highest_streak', 0)
     total_answered = session.get('endless_total_answered', 0)
@@ -1556,6 +1628,20 @@ def endless_result():
             player_name = request.form.get('player_name', 'Anonymous')
             session['player_name'] = player_name
         save_leaderboard(player_name, score, total_time, correct, wrong)
+        
+        # Save student progress if logged in
+        if session.get('is_student') and session.get('student_id'):
+            student_id = session.get('student_id')
+            update_student_progress(
+                student_id=student_id,
+                game_type='endless_mode',
+                level=None,
+                score=score,
+                correct_answers=correct,
+                total_questions=total_answered,
+                time_taken=total_time
+            )
+        
         # Clear session state for endless mode
         session.pop('endless_score', None)
         session.pop('endless_hp', None)
@@ -2383,6 +2469,231 @@ def teacher_delete_level(level_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+# Student Management Routes
+@app.route('/teacher/students')
+@teacher_required
+def teacher_students():
+    students = load_students()
+    progress_data = load_student_progress()
+    
+    # Add progress summary to each student
+    for student in students:
+        student_progress = progress_data.get(student['id'], {})
+        student['games_played'] = student_progress.get('games_played', 0)
+        student['best_score'] = student_progress.get('best_score', 0)
+        student['average_accuracy'] = student_progress.get('stats', {}).get('average_accuracy', 0)
+    
+    return render_template('teacher_students.html', students=students)
+
+@app.route('/teacher/add-student', methods=['POST'])
+@teacher_required
+def teacher_add_student():
+    try:
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        full_name = request.form['full_name'].strip()
+        email = request.form.get('email', '').strip()
+        
+        if not username or not password or not full_name:
+            flash('Username, password, and full name are required.', 'error')
+            return redirect(url_for('teacher_students'))
+        
+        success, result = create_student(username, password, full_name, email)
+        
+        if success:
+            flash(f'Student "{full_name}" created successfully! Student ID: {result}', 'success')
+        else:
+            flash(f'Error creating student: {result}', 'error')
+    
+    except Exception as e:
+        flash(f'Error adding student: {str(e)}', 'error')
+    
+    return redirect(url_for('teacher_students'))
+
+@app.route('/teacher/edit-student', methods=['POST'])
+@teacher_required
+def teacher_edit_student():
+    try:
+        student_id = request.form['student_id']
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        full_name = request.form['full_name'].strip()
+        email = request.form.get('email', '').strip()
+        active = request.form.get('active') == 'on'
+        
+        students = load_students()
+        student = next((s for s in students if s['id'] == student_id), None)
+        
+        if not student:
+            flash('Student not found.', 'error')
+            return redirect(url_for('teacher_students'))
+        
+        # Check if username is already taken by another student
+        if any(s['username'] == username and s['id'] != student_id for s in students):
+            flash('Username already exists.', 'error')
+            return redirect(url_for('teacher_students'))
+        
+        # Update student data
+        student['username'] = username
+        if password:  # Only update password if provided
+            student['password'] = password
+        student['full_name'] = full_name
+        student['email'] = email
+        student['active'] = active
+        
+        if save_students(students):
+            flash(f'Student "{full_name}" updated successfully!', 'success')
+        else:
+            flash('Error saving student data.', 'error')
+    
+    except Exception as e:
+        flash(f'Error updating student: {str(e)}', 'error')
+    
+    return redirect(url_for('teacher_students'))
+
+@app.route('/teacher/delete-student/<student_id>', methods=['POST'])
+@teacher_required
+def teacher_delete_student(student_id):
+    try:
+        students = load_students()
+        original_count = len(students)
+        students = [s for s in students if s['id'] != student_id]
+        
+        if len(students) == original_count:
+            return jsonify({'success': False, 'error': 'Student not found'})
+        
+        if save_students(students):
+            # Also remove student's progress data
+            progress_data = load_student_progress()
+            if student_id in progress_data:
+                del progress_data[student_id]
+                save_student_progress(progress_data)
+            
+            return jsonify({'success': True, 'message': 'Student deleted successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Error saving data'})
+    
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/student-progress/<student_id>')
+@teacher_required
+def teacher_student_progress(student_id):
+    student = get_student_by_id(student_id)
+    if not student:
+        flash('Student not found.', 'error')
+        return redirect(url_for('teacher_students'))
+    
+    progress = get_student_progress(student_id)
+    return render_template('teacher_student_progress.html', student=student, progress=progress)
+
+# Student Authentication Routes
+@app.route('/student/login', methods=['GET', 'POST'])
+def student_login():
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        
+        student = authenticate_student(username, password)
+        if student:
+            session['student_id'] = student['id']
+            session['student_username'] = student['username']
+            session['student_name'] = student['full_name']
+            session['is_student'] = True
+            flash(f'Welcome back, {student["full_name"]}!', 'success')
+            return redirect(url_for('student_dashboard'))
+        else:
+            flash('Invalid username or password.', 'error')
+    
+    return render_template('student_login.html')
+
+@app.route('/student/logout')
+def student_logout():
+    # Clear student session
+    for key in list(session.keys()):
+        if key.startswith('student_') or key == 'is_student':
+            session.pop(key, None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('student_login'))
+
+@app.route('/check_student_session')
+def check_student_session():
+    """Check if a student is currently logged in"""
+    is_logged_in = session.get('is_student', False) and 'student_id' in session
+    return jsonify({
+        'logged_in': is_logged_in,
+        'student_name': session.get('student_name', '') if is_logged_in else ''
+    })
+
+@app.route('/student/dashboard')
+def student_dashboard():
+    if not session.get('is_student'):
+        flash('Please log in to access your dashboard.', 'error')
+        return redirect(url_for('student_login'))
+    
+    student_id = session.get('student_id')
+    student = get_student_by_id(student_id)
+    progress = get_student_progress(student_id)
+    
+    # Get settings to check available game modes
+    settings = get_current_game_settings()
+    
+    return render_template('student_dashboard.html', student=student, progress=progress, settings=settings)
+
+@app.route('/student/profile', methods=['GET', 'POST'])
+def student_profile():
+    if not session.get('is_student'):
+        flash('Please log in to access your profile.', 'error')
+        return redirect(url_for('student_login'))
+    
+    student_id = session.get('student_id')
+    student = get_student_by_id(student_id)
+    
+    if not student:
+        flash('Student account not found.', 'error')
+        return redirect(url_for('student_login'))
+    
+    if request.method == 'POST':
+        # Get form data
+        new_email = request.form.get('email', '').strip()
+        current_password = request.form.get('current_password', '').strip()
+        new_password = request.form.get('new_password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        
+        # Validate current password
+        if current_password != student['password']:
+            flash('Current password is incorrect.', 'error')
+            return render_template('student_profile.html', student=student)
+        
+        # Update email
+        student['email'] = new_email
+        
+        # Update password if provided
+        if new_password:
+            if new_password != confirm_password:
+                flash('New passwords do not match.', 'error')
+                return render_template('student_profile.html', student=student)
+            
+            if len(new_password) < 6:
+                flash('Password must be at least 6 characters long.', 'error')
+                return render_template('student_profile.html', student=student)
+            
+            student['password'] = new_password
+        
+        # Save updated student data
+        students = load_students()
+        for i, s in enumerate(students):
+            if s['id'] == student_id:
+                students[i] = student
+                break
+        
+        if save_students(students):
+            flash('Profile updated successfully!', 'success')
+        else:
+            flash('Error updating profile. Please try again.', 'error')
+    
+    return render_template('student_profile.html', student=student)
+
 # Helper functions for teacher portal
 def load_game_settings():
     """Load game settings from JSON file or return defaults"""
@@ -2408,7 +2719,9 @@ def load_game_settings():
         'analytics_enabled': True,
         'auto_save': True,
         'session_timeout': 30,
-        'timeout_behavior': 'penalty'  # 'penalty' or 'fail'
+        'timeout_behavior': 'penalty',  # 'penalty' or 'fail'
+        'test_yourself_enabled': True,
+        'endless_mode_enabled': True
     }
     
     try:
@@ -2441,6 +2754,168 @@ def calculate_average_score():
 
 def count_ai_generated_questions():
     return sum(1 for q in questions if q.get('ai_generated', False))
+
+# Student Management Functions
+def load_students():
+    """Load students from JSON file"""
+    try:
+        with open('data/students.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def save_students(students):
+    """Save students to JSON file"""
+    try:
+        os.makedirs('data', exist_ok=True)
+        with open('data/students.json', 'w', encoding='utf-8') as f:
+            json.dump(students, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Error saving students: {e}")
+        return False
+
+def create_student(username, password, full_name, email=None):
+    """Create a new student account"""
+    students = load_students()
+    
+    # Check if username already exists
+    if any(s['username'] == username for s in students):
+        return False, "Username already exists"
+    
+    # Generate unique student ID
+    student_id = str(len(students) + 1).zfill(4)
+    
+    new_student = {
+        'id': student_id,
+        'username': username,
+        'password': password,  # In production, this should be hashed
+        'full_name': full_name,
+        'email': email or '',
+        'created_date': datetime.now().isoformat(),
+        'last_login': None,
+        'active': True
+    }
+    
+    students.append(new_student)
+    if save_students(students):
+        return True, student_id
+    return False, "Failed to save student"
+
+def authenticate_student(username, password):
+    """Authenticate student login"""
+    students = load_students()
+    for student in students:
+        if student['username'] == username and student['password'] == password and student['active']:
+            # Update last login
+            student['last_login'] = datetime.now().isoformat()
+            save_students(students)
+            return student
+    return None
+
+def get_student_by_id(student_id):
+    """Get student by ID"""
+    students = load_students()
+    return next((s for s in students if s['id'] == student_id), None)
+
+def load_student_progress():
+    """Load all student progress data"""
+    try:
+        with open('data/student_progress.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_student_progress(progress_data):
+    """Save student progress data"""
+    try:
+        os.makedirs('data', exist_ok=True)
+        with open('data/student_progress.json', 'w', encoding='utf-8') as f:
+            json.dump(progress_data, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Error saving student progress: {e}")
+        return False
+
+def update_student_progress(student_id, game_type, level, score, correct_answers, total_questions, time_taken):
+    """Update progress for a specific student"""
+    progress_data = load_student_progress()
+    
+    if student_id not in progress_data:
+        progress_data[student_id] = {
+            'games_played': 0,
+            'total_score': 0,
+            'best_score': 0,
+            'levels_completed': [],
+            'game_history': [],
+            'stats': {
+                'total_correct': 0,
+                'total_questions': 0,
+                'average_accuracy': 0,
+                'total_time': 0
+            }
+        }
+    
+    student_progress = progress_data[student_id]
+    
+    # Update game history
+    game_record = {
+        'date': datetime.now().isoformat(),
+        'game_type': game_type,
+        'level': level,
+        'score': score,
+        'correct_answers': correct_answers,
+        'total_questions': total_questions,
+        'time_taken': time_taken,
+        'accuracy': round((correct_answers / total_questions) * 100, 2) if total_questions > 0 else 0
+    }
+    
+    student_progress['game_history'].append(game_record)
+    student_progress['games_played'] += 1
+    student_progress['total_score'] += score
+    
+    # Update best score
+    if score > student_progress['best_score']:
+        student_progress['best_score'] = score
+    
+    # Update level completion
+    if level and level not in student_progress['levels_completed']:
+        student_progress['levels_completed'].append(level)
+        student_progress['levels_completed'].sort()
+    
+    # Update stats
+    student_progress['stats']['total_correct'] += correct_answers
+    student_progress['stats']['total_questions'] += total_questions
+    student_progress['stats']['total_time'] += time_taken
+    
+    if student_progress['stats']['total_questions'] > 0:
+        student_progress['stats']['average_accuracy'] = round(
+            (student_progress['stats']['total_correct'] / student_progress['stats']['total_questions']) * 100, 2
+        )
+    
+    # Keep only last 50 games to prevent file from growing too large
+    if len(student_progress['game_history']) > 50:
+        student_progress['game_history'] = student_progress['game_history'][-50:]
+    
+    progress_data[student_id] = student_progress
+    return save_student_progress(progress_data)
+
+def get_student_progress(student_id):
+    """Get progress for a specific student"""
+    progress_data = load_student_progress()
+    return progress_data.get(student_id, {
+        'games_played': 0,
+        'total_score': 0,
+        'best_score': 0,
+        'levels_completed': [],
+        'game_history': [],
+        'stats': {
+            'total_correct': 0,
+            'total_questions': 0,
+            'average_accuracy': 0,
+            'total_time': 0
+        }
+    })
 
 def recreate_search_index():
     """Recreate the search index after adding new questions"""

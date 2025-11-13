@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Dungeons of Knowledge - My Profile</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #2e3d1f 0%, #1a2312 100%);
+            color: #f8e5b3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f3eac2;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 0 24px rgba(0,0,0,0.5);
+            color: #4b2e05;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .page-title {
+            font-size: 2.5em;
+            color: #4b2e05;
+            margin: 0;
+        }
+        .btn {
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: 'Times New Roman', Times, serif;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .btn-success { background: #2d5016; }
+        .btn-success:hover { background: #3d6a20; }
+        .profile-info {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .form-section {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #4b2e05;
+            border-bottom: 2px solid #4b2e05;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4b2e05;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #4b2e05;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-family: 'Times New Roman', Times, serif;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2d5016;
+            box-shadow: 0 0 8px rgba(45, 80, 22, 0.3);
+        }
+        .form-group input[readonly] {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .flash-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flash-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .password-requirements {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .divider {
+            height: 2px;
+            background: #4b2e05;
+            margin: 30px 0;
+        }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .page-title {
+                font-size: 2em;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="page-title">👤 My Profile</h1>
+            <a href="{{ url_for('student_dashboard') }}" class="btn">← Back to Dashboard</a>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Student Information (Read-only) -->
+        <div class="profile-info">
+            <h3 style="margin-top: 0; color: #4b2e05;">📋 Account Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <strong>Student ID:</strong> {{ student.id }}<br>
+                    <strong>Full Name:</strong> {{ student.full_name }}<br>
+                    <strong>Username:</strong> {{ student.username }}
+                </div>
+                <div>
+                    <strong>Account Status:</strong> {% if student.active %}Active{% else %}Inactive{% endif %}<br>
+                    <strong>Created:</strong> {{ student.created_date[:10] if student.created_date else 'Unknown' }}<br>
+                    <strong>Last Login:</strong> {{ student.last_login[:19].replace('T', ' ') if student.last_login else 'Never' }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Profile Form -->
+        <form method="POST" action="{{ url_for('student_profile') }}">
+            <!-- Email Section -->
+            <div class="form-section">
+                <h3>📧 Email Address</h3>
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" value="{{ student.email or '' }}" placeholder="Enter your email address">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Password Section -->
+            <div class="form-section">
+                <h3>🔒 Change Password</h3>
+                <div class="form-group">
+                    <label for="current_password">Current Password:</label>
+                    <input type="password" id="current_password" name="current_password" required placeholder="Enter current password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="new_password">New Password (optional):</label>
+                    <input type="password" id="new_password" name="new_password" placeholder="Enter new password (leave blank to keep current)">
+                    <div class="password-requirements">
+                        Password must be at least 6 characters long
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm New Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="submit" class="btn btn-success">💾 Update Profile</button>
+                <a href="{{ url_for('student_dashboard') }}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Password confirmation validation
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = this.value;
+            
+            if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+                this.setCustomValidity('Passwords do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('new_password').addEventListener('input', function() {
+            const confirmPassword = document.getElementById('confirm_password');
+            confirmPassword.value = '';
+            confirmPassword.setCustomValidity('');
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const currentPassword = document.getElementById('current_password').value.trim();
+            const newPassword = document.getElementById('new_password').value.trim();
+            const confirmPassword = document.getElementById('confirm_password').value.trim();
+            
+            if (!currentPassword) {
+                e.preventDefault();
+                alert('Please enter your current password.');
+                return false;
+            }
+            
+            if (newPassword && newPassword.length < 6) {
+                e.preventDefault();
+                alert('New password must be at least 6 characters long.');
+                return false;
+            }
+            
+            if (newPassword && newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('New passwords do not match.');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

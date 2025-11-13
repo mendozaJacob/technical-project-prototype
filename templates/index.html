@@ -34,6 +34,37 @@
             color: #f5deb3;
             margin-top: 6px;
         }
+        .teacher-login-bottom {
+            text-align: center;
+            margin: 30px auto 20px;
+            padding: 15px;
+        }
+        .teacher-login-bottom .teacher-login-btn {
+            background: #4b2e05;
+            color: #f3eac2;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: bold;
+            border: 2px solid #b8860b;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .teacher-login-bottom .teacher-login-btn:hover {
+            background: #2e3d1f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        @media (max-width: 600px) {
+            .site-title {
+                font-size: 2.2em;
+            }
+            .teacher-login-bottom .teacher-login-btn {
+                font-size: 0.9em;
+                padding: 10px 20px;
+            }
+        }
         .scroll-box {
             background: rgba(40, 20, 10, 0.85);
             border: 3px solid #b8860b;
@@ -98,78 +129,115 @@
 
         <div class="controls">
             <a href="{{ url_for('select_level') }}" class="btn">🎮 Start Game</a>
+            {% if settings and settings.test_yourself_enabled %}
             <a href="{{ url_for('test_yourself', new=1) }}" class="btn">🧪 Test Yourself</a>
+            {% endif %}
+            {% if settings and settings.endless_mode_enabled %}
             <a href="{{ url_for('endless') }}" class="btn">♾️ Endless Mode</a>
+            {% endif %}
             <a href="{{ url_for('howto') }}" class="btn small">📜 How to Play</a>
             
-            <!-- Auto-save Load Progress Section -->
-            <div id="auto-save-section" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid #b8860b;">
-                <div style="color: #f0d9b5; margin-bottom: 10px; font-size: 0.9em;">💾 Load Saved Progress</div>
-                <form onsubmit="loadProgress(event)" style="display: flex; flex-direction: column; gap: 8px;">
-                    <input type="text" id="player-name-input" placeholder="Enter your name..." 
-                           style="padding: 8px; border-radius: 4px; border: 1px solid #b8860b; background: #2a1a0f; color: #f0d9b5; text-align: center;">
-                    <button type="submit" class="btn small" style="margin: 0;">🔄 Load Progress</button>
-                </form>
-                <div id="save-status" style="margin-top: 8px; font-size: 0.8em; color: #d0d0d0;"></div>
+            <!-- Student Login Section -->
+            <div style="margin-top: 20px; padding: 15px; background: rgba(75, 46, 5, 0.3); border-radius: 8px; border: 1px solid #b8860b;">
+                <div style="color: #f0d9b5; margin-bottom: 15px; font-size: 0.9em; text-align: center;">📚 Student Login to Track Your Progress</div>
+                <div style="display: flex; justify-content: center;">
+                    <a href="{{ url_for('student_login') }}" class="btn" style="background: #2d5016; min-width: 180px; text-align: center;">🎓 Student Login</a>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.8em; color: #d0d0d0; text-align: center;">Login to save your progress and track your learning journey!</div>
             </div>
             
             <div style="margin-top:14px; font-size:0.9em; color:#e6d3b0;">Already have a level selected? Continue to play.</div>
         </div>
     </div>
 
+    <!-- Teacher Login Section -->
+    <div class="teacher-login-bottom">
+        <a href="{{ url_for('teacher_login') }}" class="teacher-login-btn">👨‍🏫 Teacher Login</a>
+    </div>
+
     <footer>
         <p>&copy; Quiz Battle — Built for learning and fun</p>
-        <div style="margin-top: 10px;">
-            <a href="{{ url_for('teacher_login') }}" style="color: #b8860b; text-decoration: none; font-size: 0.9em;">
-                🎓 Teacher Portal
-            </a>
-        </div>
     </footer>
 
     <script>
-        // Auto-save functionality
-        function loadProgress(event) {
-            event.preventDefault();
-            const playerName = document.getElementById('player-name-input').value.trim();
-            if (!playerName) {
-                document.getElementById('save-status').textContent = 'Please enter your name first.';
-                return;
-            }
-
-            // Check if auto-save exists first
-            fetch(`/check_auto_save/${encodeURIComponent(playerName)}`)
+        // Login prompt functionality
+        function checkLoginAndStartGame(gameMode) {
+            // Check if user is logged in as student
+            fetch('/check_student_session')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.exists) {
-                        const saveDate = new Date(data.timestamp * 1000).toLocaleString();
-                        if (confirm(`Found saved progress!\nLevel: ${data.level}\nScore: ${data.score}\nSaved: ${saveDate}\n\nDo you want to load this progress?`)) {
-                            // Create form and submit to load progress
-                            const form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = '/load_progress';
-                            
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'player_name';
-                            input.value = playerName;
-                            
-                            form.appendChild(input);
-                            document.body.appendChild(form);
-                            form.submit();
-                        }
+                    if (data.logged_in) {
+                        // Student is logged in, proceed to game
+                        window.location.href = gameMode;
                     } else {
-                        document.getElementById('save-status').textContent = 'No saved progress found for this name.';
+                        // Show login prompt
+                        showLoginPrompt(gameMode);
                     }
                 })
                 .catch(error => {
-                    document.getElementById('save-status').textContent = 'Error checking for saved progress.';
-                    console.error('Error:', error);
+                    console.error('Error checking login status:', error);
+                    // On error, show login prompt to be safe
+                    showLoginPrompt(gameMode);
                 });
         }
 
-        // Check if player name input changes
-        document.getElementById('player-name-input').addEventListener('input', function() {
-            document.getElementById('save-status').textContent = '';
+        function showLoginPrompt(gameMode) {
+            const modal = document.createElement('div');
+            modal.className = 'login-modal';
+            modal.innerHTML = `
+                <div class="login-modal-content">
+                    <h3>🎮 Student Login Required</h3>
+                    <p>Please log in to your student account to start playing and save your progress!</p>
+                    <div class="login-modal-buttons">
+                        <button onclick="window.location.href='/student/login'" class="login-btn">Student Login</button>
+                        <button onclick="continueAsGuest('${gameMode}')" class="guest-btn">Play as Guest</button>
+                        <button onclick="closeLoginModal()" class="close-btn">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function continueAsGuest(gameMode) {
+            closeLoginModal();
+            window.location.href = gameMode;
+        }
+
+        function closeLoginModal() {
+            const modal = document.querySelector('.login-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Update game mode buttons to use the login check
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adventure Mode
+            const adventureBtn = document.querySelector('a[href="/select_level"]');
+            if (adventureBtn) {
+                adventureBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    checkLoginAndStartGame('/select_level');
+                });
+            }
+
+            // Test Yourself
+            const testBtn = document.querySelector('a[href="/test_yourself"]');
+            if (testBtn) {
+                testBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    checkLoginAndStartGame('/test_yourself');
+                });
+            }
+
+            // Endless Mode
+            const endlessBtn = document.querySelector('a[href="/endless"]');
+            if (endlessBtn) {
+                endlessBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    checkLoginAndStartGame('/endless');
+                });
+            }
         });
     </script>
 </body>

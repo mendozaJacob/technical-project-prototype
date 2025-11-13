@@ -305,6 +305,15 @@ body {
     transform: translateY(-2px);
 }
 
+/* Progress bar colors */
+.progress-good {
+    background: #4a7c59 !important;
+}
+
+.progress-poor {
+    background: #e74c3c !important;
+}
+
 /* Responsive design for modal */
 @media (max-width: 600px) {
     .login-modal-buttons {

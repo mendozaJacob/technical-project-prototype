@@ -372,16 +372,22 @@
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <strong>Success Rate: </strong>
-                        <span style="color: {{ '#4a7c59' if question.success_rate >= 70 else '#e74c3c' }};">
-                            {{ question.success_rate }}%
-                        </span>
+                        {% if question.success_rate >= 70 %}
+                        <span style="color: #4a7c59;">{{ question.success_rate }}%</span>
+                        {% else %}
+                        <span style="color: #e74c3c;">{{ question.success_rate }}%</span>
+                        {% endif %}
                     </div>
                     <div>
                         <strong>Attempts:</strong> {{ question.total_attempts }}
                     </div>
                 </div>
                 <div class="progress-bar" style="margin-top: 10px;">
-                    <div class="progress-fill" style="width: {{ question.success_rate }}%; background: {{ '#4a7c59' if question.success_rate >= 70 else '#e74c3c' }};"></div>
+                    {% if question.success_rate >= 70 %}
+                    <div class="progress-fill progress-good" style="width: {{ question.success_rate }}%;"></div>
+                    {% else %}
+                    <div class="progress-fill progress-poor" style="width: {{ question.success_rate }}%;"></div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

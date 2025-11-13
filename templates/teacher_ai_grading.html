@@ -284,9 +284,11 @@
                 <p><strong>Expected:</strong> {{ test_result.expected }}</p>
                 <p><strong>Student Answer:</strong> {{ test_result.student_answer }}</p>
                 <p><strong>AI Decision:</strong> 
-                    <span style="color: {{ '#4a7c59' if test_result.correct else '#b22222' }};">
-                        {{ '✅ Correct' if test_result.correct else '❌ Incorrect' }}
-                    </span>
+                    {% if test_result.correct %}
+                    <span style="color: #4a7c59;">✅ Correct</span>
+                    {% else %}
+                    <span style="color: #b22222;">❌ Incorrect</span>
+                    {% endif %}
                 </p>
                 <p><strong>Confidence:</strong> {{ test_result.confidence }}%</p>
                 <p><strong>AI Explanation:</strong> {{ test_result.explanation }}</p>
@@ -305,9 +307,11 @@
             
             <p style="color: #4b2e05;">
                 <strong>Current Status:</strong> 
-                <span style="color: {{ '#4a7c59' if api_key_configured else '#b22222' }};">
-                    {{ '✅ API Key Configured' if api_key_configured else '❌ API Key Missing' }}
-                </span>
+                {% if api_key_configured %}
+                <span style="color: #4a7c59;">✅ API Key Configured</span>
+                {% else %}
+                <span style="color: #b22222;">❌ API Key Missing</span>
+                {% endif %}
             </p>
             
             {% if not api_key_configured %}

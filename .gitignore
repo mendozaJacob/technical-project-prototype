@@ -24,6 +24,9 @@ wheels/
 indexdir/
 indexdir_backup.zip
 
+# Uploads directory
+uploads/
+
 # Flask
 instance/
 .webassets-cache

@@ -306,7 +306,11 @@
                 <div class="hp-bar">
                     <div class="hp-fill enemy-hp-fill" style="width: {{ enemy_hp }}%;">{{ enemy_hp }}/100 HP</div>
                 </div>
+                {% if enemy_defeated %}
+                <div style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">💀 DEFEATED! Earn bonus points!</div>
+                {% else %}
                 <div style="color: #4b2e05; font-style: italic;">"{{ enemy.taunt }}"</div>
+                {% endif %}
             </div>
         </div>
 

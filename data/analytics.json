@@ -83,5 +83,133 @@
       "player_hp": 100,
       "enemy_hp": 100
     }
+  },
+  {
+    "timestamp": 1763492556.526438,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1763492563.8272095,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 1,
+      "user_answer": "hostnamectl set-hostname server1.example.ca",
+      "correct_answer": "hostnamectl set-hostname server1.example.com",
+      "is_correct": true,
+      "time_taken": 7.292006015777588,
+      "similarity_score": 0.9,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763492575.4533486,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 2,
+      "user_answer": "ls",
+      "correct_answer": "ls",
+      "is_correct": true,
+      "time_taken": 11.615573644638062,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763492589.5671105,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 3,
+      "user_answer": "useradd student; passwd student",
+      "correct_answer": "useradd student; echo 'student' | passwd --stdin student",
+      "is_correct": true,
+      "time_taken": 14.10388469696045,
+      "similarity_score": 0.9,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763492605.7985275,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 4,
+      "user_answer": "mkdir /home/student/docs",
+      "correct_answer": "mkdir -p /home/student/docs",
+      "is_correct": true,
+      "time_taken": 16.222005128860474,
+      "similarity_score": 0.9,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763492652.4302437,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 5,
+      "user_answer": "mount /dev/sdb1 /mnt/data",
+      "correct_answer": "mount /dev/sdb1 /mnt/data",
+      "is_correct": true,
+      "time_taken": 46.62050247192383,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763492674.1321774,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 6,
+      "user_answer": "systemctl",
+      "correct_answer": "systemctl set-default graphical.target",
+      "is_correct": true,
+      "time_taken": 21.686076164245605,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763492687.4669673,
+    "event_type": "level_completed",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "final_score": 85,
+      "player_hp": 100,
+      "enemy_hp": -20,
+      "total_time": 130.9303879737854,
+      "correct_answers": 6,
+      "wrong_answers": 0,
+      "level_completed": true
+    }
+  },
+  {
+    "timestamp": 1763492693.1271434,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 2,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
   }
 ]

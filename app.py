@@ -820,6 +820,7 @@ def select_level():
         session["level_start_time"] = time.time()
         session["game_start_time"] = time.time()
         session['level_completed'] = False
+        session['enemy_defeated'] = False  # Reset enemy defeated status for new level
         session['current_timer'] = settings.get('question_time_limit', 30)  # Use configurable time limit
         # Initialize enemy progression index to the Novice Gnome every time a new
         # game is started. This ensures each new game begins against the Novice Gnome
@@ -975,16 +976,18 @@ def game():
     if not level_questions:
         return "No questions available for this level. Please check levels.json."
 
-    # Check if enemy is defeated (HP <= 0) or if we've exceeded max questions
+    # Check if we've exceeded max questions
     settings = get_current_game_settings()
     questions_per_level = settings.get('questions_per_level', 10)
     question_index = session['q_index'] % questions_per_level
+    
+    # Mark enemy as defeated if HP <= 0 but continue playing
     if session.get('enemy_hp', BASE_ENEMY_HP) <= 0:
-        # Enemy defeated - level completed!
+        session['enemy_defeated'] = True
         session['level_completed'] = True
-        return redirect(url_for('result'))
-    elif session['q_index'] >= questions_per_level:
-        # Reached max questions but enemy not defeated - level failed
+    
+    # Only end the level when all questions are answered
+    if session['q_index'] >= questions_per_level:
         return redirect(url_for('result'))
     question = level_questions[question_index]
 
@@ -1169,17 +1172,41 @@ def game():
                 
                 points_awarded = int(points_correct * speed_multiplier)
                 
+                # Check if enemy is already defeated for bonus scoring
+                enemy_already_defeated = session.get('enemy_defeated', False)
+                
                 if "Exact answer" in feedback_type or similarity_score == 1.0:
-                    # Exact match gets triple damage
-                    session['score'] += points_awarded
-                    session['enemy_hp'] -= (base_damage * 3)
-                    session['feedback'] = f"🔥 {feedback_type} Triple damage: {base_damage*3} and {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
+                    # Exact match gets triple damage or bonus points
+                    if enemy_already_defeated:
+                        # Enemy already defeated - give bonus points instead of damage
+                        bonus_points = points_awarded * 2  # Double bonus for exact match after defeat
+                        session['score'] += bonus_points
+                        session['feedback'] = f"🏆 {feedback_type} Enemy already defeated! Bonus points: {bonus_points} in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
+                    else:
+                        # Normal damage to enemy
+                        session['score'] += points_awarded
+                        session['enemy_hp'] -= (base_damage * 3)
+                        # Ensure enemy HP doesn't go below 0
+                        if session['enemy_hp'] <= 0:
+                            session['enemy_hp'] = 0
+                            session['enemy_defeated'] = True
+                        session['feedback'] = f"🔥 {feedback_type} Triple damage: {base_damage*3} and {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
                 else:
-                    # Fuzzy match gets regular damage
-                    session['score'] += points_awarded
-                    session['enemy_hp'] -= base_damage
+                    # Fuzzy match gets regular damage or normal points
                     similarity_percent = int(similarity_score * 100)
-                    session['feedback'] = f"🎯 {feedback_type} ({similarity_percent}% match) You dealt {base_damage} damage and earned {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
+                    if enemy_already_defeated:
+                        # Enemy already defeated - give normal points (same as regular scoring)
+                        session['score'] += points_awarded
+                        session['feedback'] = f"🏆 {feedback_type} ({similarity_percent}% match) Enemy already defeated! Earned {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
+                    else:
+                        # Normal damage to enemy
+                        session['score'] += points_awarded
+                        session['enemy_hp'] -= base_damage
+                        # Ensure enemy HP doesn't go below 0
+                        if session['enemy_hp'] <= 0:
+                            session['enemy_hp'] = 0
+                            session['enemy_defeated'] = True
+                        session['feedback'] = f"🎯 {feedback_type} ({similarity_percent}% match) You dealt {base_damage} damage and earned {points_awarded} points in {time_taken:.2f} seconds{speed_message}.<br><br>✅ {question_feedback}"
                 
                 session["current_timer"] = min(settings.get('question_time_limit', 30) * 2, session.get("current_timer", settings.get('question_time_limit', 30)) + 5)  # Add 5s to timer for next question, max 2x base limit
                 session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
@@ -1208,6 +1235,7 @@ def game():
                            score=session['score'],
                            player_hp=session['player_hp'],
                            enemy_hp=session['enemy_hp'],
+                           enemy_defeated=session.get('enemy_defeated', False),
                            q_number=question_index + 1,
                            total=questions_per_level,  # Use configurable questions per level
                            level=current_level,

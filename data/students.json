@@ -2,11 +2,11 @@
   {
     "id": "0001",
     "username": "Student1",
-    "password": "password123",
+    "password": "humber1",
     "full_name": "John Doe",
     "email": "",
     "created_date": "2025-11-13T00:25:31.377167",
-    "last_login": "2025-11-13T02:30:45.825761",
+    "last_login": "2025-11-18T13:04:28.542710",
     "active": true,
     "selected_character": 1
   }

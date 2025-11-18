@@ -3047,6 +3047,7 @@ def student_profile():
     
     if request.method == 'POST':
         # Get form data
+        new_username = request.form.get('username', '').strip()
         new_email = request.form.get('email', '').strip()
         current_password = request.form.get('current_password', '').strip()
         new_password = request.form.get('new_password', '').strip()
@@ -3057,6 +3058,29 @@ def student_profile():
             flash('Current password is incorrect.', 'error')
             return render_template('student_profile.html', student=student)
         
+        # Track username change for success message
+        username_changed = False
+        old_username = student['username']
+        
+        # Validate and update username
+        if new_username != student['username']:
+            if len(new_username) < 3 or len(new_username) > 50:
+                flash('Username must be between 3-50 characters long.', 'error')
+                return render_template('student_profile.html', student=student)
+            
+            # Check if username is already taken
+            students = load_students()
+            if any(s['username'].lower() == new_username.lower() and s['id'] != student_id for s in students):
+                flash('Username is already taken. Please choose a different one.', 'error')
+                return render_template('student_profile.html', student=student)
+            
+            # Update username
+            student['username'] = new_username
+            username_changed = True
+            
+            # Update leaderboard entries with new username
+            update_leaderboard_username(old_username, new_username)
+            
         # Update email
         student['email'] = new_email
         
@@ -3080,7 +3104,10 @@ def student_profile():
                 break
         
         if save_students(students):
-            flash('Profile updated successfully!', 'success')
+            if username_changed:
+                flash(f'Profile updated successfully! Username changed to "{new_username}"', 'success')
+            else:
+                flash('Profile updated successfully!', 'success')
         else:
             flash('Error updating profile. Please try again.', 'error')
     
@@ -3207,6 +3234,31 @@ def get_student_by_id(student_id):
     """Get student by ID"""
     students = load_students()
     return next((s for s in students if s['id'] == student_id), None)
+
+def update_leaderboard_username(old_username, new_username):
+    """Update username in leaderboard entries"""
+    try:
+        # Update main leaderboard
+        leaderboard = load_leaderboard()
+        for entry in leaderboard:
+            if entry.get('player') == old_username:
+                entry['player'] = new_username
+        save_leaderboard(leaderboard)
+        
+        # Update guest leaderboard if it exists
+        try:
+            with open('data/guest_leaderboard.json', 'r') as f:
+                guest_leaderboard = json.load(f)
+            for entry in guest_leaderboard:
+                if entry.get('player') == old_username:
+                    entry['player'] = new_username
+            with open('data/guest_leaderboard.json', 'w') as f:
+                json.dump(guest_leaderboard, f, indent=2)
+        except FileNotFoundError:
+            pass
+            
+    except Exception as e:
+        print(f"Error updating leaderboard username: {e}")
 
 def load_student_progress():
     """Load all student progress data"""

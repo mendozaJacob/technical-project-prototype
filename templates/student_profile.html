@@ -171,6 +171,20 @@
 
         <!-- Update Profile Form -->
         <form method="POST" action="{{ url_for('student_profile') }}">
+            <!-- Username Section -->
+            <div class="form-section">
+                <h3>👤 Change Username</h3>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" value="{{ student.username }}" placeholder="Enter new username" maxlength="50">
+                    <div class="password-requirements">
+                        Username must be unique and between 3-50 characters
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
             <!-- Email Section -->
             <div class="form-section">
                 <h3>📧 Email Address</h3>
@@ -233,6 +247,7 @@
 
         // Form validation
         document.querySelector('form').addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
             const currentPassword = document.getElementById('current_password').value.trim();
             const newPassword = document.getElementById('new_password').value.trim();
             const confirmPassword = document.getElementById('confirm_password').value.trim();
@@ -240,6 +255,12 @@
             if (!currentPassword) {
                 e.preventDefault();
                 alert('Please enter your current password.');
+                return false;
+            }
+            
+            if (username.length < 3 || username.length > 50) {
+                e.preventDefault();
+                alert('Username must be between 3-50 characters long.');
                 return false;
             }
             

@@ -211,5 +211,16 @@
       "player_hp": 100,
       "enemy_hp": 100
     }
+  },
+  {
+    "timestamp": 1763494811.9138665,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 2,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
   }
 ]

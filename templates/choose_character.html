@@ -49,10 +49,10 @@
   {% endif %}
 
   <form method="post" id="chooseForm">
-    <div class="character-grid" id="characterGrid">
+    <div class="character-grid" id="characterGrid"{% if current_character %} data-current-character="{{ current_character }}"{% endif %}>
       {% for i in range(1, total_characters + 1) %}
         <div class="character" data-character="{{ i }}">
-          <img src="{{ url_for('static', filename='characters/character' ~ i ~ '.png') }}" alt="Character {{ i }}" onerror="this.src='{{ url_for('static', filename='placeholder.png') }}'">
+          <img src="{{ url_for('static', filename='characters/character' ~ i ~ '.png') }}" alt="Character {{ i }}" data-fallback="{{ url_for('static', filename='placeholder.png') }}" onerror="handleImageError(this)">
         </div>
       {% endfor %}
     </div>
@@ -62,20 +62,24 @@
   </form>
 
   <script>
+    function handleImageError(img) {
+      img.src = img.dataset.fallback;
+    }
+
     const grid = document.getElementById('characterGrid');
     const input = document.getElementById('characterInput');
     const startBtn = document.getElementById('startGameBtn');
 
     // Pre-select current character if exists
-    {% if current_character %}
-    const currentChar = document.querySelector('[data-character="{{ current_character }}"]');
-    if (currentChar) {
-      currentChar.classList.add('selected');
-      input.value = '{{ current_character }}';
-      startBtn.disabled = false;
-      startBtn.textContent = '{% if student_name %}Save Character{% else %}Start Game{% endif %}';
+    const charId = grid.dataset.currentCharacter;
+    if (charId) {
+      const currentChar = document.querySelector('[data-character="' + charId + '"]');
+      if (currentChar) {
+        currentChar.classList.add('selected');
+        input.value = charId;
+        startBtn.disabled = false;
+      }
     }
-    {% endif %}
 
     grid.addEventListener('click', (e) => {
       const charDiv = e.target.closest('.character');
@@ -85,7 +89,7 @@
       const id = charDiv.dataset.character;
       input.value = id;
       startBtn.disabled = false;
-      startBtn.textContent = '{% if student_name %}Save Character{% else %}Start Game{% endif %}';
+      // Button text is set by the initial HTML
     });
   </script>
 </body>

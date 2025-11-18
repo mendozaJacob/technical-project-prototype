@@ -1966,14 +1966,6 @@ def endless_result():
                           total_time=round(total_time, 2),
                           player_name=player_name,
                           feedback_list=feedback_list)
-    return render_template('endless_result.html',
-                          score=score,
-                          highest_streak=highest_streak,
-                          total_questions=total_answered,
-                          correct=correct,
-                          wrong=wrong,
-                          total_time=round(total_time, 2),
-                          player_name=player_name)
 
 
 @app.route('/set_name', methods=['POST'])

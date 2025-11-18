@@ -4,15 +4,15 @@
     "name": "Novice Gnome",
     "avatar": "🧙‍♂️",
     "taunt": "Let's see if you even know what 'ls' does!",
-  "image": "enemies/novice_gnome.jpg",
+    "image": "enemies/novice_gnome.jpg",
     "range": "Q1–Q10"
   },
   {
     "level": 2,
     "name": "Apprentice Admin",
     "avatar": "👨‍💻",
-    "taunt": "You’ve mastered the basics… but can you handle users and groups?",
-  "image": "enemies/apprentice.jpg",
+    "taunt": "You've mastered the basics… but can you handle users and groups?",
+    "image": "enemies/apprentice.jpg",
     "range": "Q11–Q20"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Daemon Scribe",
     "avatar": "👾",
     "taunt": "Services and mounts are my domain. Tread carefully.",
-  "image": "enemies/daemon.jpg",
+    "image": "enemies/daemon.jpg",
     "range": "Q21–Q30"
   },
   {
@@ -28,7 +28,7 @@
     "name": "Shell Warden",
     "avatar": "🧞",
     "taunt": "Your shell skills are weak, mortal!",
-  "image": "enemies/warden.jpg",
+    "image": "enemies/warden.jpg",
     "range": "Q31–Q40"
   },
   {
@@ -36,7 +36,7 @@
     "name": "System Guardian",
     "avatar": "🛡️",
     "taunt": "Let's see how well you know your systemctl magic.",
-  "image": "enemies/knight.jpg",
+    "image": "enemies/knight.jpg",
     "range": "Q41–Q50"
   },
   {
@@ -60,7 +60,7 @@
     "name": "Storage Titan",
     "avatar": "💾",
     "taunt": "LVM, RAID, and mounting madness await you!",
-  "image": "enemies/titan.jpg",
+    "image": "enemies/titan.jpg",
     "range": "Q71–Q80"
   },
   {
@@ -68,15 +68,15 @@
     "name": "Virtual Overlord",
     "avatar": "🤖",
     "taunt": "Containers, virtualization, and automation — prove your worth!",
-  "image": "enemies/overlord.jpeg",
+    "image": "enemies/overlord.jpeg",
     "range": "Q81–Q90"
   },
   {
     "level": 10,
     "name": "Root Daemon",
     "avatar": "🔥",
-    "taunt": "You’ve reached the core. Only a true sysadmin can defeat me!",
-  "image": "enemies/root_daemon.jpeg",
+    "taunt": "You've reached the core. Only a true sysadmin can defeat me!",
+    "image": "enemies/root_daemon.jpeg",
     "range": "Q91–Q100"
   }
 ]

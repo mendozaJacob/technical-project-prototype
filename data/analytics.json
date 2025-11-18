@@ -35,5 +35,53 @@
       "player_hp": 100,
       "enemy_hp": 100
     }
+  },
+  {
+    "timestamp": 1763489249.4467216,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1763489259.1275282,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 1,
+      "user_answer": "hostnamectl set-hostname server1.example.ca",
+      "correct_answer": "hostnamectl set-hostname server1.example.com",
+      "is_correct": true,
+      "time_taken": 9.669604778289795,
+      "similarity_score": 0.9,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763489355.11258,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1763489368.1641495,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
   }
 ]

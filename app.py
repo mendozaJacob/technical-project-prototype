@@ -96,7 +96,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Initialize Flask-SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*")
+try:
+    socketio = SocketIO(app, cors_allowed_origins="*")
+except Exception as e:
+    print(f"Warning: SocketIO initialization failed: {e}")
+    socketio = None
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

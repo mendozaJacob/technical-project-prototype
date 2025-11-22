@@ -11,6 +11,7 @@ Welcome to the Quiz Battle: Dungeons of Knowledge documentation! This folder con
 ### 📖 **Complete Guides**
 - **[DOCUMENTATION.md](DOCUMENTATION.md)** - 📚 Complete technical documentation and project overview
 - **[TEACHER_PORTAL_README.md](TEACHER_PORTAL_README.md)** - 🎓 Comprehensive teacher portal guide with AI features
+- **[REAL_TIME_MONITORING.md](REAL_TIME_MONITORING.md)** - 📡 Real-time student answer monitoring system guide
 
 ### 🔧 **Technical References**
 - **[JSON_REFERENCE.md](JSON_REFERENCE.md)** - 📊 Data format schemas, examples, and validation rules
@@ -27,7 +28,8 @@ Welcome to the Quiz Battle: Dungeons of Knowledge documentation! This folder con
 ### 👨‍🏫 **For Teachers**
 1. Begin with [TEACHER_SETUP.md](TEACHER_SETUP.md) for account setup
 2. Follow [TEACHER_PORTAL_README.md](TEACHER_PORTAL_README.md) for full features
-3. Use [SETTINGS_SYSTEM_FIXED.md](SETTINGS_SYSTEM_FIXED.md) for game configuration
+3. Check [REAL_TIME_MONITORING.md](REAL_TIME_MONITORING.md) for live student monitoring
+4. Use [SETTINGS_SYSTEM_FIXED.md](SETTINGS_SYSTEM_FIXED.md) for game configuration
 
 ### 🛠️ **For Developers**
 1. Review [IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md) for technical details
@@ -41,6 +43,7 @@ Welcome to the Quiz Battle: Dungeons of Knowledge documentation! This folder con
 | QUICK_GUIDE.md | Fast customization | Beginners | 5 minutes |
 | DOCUMENTATION.md | Complete guide | All users | 20 minutes |
 | TEACHER_PORTAL_README.md | Teacher features | Teachers | 15 minutes |
+| REAL_TIME_MONITORING.md | Live monitoring system | Teachers | 12 minutes |
 | JSON_REFERENCE.md | Data formats | Content creators | 10 minutes |
 | SETTINGS_SYSTEM_FIXED.md | Settings details | Administrators | 8 minutes |
 | IMPLEMENTATION_COMPLETE.md | Technical specs | Developers | 12 minutes |
@@ -52,6 +55,7 @@ Welcome to the Quiz Battle: Dungeons of Knowledge documentation! This folder con
 **Need to change colors/fonts?** → [QUICK_GUIDE.md](QUICK_GUIDE.md)  
 **Setting up teacher access?** → [TEACHER_SETUP.md](TEACHER_SETUP.md)  
 **Using AI features?** → [TEACHER_PORTAL_README.md](TEACHER_PORTAL_README.md)  
+**Real-time student monitoring?** → [REAL_TIME_MONITORING.md](REAL_TIME_MONITORING.md)  
 **Configuring game settings?** → [SETTINGS_SYSTEM_FIXED.md](SETTINGS_SYSTEM_FIXED.md)  
 **Understanding the codebase?** → [DOCUMENTATION.md](DOCUMENTATION.md)  
 

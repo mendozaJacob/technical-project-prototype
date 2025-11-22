@@ -18,5 +18,5 @@
   "analytics_enabled": true,
   "auto_save": false,
   "session_timeout": 30,
-  "timeout_behavior": "fail"
+  "timeout_behavior": "penalty"
 }

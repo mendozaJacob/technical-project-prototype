@@ -171,6 +171,7 @@
             <h1 class="page-title">👥 Student Management</h1>
             <div>
                 <a href="{{ url_for('teacher_dashboard') }}" class="btn">← Back to Dashboard</a>
+                <button onclick="openBatchResetModal()" class="btn" style="background: #cc4400;">🔄 Batch Reset</button>
                 <button onclick="openAddModal()" class="btn btn-success">+ Add Student</button>
             </div>
         </div>
@@ -191,7 +192,10 @@
             <div class="students-grid">
                 {% for student in students %}
                 <div class="student-card">
-                    <div class="student-name">{{ student.full_name }}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div class="student-name">{{ student.full_name }}</div>
+                        <input type="checkbox" class="student-checkbox" value="{{ student.id }}" style="transform: scale(1.2);">
+                    </div>
                     <div class="student-info">
                         <strong>ID:</strong> {{ student.id }}<br>
                         <strong>Username:</strong> {{ student.username }}<br>
@@ -262,6 +266,40 @@
                     <button type="button" class="btn" onclick="closeModal('addModal')">Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Batch Reset Modal -->
+    <div id="batchResetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('batchResetModal')">&times;</span>
+            <h2>🔄 Batch Reset Students</h2>
+            <p style="margin-bottom: 20px;">Select students and choose what to reset:</p>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px;">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select All Students
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: #fffbe6; border: 2px solid #4b2e05; border-radius: 8px;">
+                <h4>Reset Options:</h4>
+                <label style="display: block; margin-bottom: 8px;">
+                    <input type="radio" name="resetType" value="progress" checked> Reset All Progress (scores, history, levels)
+                </label>
+                <label style="display: block; margin-bottom: 8px;">
+                    <input type="radio" name="resetType" value="gamemodes"> Reset Game Mode Sessions Only
+                </label>
+            </div>
+            
+            <div id="selectedStudents" style="margin-bottom: 20px; padding: 10px; background: #f0f0f0; border-radius: 6px; min-height: 30px;">
+                <em>No students selected</em>
+            </div>
+            
+            <div style="text-align: center;">
+                <button onclick="executeBatchReset()" class="btn" style="background: #cc4400;">Execute Reset</button>
+                <button type="button" class="btn" onclick="closeModal('batchResetModal')">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -350,16 +388,102 @@
                 });
             }
         }
+        
+        function openBatchResetModal() {
+            document.getElementById('batchResetModal').style.display = 'block';
+            updateSelectedStudents();
+        }
+        
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelectedStudents();
+        }
+        
+        function updateSelectedStudents() {
+            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+            const selectedDiv = document.getElementById('selectedStudents');
+            
+            if (checkboxes.length === 0) {
+                selectedDiv.innerHTML = '<em>No students selected</em>';
+            } else {
+                const selectedNames = Array.from(checkboxes).map(cb => {
+                    const student = students.find(s => s.id === cb.value);
+                    return student ? student.full_name : 'Unknown';
+                });
+                selectedDiv.innerHTML = `<strong>Selected (${checkboxes.length}):</strong> ${selectedNames.join(', ')}`;
+            }
+        }
+        
+        function executeBatchReset() {
+            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+            const resetType = document.querySelector('input[name="resetType"]:checked').value;
+            
+            if (checkboxes.length === 0) {
+                alert('Please select at least one student.');
+                return;
+            }
+            
+            const studentIds = Array.from(checkboxes).map(cb => cb.value);
+            const studentNames = Array.from(checkboxes).map(cb => {
+                const student = students.find(s => s.id === cb.value);
+                return student ? student.full_name : 'Unknown';
+            });
+            
+            const resetTypeText = resetType === 'progress' ? 'ALL PROGRESS DATA' : 'GAME MODE SESSIONS';
+            const confirmMessage = `⚠️ Are you sure you want to reset ${resetTypeText} for these ${studentIds.length} students?\n\n` +
+                                 `Students: ${studentNames.join(', ')}\n\n` +
+                                 `${resetType === 'progress' ? 'This will permanently delete all scores, history, and progress!' : 'This will clear active game sessions.'}\n\n` +
+                                 `Type "RESET" to confirm:`;
+            
+            const confirmation = prompt(confirmMessage);
+            if (confirmation === 'RESET') {
+                const url = resetType === 'progress' ? '/teacher/batch-reset-progress' : '/teacher/batch-reset-gamemodes';
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ student_ids: studentIds })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        closeModal('batchResetModal');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error executing batch reset: ' + error);
+                });
+            }
+        }
+        
+        // Update selected students when checkboxes change
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('student-checkbox')) {
+                updateSelectedStudents();
+            }
+        });
 
         // Close modal when clicking outside
         window.onclick = function(event) {
             const addModal = document.getElementById('addModal');
             const editModal = document.getElementById('editModal');
+            const batchResetModal = document.getElementById('batchResetModal');
             if (event.target === addModal) {
                 addModal.style.display = 'none';
             }
             if (event.target === editModal) {
                 editModal.style.display = 'none';
+            }
+            if (event.target === batchResetModal) {
+                batchResetModal.style.display = 'none';
             }
         }
     </script>

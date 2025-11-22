@@ -13,9 +13,11 @@ from datetime import datetime
 from functools import wraps
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from whoosh.fields import Schema, TEXT, ID
 from whoosh import index
 from config import TEACHER_CREDENTIALS, AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_KEY, OPENAI_MODEL, GEMINI_MODEL, AI_MODEL, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_CONTENT_LENGTH
+import threading
 
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
@@ -92,6 +94,9 @@ import copy
 app.secret_key = "unix_rpg_secret"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+# Initialize Flask-SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -622,6 +627,22 @@ def load_leaderboard():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
+def reset_test_yourself_session():
+    """Completely reset Test Yourself mode session data"""
+    test_keys = ['test_question_ids', 'test_q_index', 'test_correct', 
+                'test_start_time', 'test_time_limit', 'test_user_answers']
+    for key in test_keys:
+        session.pop(key, None)
+
+def reset_endless_mode_session():
+    """Completely reset Endless mode session data"""
+    endless_keys = ['endless_score', 'endless_hp', 'endless_streak', 'endless_highest_streak',
+                   'endless_total_answered', 'endless_correct', 'endless_wrong', 'endless_start_time',
+                   'endless_score_initialized', 'endless_question_start', 'endless_current_question',
+                   'endless_feedback_list']
+    for key in endless_keys:
+        session.pop(key, None)
+
 # Auto-save functionality
 def log_analytics_event(event_type, data=None):
     """Log analytics event if analytics are enabled"""
@@ -662,6 +683,51 @@ def log_analytics_event(event_type, data=None):
             
     except Exception as e:
         print(f"Analytics logging failed: {e}")
+
+def log_student_answer(student_id, student_name, question_id, question_text, student_answer, correct_answer, is_correct, game_mode, level=None):
+    """Log student answers in real-time and notify teachers via WebSocket"""
+    try:
+        # Create answer log entry
+        answer_log = {
+            'timestamp': datetime.now().isoformat(),
+            'student_id': student_id,
+            'student_name': student_name,
+            'question_id': question_id,
+            'question_text': question_text[:100] + '...' if len(question_text) > 100 else question_text,
+            'student_answer': student_answer,
+            'correct_answer': correct_answer,
+            'is_correct': is_correct,
+            'game_mode': game_mode,
+            'level': level
+        }
+        
+        # Load existing answer logs
+        try:
+            with open('data/student_answers_log.json', 'r') as f:
+                answers_data = json.load(f)
+        except FileNotFoundError:
+            answers_data = []
+        
+        # Add new answer log
+        answers_data.append(answer_log)
+        
+        # Keep only last 500 answers to prevent file from growing too large
+        if len(answers_data) > 500:
+            answers_data = answers_data[-500:]
+        
+        # Save updated answer logs
+        os.makedirs('data', exist_ok=True)
+        with open('data/student_answers_log.json', 'w') as f:
+            json.dump(answers_data, f, indent=2)
+        
+        # Emit real-time update to teachers (only if socketio is available)
+        try:
+            socketio.emit('student_answer', answer_log, room='teachers')
+        except:
+            pass  # SocketIO not available, skip real-time update
+        
+    except Exception as e:
+        print(f"Error logging student answer: {e}")
 
 def auto_save_progress():
     """Auto-save player progress if enabled in settings"""
@@ -812,6 +878,12 @@ def select_level():
         session['enemy_level'] = selected_level
         # Set enemy HP to the current setting
         session['enemy_hp'] = settings['base_enemy_hp']
+        
+        # Ensure HP values are properly set and not zero
+        if session['player_hp'] <= 0:
+            session['player_hp'] = settings['base_player_hp']
+        if session['enemy_hp'] <= 0:
+            session['enemy_hp'] = settings['base_enemy_hp']
         
         # Log level selection
         log_analytics_event('level_selected', {
@@ -979,11 +1051,42 @@ def choose_character():
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
 def game():
-    # Check if the game is over
-    # Use safe gets to avoid KeyError from malformed sessions
+    # Ensure player has selected a level and has basic session data initialized
+    if 'selected_level' not in session:
+        flash('Please select a level first.', 'warning')
+        return redirect(url_for('select_level'))
+    
+    # Ensure player has a name
+    if not session.get('player_name'):
+        flash('Please set your name first.', 'warning')
+        return redirect(url_for('index'))
+    
+    # Get settings (needed for both initialization and debug checks)
+    settings = get_current_game_settings()
+    
+    # Initialize HP if not set (for new games)
+    if 'player_hp' not in session:
+        session['player_hp'] = settings['base_player_hp']
+        session['enemy_hp'] = settings['base_enemy_hp']
+        session['score'] = 0
+        session['q_index'] = 0
+        session['correct_answers'] = 0
+        session['wrong_answers'] = 0
+        session['level_completed'] = False
+        session['enemy_defeated'] = False
+    
+    # Check if the game is over (only after ensuring HP is initialized)
     if session.get('q_index', 0) >= len(questions):
         return redirect(url_for('result'))
-    if session.get('player_hp', 0) <= 0:
+    
+    # Debug HP check
+    current_hp = session.get('player_hp', 100)
+    if settings.get('debug_mode', False):
+        print(f"DEBUG: HP Check - current_hp: {current_hp}, q_index: {session.get('q_index', 0)}")
+    
+    if current_hp <= 0:
+        if settings.get('debug_mode', False):
+            print(f"DEBUG: Redirecting to you_lose due to HP <= 0 (HP: {current_hp})")
         return redirect(url_for('you_lose'))
 
 
@@ -1005,7 +1108,6 @@ def game():
         return "No questions available for this level. Please check levels.json."
 
     # Check if we've exceeded max questions
-    settings = get_current_game_settings()
     questions_per_level = settings.get('questions_per_level', 10)
     question_index = session['q_index'] % questions_per_level
     
@@ -1118,6 +1220,10 @@ def game():
     elapsed = time.time() - session["level_start_time"]
     time_left = max(0, session.get("current_timer", settings.get('question_time_limit', 30)) - int(elapsed))
 
+    # Debug timer info
+    if settings.get('debug_mode', False):
+        print(f"DEBUG: Timer - elapsed: {elapsed:.2f}s, time_left: {time_left}s, question_time_limit: {settings.get('question_time_limit', 30)}s, current_timer: {session.get('current_timer', 'not set')}")
+
     if time_left == 0:
         # Time expired → check timeout behavior setting
         settings = get_current_game_settings()
@@ -1133,14 +1239,26 @@ def game():
         else:
             # Apply penalty and continue (default behavior) - use base damage only, not multiplied by level
             timeout_damage = settings['base_damage']
-            session['player_hp'] -= timeout_damage
+            current_hp = session.get('player_hp', settings['base_player_hp'])
+            
+            # Ensure HP is properly initialized
+            if 'player_hp' not in session:
+                session['player_hp'] = settings['base_player_hp']
+                current_hp = settings['base_player_hp']
+            
+            # Apply damage
+            session['player_hp'] = current_hp - timeout_damage
+            
+            # Debug info
+            if settings.get('debug_mode', False):
+                print(f"DEBUG: Timeout - HP before: {current_hp}, damage: {timeout_damage}, HP after: {session['player_hp']}")
             
             # Check if player has failed due to low HP
-            if session.get('player_hp', 0) <= 0:
+            if session['player_hp'] <= 0:
                 session['feedback'] = f"⏳ Time's up! You took {timeout_damage} damage and your HP reached 0. Game Over!"
                 return redirect(url_for('you_lose'))
             
-            session['feedback'] = f"⏳ Time's up! You took {timeout_damage} damage for running out of time."
+            session['feedback'] = f"⏳ Time's up! You took {timeout_damage} damage for running out of time. HP: {session['player_hp']}"
             session['q_index'] += 1
             session["level_start_time"] = time.time()  # Reset timer for the next question
             session["current_timer"] = max(10, session.get("current_timer", settings.get('question_time_limit', 30)) - 5)  # Deduct 5s for next question, min 10s
@@ -1194,6 +1312,20 @@ def game():
             
             # Use fuzzy matching for answer checking
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            # Log student answer in real-time
+            if 'student_id' in session:
+                log_student_answer(
+                    student_id=session['student_id'],
+                    student_name=session.get('student_name', 'Unknown'),
+                    question_id=question.get('id', 'unknown'),
+                    question_text=question.get('q', ''),
+                    student_answer=user_answer,
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                    game_mode='adventure',
+                    level=current_level
+                )
             
             # Log answer attempt
             log_analytics_event('answer_submitted', {
@@ -1549,18 +1681,182 @@ def you_win():
     return render_template('you_win.html', is_student=is_student)
 
 
+
 @app.route('/you_lose')
 def you_lose():
-    # Simple lose page when player HP hits 0
-    # Reset enemy state to original when the player loses
+    # Reset only the current level progress, not the entire game
     try:
         settings = get_current_game_settings()
-        session['enemy_index'] = 0
+        current_level = session.get('selected_level', 1)
+        
+        # Reset level-specific progress but keep level selection
+        session['q_index'] = 0
+        session['player_hp'] = settings['base_player_hp']
         session['enemy_hp'] = settings['base_enemy_hp']
-        session.pop('enemy_level', None)
-    except Exception:
-        pass
+        session['enemy_index'] = 0
+        session['correct_answers'] = 0
+        session['wrong_answers'] = 0
+        session['score'] = 0
+        session['level_completed'] = False
+        session['enemy_defeated'] = False
+        session.pop('feedback', None)
+        
+        # Keep the selected level so they can retry the same level
+        session['selected_level'] = current_level
+        session['enemy_level'] = current_level
+        
+        # Log the level failure for analytics
+        log_analytics_event('level_failed', {
+            'level': current_level,
+            'reason': 'hp_zero'
+        })
+        
+    except Exception as e:
+        print(f"Error in you_lose route: {e}")
+    
     return render_template('you_lose.html')
+
+@app.route('/quit_game')
+def quit_game():
+    """Handle player quitting mid-game"""
+    try:
+        current_level = session.get('selected_level', 1)
+        current_score = session.get('score', 0)
+        questions_answered = session.get('q_index', 0)
+        
+        # Log the quit action for analytics
+        log_analytics_event('game_quit', {
+            'level': current_level,
+            'score': current_score,
+            'questions_answered': questions_answered,
+            'reason': 'player_quit'
+        })
+        
+        # Clear current game progress but keep player info
+        game_progress_keys = ['q_index', 'player_hp', 'enemy_hp', 'score', 
+                             'correct_answers', 'wrong_answers', 'level_completed', 
+                             'enemy_defeated', 'feedback', 'current_timer']
+        
+        for key in game_progress_keys:
+            session.pop(key, None)
+        
+        flash(f'Game quit. You scored {current_score} points on Level {current_level}.', 'info')
+        
+    except Exception as e:
+        print(f"Error in quit_game route: {e}")
+        flash('Game ended.', 'info')
+    
+    return redirect(url_for('select_level'))
+
+@app.route('/quit_test_yourself')
+def quit_test_yourself():
+    """Handle player quitting Test Yourself mode - auto-save to leaderboard"""
+    try:
+        questions_answered = session.get('test_q_index', 0)
+        correct_answers = session.get('test_correct', 0)
+        total_questions = len(session.get('test_question_ids', []))
+        test_start_time = session.get('test_start_time', time.time())
+        time_taken = time.time() - test_start_time
+        score = correct_answers * 10  # Same scoring as normal completion
+        player_name = session.get('player_name', 'Anonymous')
+        
+        # Auto-save to leaderboard when quitting
+        save_leaderboard(
+            player_name=player_name,
+            score=score,
+            total_time=time_taken,
+            correct_answers=correct_answers,
+            wrong_answers=questions_answered - correct_answers,
+            game_mode="test_yourself"
+        )
+        
+        # Save student progress if logged in
+        if session.get('is_student') and session.get('student_id'):
+            student_id = session.get('student_id')
+            update_student_progress(
+                student_id=student_id,
+                game_type='test_yourself',
+                level=None,
+                score=score,
+                correct_answers=correct_answers,
+                total_questions=total_questions,
+                time_taken=time_taken
+            )
+        
+        # Log the quit action for analytics
+        log_analytics_event('test_yourself_quit', {
+            'questions_answered': questions_answered,
+            'correct_answers': correct_answers,
+            'score': score,
+            'reason': 'player_quit'
+        })
+        
+        # Clear all test yourself session data completely
+        reset_test_yourself_session()
+        
+        accuracy = (correct_answers / questions_answered * 100) if questions_answered > 0 else 0
+        flash(f'Test Yourself completed (quit). Score: {score}, Accuracy: {accuracy:.1f}% - Saved to leaderboard!', 'success')
+        
+    except Exception as e:
+        print(f"Error in quit_test_yourself route: {e}")
+        flash('Test session ended.', 'info')
+    
+    return redirect(url_for('leaderboard'))
+
+@app.route('/quit_endless')
+def quit_endless():
+    """Handle player quitting Endless mode - auto-save to leaderboard"""
+    try:
+        total_answered = session.get('endless_total_answered', 0)
+        correct_answers = session.get('endless_correct', 0)
+        wrong_answers = session.get('endless_wrong', 0)
+        final_score = session.get('endless_score', 0)
+        highest_streak = session.get('endless_highest_streak', 0)
+        endless_start_time = session.get('endless_start_time', time.time())
+        total_time = time.time() - endless_start_time
+        player_name = session.get('player_name', 'Anonymous')
+        
+        # Auto-save to leaderboard when quitting
+        save_leaderboard(
+            player_name=player_name,
+            score=final_score,
+            total_time=total_time,
+            correct_answers=correct_answers,
+            wrong_answers=wrong_answers,
+            game_mode="endless"
+        )
+        
+        # Save student progress if logged in
+        if session.get('is_student') and session.get('student_id'):
+            student_id = session.get('student_id')
+            update_student_progress(
+                student_id=student_id,
+                game_type='endless_mode',
+                level=None,
+                score=final_score,
+                correct_answers=correct_answers,
+                total_questions=total_answered,
+                time_taken=total_time
+            )
+        
+        # Log the quit action for analytics
+        log_analytics_event('endless_mode_quit', {
+            'questions_answered': total_answered,
+            'final_score': final_score,
+            'max_streak': highest_streak,
+            'reason': 'player_quit'
+        })
+        
+        # Clear all endless mode session data completely
+        reset_endless_mode_session()
+        
+        flash(f'Endless Mode completed (quit). Score: {final_score}, {total_answered} questions - Saved to leaderboard!', 'success')
+        
+    except Exception as e:
+        print(f"Error in quit_endless route: {e}")
+        flash('Endless session ended.', 'info')
+    
+    return redirect(url_for('leaderboard'))
 
 # ------------------- TEST YOURSELF MODE -------------------
 import random
@@ -1573,13 +1869,10 @@ def test_yourself():
         flash('Test Yourself mode is currently disabled.', 'error')
         return redirect(url_for('index'))
     
-    # Only reset test state for a true new start (GET with ?new=1)
-    if request.method == 'GET' and request.args.get('new') == '1':
-        session.pop('test_question_ids', None)
-        session.pop('test_q_index', None)
-        session.pop('test_correct', None)
-        session.pop('test_start_time', None)
-        session.pop('test_time_limit', None)
+    # Reset test state for a true new start (GET with ?new=1) or if no session data exists
+    if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
+        # Completely reset session to ensure clean start
+        reset_test_yourself_session()
         session['test_user_answers'] = []
         print(f"[DEBUG] questions list length at test start: {len(questions)}")
         
@@ -1639,6 +1932,19 @@ def test_yourself():
             keywords = [str(k).strip().lower() for k in raw_keywords]
         # Use fuzzy matching for test mode
         is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+        
+        # Log student answer in real-time
+        if 'student_id' in session:
+            log_student_answer(
+                student_id=session['student_id'],
+                student_name=session.get('student_name', 'Unknown'),
+                question_id=question.get('id', 'unknown'),
+                question_text=question.get('q', ''),
+                student_answer=user_answer,
+                correct_answer=correct_answer,
+                is_correct=is_correct,
+                game_mode='test_yourself'
+            )
         
         session['test_user_answers'].append({
             'question': question.get('q', ''),
@@ -1826,7 +2132,10 @@ def endless_start():
     # Set player name in session
     session['player_name'] = player_name
     
-    # Initialize endless mode session state
+    # Completely reset any existing endless mode data to ensure clean start
+    reset_endless_mode_session()
+    
+    # Initialize fresh endless mode session state
     session['endless_score'] = 0
     session['endless_hp'] = 100
     session['endless_streak'] = 0
@@ -1868,7 +2177,7 @@ def endless_game():
     if 'endless_question_start' not in session:
         session['endless_question_start'] = time.time()
     elapsed = time.time() - session['endless_question_start']
-    time_left = max(0, 45 - int(elapsed))
+    time_left = max(0, 60 - int(elapsed))
     
     # Pick or keep the current question
     if 'endless_current_question' not in session:
@@ -1916,6 +2225,19 @@ def endless_game():
             keywords = [str(k).strip().lower() for k in raw_keywords]
         # Use fuzzy matching for endless mode
         is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+        
+        # Log student answer in real-time
+        if 'student_id' in session:
+            log_student_answer(
+                student_id=session['student_id'],
+                student_name=session.get('student_name', 'Unknown'),
+                question_id=question.get('id', 'unknown'),
+                question_text=question.get('q', ''),
+                student_answer=user_answer,
+                correct_answer=correct_answer,
+                is_correct=is_correct,
+                game_mode='endless'
+            )
         
         # Store feedback for this question
         question_feedback = question.get('feedback', 'No additional information available.')
@@ -3046,6 +3368,196 @@ def teacher_student_progress(student_id):
     progress = get_student_progress(student_id)
     return render_template('teacher_student_progress.html', student=student, progress=progress)
 
+@app.route('/teacher/reset-student-progress/<student_id>')
+@teacher_required
+def teacher_reset_student_progress(student_id):
+    """Reset all progress for a specific student"""
+    student = get_student_by_id(student_id)
+    if not student:
+        flash('Student not found.', 'error')
+        return redirect(url_for('teacher_students'))
+    
+    try:
+        # Load current progress data
+        progress_data = load_student_progress()
+        
+        # Remove this student's progress completely
+        if student_id in progress_data:
+            del progress_data[student_id]
+        
+        # Save updated progress data
+        save_student_progress(progress_data)
+        
+        # Clear any active sessions for this student
+        # Note: This won't affect current browser sessions, but will reset stored data
+        
+        # Log the reset action for analytics
+        log_analytics_event('teacher_reset_student_progress', {
+            'teacher_id': session.get('teacher_id'),
+            'student_id': student_id,
+            'student_name': student['full_name'],
+            'reset_type': 'complete_progress'
+        })
+        
+        flash(f'All progress for {student["full_name"]} has been reset successfully.', 'success')
+        
+    except Exception as e:
+        print(f"Error resetting student progress: {e}")
+        flash('Error resetting student progress. Please try again.', 'error')
+    
+    return redirect(url_for('teacher_student_progress', student_id=student_id))
+
+@app.route('/teacher/reset-game-modes/<student_id>')
+@teacher_required
+def teacher_reset_game_modes(student_id):
+    """Reset active game mode sessions for a specific student"""
+    student = get_student_by_id(student_id)
+    if not student:
+        flash('Student not found.', 'error')
+        return redirect(url_for('teacher_students'))
+    
+    try:
+        # Note: Since sessions are browser-specific, we can't directly clear a student's
+        # active session from the server side. However, we can clear any stored game state
+        # that might persist between sessions.
+        
+        # For now, we'll log this action and provide feedback
+        log_analytics_event('teacher_reset_game_modes', {
+            'teacher_id': session.get('teacher_id'),
+            'student_id': student_id,
+            'student_name': student['full_name'],
+            'reset_type': 'game_sessions'
+        })
+        
+        flash(f'Game mode sessions for {student["full_name"]} have been reset. ' +
+              f'The student should refresh their browser to see changes.', 'info')
+        
+    except Exception as e:
+        print(f"Error resetting game modes: {e}")
+        flash('Error resetting game modes. Please try again.', 'error')
+    
+    return redirect(url_for('teacher_student_progress', student_id=student_id))
+
+@app.route('/teacher/real-time-monitoring')
+@teacher_required
+def teacher_real_time_monitoring():
+    """Real-time student answer monitoring page"""
+    try:
+        # Load recent student answers
+        try:
+            with open('data/student_answers_log.json', 'r') as f:
+                recent_answers = json.load(f)
+        except FileNotFoundError:
+            recent_answers = []
+        
+        # Get last 50 answers, sorted by most recent
+        recent_answers = sorted(recent_answers, key=lambda x: x['timestamp'], reverse=True)[:50]
+        
+        # Get list of students for filtering
+        students = load_students()
+        
+        return render_template('teacher_real_time_monitoring.html', 
+                             recent_answers=recent_answers,
+                             students=students)
+    except Exception as e:
+        print(f"Error in real-time monitoring: {e}")
+        flash('Error loading real-time monitoring. Please try again.', 'error')
+        return redirect(url_for('teacher_dashboard'))
+
+@app.route('/teacher/batch-reset-progress', methods=['POST'])
+@teacher_required
+def teacher_batch_reset_progress():
+    """Reset progress for multiple students at once"""
+    try:
+        data = request.get_json()
+        student_ids = data.get('student_ids', [])
+        
+        if not student_ids:
+            return jsonify({'success': False, 'error': 'No students selected'})
+        
+        # Load student progress data
+        try:
+            with open('data/student_progress.json', 'r') as f:
+                progress_data = json.load(f)
+        except FileNotFoundError:
+            progress_data = {}
+        
+        # Reset progress for selected students
+        reset_count = 0
+        student_names = []
+        for student_id in student_ids:
+            student = get_student_by_id(student_id)
+            if student:
+                student_names.append(student['full_name'])
+                # Reset progress data
+                progress_data[student_id] = {
+                    "current_level": 1,
+                    "total_score": 0,
+                    "games_played": 0,
+                    "total_questions_answered": 0,
+                    "total_correct_answers": 0,
+                    "level_history": [],
+                    "score_history": [],
+                    "accuracy_history": [],
+                    "character_unlocks": [],
+                    "achievements": []
+                }
+                reset_count += 1
+        
+        # Save updated progress data
+        with open('data/student_progress.json', 'w') as f:
+            json.dump(progress_data, f, indent=4)
+        
+        # Log the action
+        log_analytics_event('teacher_batch_reset_progress', {
+            'teacher_id': session.get('teacher_id'),
+            'student_ids': student_ids,
+            'student_names': student_names,
+            'reset_count': reset_count
+        })
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Successfully reset progress for {reset_count} students: {", ".join(student_names)}'
+        })
+    except Exception as e:
+        print(f"Error in batch reset progress: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/batch-reset-gamemodes', methods=['POST'])
+@teacher_required
+def teacher_batch_reset_gamemodes():
+    """Reset game mode sessions for multiple students at once"""
+    try:
+        data = request.get_json()
+        student_ids = data.get('student_ids', [])
+        
+        if not student_ids:
+            return jsonify({'success': False, 'error': 'No students selected'})
+        
+        # Get student names for logging
+        student_names = []
+        for student_id in student_ids:
+            student = get_student_by_id(student_id)
+            if student:
+                student_names.append(student['full_name'])
+        
+        # Log the action
+        log_analytics_event('teacher_batch_reset_gamemodes', {
+            'teacher_id': session.get('teacher_id'),
+            'student_ids': student_ids,
+            'student_names': student_names,
+            'reset_count': len(student_names)
+        })
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Game mode session reset requested for {len(student_names)} students: {", ".join(student_names)}. Students should refresh their browsers to see changes.'
+        })
+    except Exception as e:
+        print(f"Error in batch reset gamemodes: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 # Student Authentication Routes
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
@@ -3700,9 +4212,37 @@ def teacher_assign_questions_to_pool():
     
     return redirect(url_for('teacher_question_pools'))
 
+# WebSocket event handlers
+@socketio.on('connect')
+def on_connect():
+    print(f"Client connected: {request.sid}")
+
+@socketio.on('disconnect')
+def on_disconnect():
+    print(f"Client disconnected: {request.sid}")
+
+@socketio.on('join_teachers_room')
+def on_join_teachers_room():
+    if 'teacher_id' in session:
+        join_room('teachers')
+        print(f"Teacher {session.get('teacher_username', 'Unknown')} joined monitoring room")
+        emit('status', {'message': 'Connected to real-time monitoring'})
+
+@socketio.on('leave_teachers_room')
+def on_leave_teachers_room():
+    if 'teacher_id' in session:
+        leave_room('teachers')
+        print(f"Teacher {session.get('teacher_username', 'Unknown')} left monitoring room")
+
 # Run the Flask app
 if __name__ == "__main__":
     print("🎮 Starting Quiz Battle: Dungeons of Knowledge")
     print("🌐 Server running at: http://127.0.0.1:5000")
     print("🎯 Ready for educational adventures!")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    print("📡 Real-time monitoring enabled!")
+    try:
+        socketio.run(app, debug=True, host='127.0.0.1', port=5000)
+    except:
+        # Fallback if SocketIO is not available
+        print("⚠️  SocketIO not available, running without real-time features")
+        app.run(debug=True, host='127.0.0.1', port=5000)

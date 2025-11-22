@@ -37,6 +37,12 @@
 <body>
     <div class="container">
     <h1 style="color:#4b2e05; font-size:2em; font-weight:bold; background:#fffbe6; border-radius:8px; padding:10px 0;">🧙‍♂️ Test Yourself</h1>
+    
+    <!-- Quit Button -->
+    <div style="text-align: right; margin-bottom: 10px;">
+        <button onclick="quitTestYourself()" class="btn" style="background: #cc4400; font-size: 0.9em; padding: 8px 15px;">🚪 Quit</button>
+    </div>
+    
     <div class="timer" id="timer">Time Left: {{ time_left_min }}m {{ '%02d' % time_left_sec }}s</div>
     <div class="questions-left">Questions Left: {{ 40 - q_index }}</div>
         <div class="progress">Question {{ q_number }} of 40 | Correct: {{ correct_count }}</div>
@@ -104,6 +110,24 @@
         }
     }
     updateTimer();
+    
+    // Quit test yourself function with confirmation
+    function quitTestYourself() {
+        const questionsAnswered = {{ q_index }};
+        const correctAnswers = {{ correct_count }};
+        const timeRemaining = timeLeft;
+        
+        const confirmMessage = `⚠️ Are you sure you want to quit Test Yourself mode?\n\n` +
+                             `You will lose your current progress:\n` +
+                             `• Questions answered: ${questionsAnswered}/40\n` +
+                             `• Correct answers: ${correctAnswers}\n` +
+                             `• Time remaining: ${Math.floor(timeRemaining/60)}m ${timeRemaining%60}s\n\n` +
+                             `Click OK to quit or Cancel to continue testing.`;
+        
+        if (confirm(confirmMessage)) {
+            window.location.href = '/quit_test_yourself';
+        }
+    }
     
     // Question type interaction functions for test yourself
     function selectTestOption(letter, optionText) {

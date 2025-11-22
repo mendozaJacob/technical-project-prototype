@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Student Monitoring</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #333; 
+            margin: 0;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 40px; 
+        }
+        .page-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .status-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .filters-section {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .filter-controls select, .filter-controls input {
+            padding: 8px 12px;
+            border: 2px solid #4b2e05;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        .answers-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .answer-item {
+            border-left: 4px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        .answer-item.correct {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+        .answer-item.incorrect {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+        .answer-item.new {
+            animation: highlightNew 2s ease-in-out;
+            border-left-color: #007bff;
+        }
+        @keyframes highlightNew {
+            0% { background: #e3f2fd; }
+            100% { background: #f9f9f9; }
+        }
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .student-name {
+            font-weight: bold;
+            color: #4b2e05;
+            font-size: 1.1em;
+        }
+        .answer-timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .game-mode-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+        .mode-adventure { background: #4a7c59; }
+        .mode-test_yourself { background: #e67e22; }
+        .mode-endless { background: #8e44ad; }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .answer-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .student-answer, .correct-answer {
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+        }
+        .student-answer {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+        .student-answer.correct {
+            background: #f0fff4;
+            border-color: #28a745;
+        }
+        .correct-answer {
+            background: #f8f9fa;
+            border-color: #6c757d;
+        }
+        .answer-label {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .level-indicator {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .no-answers {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #e8dcc6;
+            border: 2px solid #4b2e05;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4b2e05;
+        }
+        .stat-label {
+            color: #333;
+            font-size: 0.9em;
+        }
+        .auto-scroll-toggle {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .auto-scroll-toggle.disabled {
+            background: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-controls">
+            <h1 class="page-title">📡 Real-Time Student Monitoring</h1>
+            <div>
+                <span id="connectionStatus" class="status-indicator status-disconnected">Disconnected</span>
+                <a href="{{ url_for('teacher_dashboard') }}" class="btn">← Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-number" id="totalAnswers">{{ recent_answers|length }}</div>
+                <div class="stat-label">Total Answers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctAnswers">
+                    {{ recent_answers | selectattr('is_correct') | list | length }}
+                </div>
+                <div class="stat-label">Correct Answers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracyRate">
+                    {% set total = recent_answers|length %}
+                    {% set correct = recent_answers | selectattr('is_correct') | list | length %}
+                    {{ "%.1f"|format((correct / total * 100) if total > 0 else 0) }}%
+                </div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeStudents">
+                    {{ recent_answers | map(attribute='student_name') | unique | list | length }}
+                </div>
+                <div class="stat-label">Active Students</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <h3 style="color: #4b2e05; margin-bottom: 15px;">🔍 Filters & Controls</h3>
+            <div class="filter-controls">
+                <div>
+                    <label for="studentFilter"><strong>Student:</strong></label>
+                    <select id="studentFilter" onchange="filterAnswers()">
+                        <option value="">All Students</option>
+                        {% for student in students %}
+                        <option value="{{ student.full_name }}">{{ student.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="gameModeFilter"><strong>Game Mode:</strong></label>
+                    <select id="gameModeFilter" onchange="filterAnswers()">
+                        <option value="">All Modes</option>
+                        <option value="adventure">Adventure Mode</option>
+                        <option value="test_yourself">Test Yourself</option>
+                        <option value="endless">Endless Mode</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="correctnessFilter"><strong>Answer:</strong></label>
+                    <select id="correctnessFilter" onchange="filterAnswers()">
+                        <option value="">All Answers</option>
+                        <option value="correct">Correct Only</option>
+                        <option value="incorrect">Incorrect Only</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="autoScrollBtn" class="auto-scroll-toggle" onclick="toggleAutoScroll()">
+                        Auto-Scroll: ON
+                    </button>
+                </div>
+                <div>
+                    <button onclick="clearAnswers()" class="btn" style="background: #dc3545;">
+                        Clear Display
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Answers Container -->
+        <div class="answers-container" id="answersContainer">
+            {% if recent_answers %}
+                {% for answer in recent_answers %}
+                <div class="answer-item {{ 'correct' if answer.is_correct else 'incorrect' }}" data-student="{{ answer.student_name }}" data-mode="{{ answer.game_mode }}" data-correct="{{ 'correct' if answer.is_correct else 'incorrect' }}">
+                    <div class="answer-header">
+                        <div>
+                            <span class="student-name">{{ answer.student_name }}</span>
+                            <span class="game-mode-badge mode-{{ answer.game_mode }}">
+                                {% if answer.game_mode == 'adventure' %}🏰 Adventure
+                                {% elif answer.game_mode == 'test_yourself' %}📝 Test Yourself
+                                {% elif answer.game_mode == 'endless' %}🐉 Endless
+                                {% endif %}
+                                {% if answer.level %} - Level {{ answer.level }}{% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            {% if answer.level %}
+                            <span class="level-indicator">Level {{ answer.level }}</span>
+                            {% endif %}
+                            <span class="answer-timestamp">{{ answer.timestamp }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question-text">
+                        Q: {{ answer.question_text }}
+                    </div>
+                    
+                    <div class="answer-comparison">
+                        <div class="student-answer {{ 'correct' if answer.is_correct else '' }}">
+                            <div class="answer-label">Student Answer:</div>
+                            <div>{{ answer.student_answer }}</div>
+                        </div>
+                        <div class="correct-answer">
+                            <div class="answer-label">Correct Answer:</div>
+                            <div>{{ answer.correct_answer }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-answers" id="noAnswersMessage">
+                    <h3>🔍 Waiting for Student Answers...</h3>
+                    <p>Student answers will appear here in real-time as they submit responses.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        let socket;
+        let autoScroll = true;
+        let totalAnswers = {{ recent_answers|length }};
+        let correctAnswers = {{ recent_answers | selectattr('is_correct') | list | length }};
+
+        // Initialize Socket.IO connection
+        try {
+            socket = io();
+            
+            socket.on('connect', function() {
+                console.log('Connected to server');
+                document.getElementById('connectionStatus').textContent = 'Connected';
+                document.getElementById('connectionStatus').className = 'status-indicator status-connected';
+                socket.emit('join_teachers_room');
+            });
+            
+            socket.on('disconnect', function() {
+                console.log('Disconnected from server');
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                document.getElementById('connectionStatus').className = 'status-indicator status-disconnected';
+            });
+            
+            socket.on('student_answer', function(data) {
+                console.log('New student answer:', data);
+                addNewAnswer(data);
+                updateStats();
+            });
+            
+            socket.on('status', function(data) {
+                console.log('Status:', data.message);
+            });
+        } catch (error) {
+            console.log('SocketIO not available, using polling fallback');
+            document.getElementById('connectionStatus').textContent = 'Polling Mode';
+            document.getElementById('connectionStatus').className = 'status-indicator status-disconnected';
+            // Start polling fallback
+            setInterval(pollForUpdates, 5000);
+        }
+        
+        function addNewAnswer(answerData) {
+            const container = document.getElementById('answersContainer');
+            const noAnswersMsg = document.getElementById('noAnswersMessage');
+            
+            if (noAnswersMsg) {
+                noAnswersMsg.remove();
+            }
+            
+            // Create new answer element
+            const answerDiv = document.createElement('div');
+            answerDiv.className = `answer-item ${answerData.is_correct ? 'correct' : 'incorrect'} new`;
+            answerDiv.setAttribute('data-student', answerData.student_name);
+            answerDiv.setAttribute('data-mode', answerData.game_mode);
+            answerDiv.setAttribute('data-correct', answerData.is_correct ? 'correct' : 'incorrect');
+            
+            const gameModeName = {
+                'adventure': '🏰 Adventure',
+                'test_yourself': '📝 Test Yourself', 
+                'endless': '🐉 Endless'
+            }[answerData.game_mode] || answerData.game_mode;
+            
+            const levelBadge = answerData.level ? `<span class="level-indicator">Level ${answerData.level}</span>` : '';
+            
+            answerDiv.innerHTML = `
+                <div class="answer-header">
+                    <div>
+                        <span class="student-name">${answerData.student_name}</span>
+                        <span class="game-mode-badge mode-${answerData.game_mode}">
+                            ${gameModeName}${answerData.level ? ` - Level ${answerData.level}` : ''}
+                        </span>
+                    </div>
+                    <div>
+                        ${levelBadge}
+                        <span class="answer-timestamp">${new Date(answerData.timestamp).toLocaleString()}</span>
+                    </div>
+                </div>
+                
+                <div class="question-text">
+                    Q: ${answerData.question_text}
+                </div>
+                
+                <div class="answer-comparison">
+                    <div class="student-answer ${answerData.is_correct ? 'correct' : ''}">
+                        <div class="answer-label">Student Answer:</div>
+                        <div>${answerData.student_answer}</div>
+                    </div>
+                    <div class="correct-answer">
+                        <div class="answer-label">Correct Answer:</div>
+                        <div>${answerData.correct_answer}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Insert at the top
+            container.insertBefore(answerDiv, container.firstChild);
+            
+            // Remove the 'new' class after animation
+            setTimeout(() => {
+                answerDiv.classList.remove('new');
+            }, 2000);
+            
+            // Auto-scroll to top if enabled
+            if (autoScroll) {
+                container.scrollTop = 0;
+            }
+            
+            // Update counters
+            totalAnswers++;
+            if (answerData.is_correct) {
+                correctAnswers++;
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('totalAnswers').textContent = totalAnswers;
+            document.getElementById('correctAnswers').textContent = correctAnswers;
+            const accuracy = totalAnswers > 0 ? (correctAnswers / totalAnswers * 100).toFixed(1) : 0;
+            document.getElementById('accuracyRate').textContent = accuracy + '%';
+            
+            // Update active students count
+            const students = new Set();
+            document.querySelectorAll('.answer-item').forEach(item => {
+                students.add(item.getAttribute('data-student'));
+            });
+            document.getElementById('activeStudents').textContent = students.size;
+        }
+        
+        function filterAnswers() {
+            const studentFilter = document.getElementById('studentFilter').value;
+            const modeFilter = document.getElementById('gameModeFilter').value;
+            const correctnessFilter = document.getElementById('correctnessFilter').value;
+            
+            document.querySelectorAll('.answer-item').forEach(item => {
+                const student = item.getAttribute('data-student');
+                const mode = item.getAttribute('data-mode');
+                const correct = item.getAttribute('data-correct');
+                
+                let show = true;
+                
+                if (studentFilter && student !== studentFilter) show = false;
+                if (modeFilter && mode !== modeFilter) show = false;
+                if (correctnessFilter && correct !== correctnessFilter) show = false;
+                
+                item.style.display = show ? 'block' : 'none';
+            });
+        }
+        
+        function toggleAutoScroll() {
+            autoScroll = !autoScroll;
+            const btn = document.getElementById('autoScrollBtn');
+            btn.textContent = `Auto-Scroll: ${autoScroll ? 'ON' : 'OFF'}`;
+            btn.className = autoScroll ? 'auto-scroll-toggle' : 'auto-scroll-toggle disabled';
+        }
+        
+        function clearAnswers() {
+            if (confirm('Clear all displayed answers? This will not affect stored data.')) {
+                const container = document.getElementById('answersContainer');
+                container.innerHTML = `
+                    <div class="no-answers" id="noAnswersMessage">
+                        <h3>🔍 Waiting for Student Answers...</h3>
+                        <p>Student answers will appear here in real-time as they submit responses.</p>
+                    </div>
+                `;
+                totalAnswers = 0;
+                correctAnswers = 0;
+                updateStats();
+            }
+        }
+        
+        function pollForUpdates() {
+            // Fallback polling mechanism if WebSocket is not available
+            fetch('/teacher/real-time-monitoring')
+                .then(response => response.text())
+                .then(html => {
+                    // Simple polling - in production, you'd want a dedicated endpoint
+                    console.log('Polling for updates...');
+                })
+                .catch(error => console.log('Polling error:', error));
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (socket) {
+                socket.emit('leave_teachers_room');
+                socket.disconnect();
+            }
+        });
+    </script>
+</body>
+</html>

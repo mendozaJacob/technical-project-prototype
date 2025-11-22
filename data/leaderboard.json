@@ -18,5 +18,15 @@
         "wrong_answers": 0,
         "game_mode": "adventure",
         "date": "2025-11-18 14:04:47"
+    },
+    {
+        "player": "Anonymous",
+        "student_id": "0001",
+        "score": 0,
+        "time": 6.15,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-21 22:38:47"
     }
 ]

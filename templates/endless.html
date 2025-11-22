@@ -37,6 +37,12 @@
 <body>
     <div class="container">
     <h1 class="endless-title">🐉 Endless Mode</h1>
+    
+    <!-- Quit Button -->
+    <div style="text-align: right; margin-bottom: 10px;">
+        <button onclick="quitEndlessMode()" class="btn" style="background: #cc4400; font-size: 0.9em; padding: 8px 15px;">🚪 Quit</button>
+    </div>
+    
     <div class="timer" id="timer" data-time-left="{{ time_left }}">Time Left: {{ time_left }} sec</div>
     <div class="questions-left">Questions Answered: {{ q_number - 1 }}</div>
     <div class="hp">Player: {{ session.get('player_name', 'Unknown') }} &nbsp;|&nbsp; HP: {{ player_hp }}</div>
@@ -104,6 +110,26 @@
         }
     }
     updateTimer();
+    
+    // Quit endless mode function with confirmation
+    function quitEndlessMode() {
+        const questionsAnswered = {{ q_number - 1 }};
+        const currentScore = {{ score }};
+        const currentStreak = {{ streak }};
+        const playerHP = {{ player_hp }};
+        
+        const confirmMessage = `⚠️ Are you sure you want to quit Endless Mode?\n\n` +
+                             `You will lose your current progress:\n` +
+                             `• Questions answered: ${questionsAnswered}\n` +
+                             `• Score: ${currentScore}\n` +
+                             `• Streak: ${currentStreak}/5\n` +
+                             `• HP: ${playerHP}\n\n` +
+                             `Click OK to quit or Cancel to continue playing.`;
+        
+        if (confirm(confirmMessage)) {
+            window.location.href = '/quit_endless';
+        }
+    }
     
     // Question type interaction functions for endless mode
     function selectEndlessOption(letter, optionText) {

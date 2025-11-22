@@ -614,6 +614,14 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
         with open(GUEST_LEADERBOARD_FILE, "w", encoding="utf-8") as f:
             json.dump(guest_leaderboard, f, indent=4)
 
+def load_leaderboard():
+    """Load leaderboard data from file"""
+    try:
+        with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
 # Auto-save functionality
 def log_analytics_event(event_type, data=None):
     """Log analytics event if analytics are enabled"""
@@ -822,25 +830,45 @@ def select_level():
         session['level_completed'] = False
         session['enemy_defeated'] = False  # Reset enemy defeated status for new level
         session['current_timer'] = settings.get('question_time_limit', 30)  # Use configurable time limit
-        # Initialize enemy progression index to the Novice Gnome every time a new
-        # game is started. This ensures each new game begins against the Novice Gnome
-        # regardless of previous session state.
+        
+        # Initialize enemy progression index based on selected level and current progress
+        # Only reset to novice if playing level 1 or if no enemy index exists
         try:
-            novice_idx = 0
-            try:
-                with open('data/enemies.json', encoding='utf-8') as ef:
-                    enemies_list = json.load(ef)
-                # Look for an enemy by name or level that indicates the novice gnome
-                for i, e in enumerate(enemies_list):
-                    name = str(e.get('name', '')).strip().lower()
-                    level = e.get('level')
-                    if name == 'novice gnome' or level == 1:
-                        novice_idx = i
-                        break
-            except Exception:
-                # If we can't read the file, default to index 0
+            current_enemy_index = session.get('enemy_index')
+            
+            # If no enemy index exists, start with novice
+            # Only reset to novice for level 1 if player hasn't progressed yet
+            if current_enemy_index is None or (selected_level == 1 and current_enemy_index == 0):
                 novice_idx = 0
-            session['enemy_index'] = int(novice_idx)
+                try:
+                    with open('data/enemies.json', encoding='utf-8') as ef:
+                        enemies_list = json.load(ef)
+                    # Look for an enemy by name or level that indicates the novice gnome
+                    for i, e in enumerate(enemies_list):
+                        name = str(e.get('name', '')).strip().lower()
+                        level = e.get('level')
+                        if name == 'novice gnome' or level == 1:
+                            novice_idx = i
+                            break
+                except Exception:
+                    # If we can't read the file, default to index 0
+                    novice_idx = 0
+                session['enemy_index'] = int(novice_idx)
+            else:
+                # Keep current enemy progression when selecting different levels
+                # But ensure enemy index corresponds roughly to the selected level
+                try:
+                    with open('data/enemies.json', encoding='utf-8') as ef:
+                        enemies_list = json.load(ef)
+                    
+                    # Try to find an enemy that matches the selected level
+                    level_based_index = min(selected_level - 1, len(enemies_list) - 1)
+                    
+                    # Use the higher of current progression or level-based index
+                    session['enemy_index'] = max(current_enemy_index, level_based_index)
+                except Exception:
+                    # Keep current enemy index if file can't be read
+                    pass
         except Exception:
             session['enemy_index'] = 0
         # Auto-save initial game state
@@ -997,21 +1025,40 @@ def game():
             enemies = json.load(f)
     except Exception:
         enemies = []
-    # Prefer ordered progression using session['enemy_index'] if present
+    # Select enemy based on progression index, with fallbacks
     enemy = None
-    enemy_index = session.get('enemy_index')
-    if enemy_index is not None and isinstance(enemies, list) and 0 <= int(enemy_index) < len(enemies):
+    enemy_index = session.get('enemy_index', 0)
+    
+    # Try to get enemy by progression index first
+    if isinstance(enemies, list) and enemies and 0 <= int(enemy_index) < len(enemies):
         try:
             enemy = enemies[int(enemy_index)]
+            print(f"DEBUG: Using enemy from index {enemy_index}: {enemy.get('name', 'Unknown')}")
         except Exception:
             enemy = None
 
-    # Fallback: try to find an enemy that matches the current level
+    # Fallback 1: try to find an enemy that matches the current level
     if not enemy:
         enemy = next((e for e in enemies if e.get("level") == current_level), None)
+        if enemy:
+            print(f"DEBUG: Found level-based enemy for level {current_level}: {enemy.get('name', 'Unknown')}")
+    
+    # Fallback 2: use enemy based on level progression (level-1 as index)
+    if not enemy and isinstance(enemies, list) and enemies:
+        level_based_index = min(max(current_level - 1, 0), len(enemies) - 1)
+        try:
+            enemy = enemies[level_based_index]
+            # Update session to match this enemy for consistency
+            session['enemy_index'] = level_based_index
+            print(f"DEBUG: Using level-based index {level_based_index} for level {current_level}: {enemy.get('name', 'Unknown')}")
+        except Exception:
+            enemy = None
+    
+    # Final fallback: default enemy
     if not enemy:
         enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found for this level."}
-    print(f"DEBUG: Selected enemy for level {current_level}: {enemy}")  # Debugging
+    
+    print(f"DEBUG: Final selected enemy for level {current_level}: {enemy.get('name', 'Unknown')} (enemy_index: {session.get('enemy_index')})")
 
     # Determine enemy image URL to mirror how player avatar images are used
     enemy_image = None
@@ -1084,15 +1131,16 @@ def game():
             session['feedback'] = "⏳ Time's up! Timeout results in immediate failure."
             return redirect(url_for('you_lose'))
         else:
-            # Apply penalty and continue (default behavior)
-            session['player_hp'] -= settings['base_damage'] * current_level
+            # Apply penalty and continue (default behavior) - use base damage only, not multiplied by level
+            timeout_damage = settings['base_damage']
+            session['player_hp'] -= timeout_damage
             
             # Check if player has failed due to low HP
             if session.get('player_hp', 0) <= 0:
-                session['feedback'] = "⏳ Time's up! Your HP reached 0. Game Over!"
+                session['feedback'] = f"⏳ Time's up! You took {timeout_damage} damage and your HP reached 0. Game Over!"
                 return redirect(url_for('you_lose'))
             
-            session['feedback'] = "⏳ Time's up! You took too long."
+            session['feedback'] = f"⏳ Time's up! You took {timeout_damage} damage for running out of time."
             session['q_index'] += 1
             session["level_start_time"] = time.time()  # Reset timer for the next question
             session["current_timer"] = max(10, session.get("current_timer", settings.get('question_time_limit', 30)) - 5)  # Deduct 5s for next question, min 10s
@@ -1211,9 +1259,9 @@ def game():
                 session["current_timer"] = min(settings.get('question_time_limit', 30) * 2, session.get("current_timer", settings.get('question_time_limit', 30)) + 5)  # Add 5s to timer for next question, max 2x base limit
                 session['correct_answers'] = session.get('correct_answers', 0) + 1  # Track correct answers
             else:
-                session['player_hp'] -= base_damage * current_level
+                session['player_hp'] -= base_damage  # Use base damage only, not multiplied by level
                 session['score'] -= points_wrong  # Deduct points for wrong answer
-                session['feedback'] = f"❌ Incorrect!<br><br>💡 {question_feedback}"
+                session['feedback'] = f"❌ Incorrect! You took {base_damage} damage.<br><br>💡 {question_feedback}"
                 session["current_timer"] = max(10, session.get("current_timer", settings.get('question_time_limit', 30)) - 5)  # Deduct 5s from timer for next question, min 10s
                 session['wrong_answers'] = session.get('wrong_answers', 0) + 1  # Track wrong answers
 
@@ -1350,15 +1398,26 @@ def result():
                 enemies_list = json.load(f)
         except Exception:
             enemies_list = []
+        
         if isinstance(enemies_list, list) and enemies_list:
             current_idx = session.get('enemy_index', 0) or 0
             try:
                 current_idx = int(current_idx)
             except Exception:
                 current_idx = 0
-            # Move to next enemy but don't exceed list bounds (wrap to last)
+            
+            # Advance to next enemy, but don't exceed the list bounds
             next_idx = min(current_idx + 1, len(enemies_list) - 1)
-            session['enemy_index'] = next_idx
+            
+            # Also ensure the enemy progression matches or exceeds the level progression
+            # Each completed level should advance at least to that level's enemy
+            level_based_idx = min(next_level - 1, len(enemies_list) - 1) if next_level <= max_level else len(enemies_list) - 1
+            
+            # Use the higher of the two indices to ensure proper progression
+            final_idx = max(next_idx, level_based_idx)
+            session['enemy_index'] = final_idx
+            
+            print(f"DEBUG: Enemy progression - Level: {next_level}, Current idx: {current_idx}, Next idx: {next_idx}, Level-based idx: {level_based_idx}, Final idx: {final_idx}")
         # If we've unlocked past the maximum level, the player beat the game
         try:
             with open("data/levels.json", "r", encoding="utf-8") as f:
@@ -3260,10 +3319,15 @@ def update_leaderboard_username(old_username, new_username):
     try:
         # Update main leaderboard
         leaderboard = load_leaderboard()
+        updated = False
         for entry in leaderboard:
             if entry.get('player') == old_username:
                 entry['player'] = new_username
-        save_leaderboard(leaderboard)
+                updated = True
+        
+        if updated:
+            with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
+                json.dump(leaderboard, f, indent=4)
         
         # Update guest leaderboard if it exists
         try:

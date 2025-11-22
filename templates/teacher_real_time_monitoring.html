@@ -358,8 +358,8 @@
     <script>
         let socket;
         let autoScroll = true;
-        let totalAnswers = {{ recent_answers|length }};
-        let correctAnswers = {{ recent_answers | selectattr('is_correct') | list | length }};
+        let totalAnswers = parseInt('{{ recent_answers|length|default(0) }}') || 0;
+        let correctAnswers = parseInt('{{ (recent_answers | selectattr("is_correct") | list | length) if recent_answers else 0 }}') || 0;
 
         // Initialize Socket.IO connection
         try {

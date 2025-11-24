@@ -971,13 +971,9 @@ def select_level():
                 session['redirect_after_character'] = 'game'
                 return redirect(url_for('choose_character'))
         else:
-            # Non-student user (guest) - check if they already have a character
-            if session.get('character'):
-                # Guest already has a character, go directly to game
-                return redirect(url_for('game'))
-            else:
-                # Guest needs to choose a character first
-                return redirect(url_for('choose_character'))
+            # Non-student user (guest) - always let them choose/change character for each new game
+            session['redirect_after_character'] = 'game'
+            return redirect(url_for('choose_character'))
 
     # Pass unlocked info to template (GET request)
     return render_template('select_level.html', levels=levels, highest_unlocked=highest_unlocked)
@@ -1058,7 +1054,11 @@ def choose_character():
             # After choosing a character, start the game
             return redirect(url_for('game'))
     
-    return render_template('choose_character.html', total_characters=total_characters)
+    # Check if guest player has a current character to display
+    current_char = session.get('character')
+    return render_template('choose_character.html', 
+                         total_characters=total_characters,
+                         current_character=current_char)
 
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
@@ -1115,13 +1115,13 @@ def game():
     # Only allow playing the selected level
     current_level = selected_level
     level_questions = get_questions_for_level(current_level, levels)
-    print(f"DEBUG: Level {current_level} questions: {level_questions}")  # Debugging
+    print(f"DEBUG: Level {current_level} questions: {len(level_questions)} questions loaded")  # Debugging
     if not level_questions:
-        return "No questions available for this level. Please check levels.json."
+        flash(f'No questions available for level {current_level}. Please contact your teacher.', 'error')
+        return redirect(url_for('select_level'))
 
     # Check if we've exceeded max questions
     questions_per_level = settings.get('questions_per_level', 10)
-    question_index = session['q_index'] % questions_per_level
     
     # Mark enemy as defeated if HP <= 0 but continue playing
     if session.get('enemy_hp', BASE_ENEMY_HP) <= 0:
@@ -1130,6 +1130,11 @@ def game():
     
     # Only end the level when all questions are answered
     if session['q_index'] >= questions_per_level:
+        return redirect(url_for('result'))
+    
+    # Get question with proper bounds checking
+    question_index = session['q_index'] % len(level_questions) if level_questions else 0
+    if question_index >= len(level_questions):
         return redirect(url_for('result'))
     question = level_questions[question_index]
 
@@ -1992,9 +1997,15 @@ def test_yourself():
     time_left_sec = total_seconds_left % 60
     q_index = session.get('test_q_index', 0)
     test_question_ids = session.get('test_question_ids', [])
+    
     # Rebuild the test_questions list from global questions using IDs
+    if not questions:
+        flash('No questions available. Please contact your teacher.', 'error')
+        return redirect(url_for('index'))
+    
     id_to_question = {q['id']: q for q in questions}
     test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
+    
     if not test_questions or q_index >= 40 or total_seconds_left <= 0:
         print(f"[DEBUG] REDIRECT TO RESULT: test_q_index={q_index}, test_questions={len(test_questions)}, total_seconds_left={total_seconds_left}, test_user_answers={len(session.get('test_user_answers', []))}")
         session['test_q_index'] = 40
@@ -2266,9 +2277,12 @@ def endless_start():
     endless_questions = get_questions_for_pool('endless_mode')
     if endless_questions:
         session['endless_current_question'] = random.choice(endless_questions)
-    else:
+    elif questions:
         # Fallback to all questions if pool is empty
         session['endless_current_question'] = random.choice(questions)
+    else:
+        flash('No questions available. Please contact your teacher to add questions.', 'error')
+        return redirect(url_for('index'))
     
     session['endless_score_initialized'] = True
     
@@ -2300,8 +2314,11 @@ def endless_game():
         endless_questions = get_questions_for_pool('endless_mode')
         if endless_questions:
             session['endless_current_question'] = random.choice(endless_questions)
-        else:
+        elif questions:
             session['endless_current_question'] = random.choice(questions)
+        else:
+            flash('No questions available. Please contact your teacher.', 'error')
+            return redirect(url_for('index'))
     question = session['endless_current_question']
     
     # Get session variables
@@ -2328,6 +2345,11 @@ def endless_game():
         endless_questions = get_questions_for_pool('endless_mode')
         if not endless_questions:
             endless_questions = questions
+        
+        if not endless_questions:
+            flash('No questions available. Game cannot continue.', 'error')
+            return redirect(url_for('endless_result'))
+        
         # Filter out the current question to ensure a new one
         available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
         if available_questions:

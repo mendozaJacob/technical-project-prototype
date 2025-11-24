@@ -46,6 +46,10 @@
     {% endif %}
   {% else %}
     <h1>Choose Your Character</h1>
+    {% if current_character %}
+      <p style="color: #00eaff; margin-bottom: 10px;">Your current character is #{{ current_character }}</p>
+      <p style="color: #ffd700; margin-bottom: 20px; font-size: 0.9em;">✨ You can keep it or select a different one below</p>
+    {% endif %}
   {% endif %}
 
   <form method="post" id="chooseForm">
@@ -59,6 +63,9 @@
 
     <input type="hidden" name="character" id="characterInput" value="">
     <button id="startGameBtn" disabled>{% if student_name %}Save Character{% else %}Start Game{% endif %}</button>
+    {% if current_character and not student_name %}
+      <button type="submit" id="keepCharBtn" style="background: #4CAF50; margin-left: 15px;">Keep Current Character & Start</button>
+    {% endif %}
   </form>
 
   <script>
@@ -69,6 +76,7 @@
     const grid = document.getElementById('characterGrid');
     const input = document.getElementById('characterInput');
     const startBtn = document.getElementById('startGameBtn');
+    const keepBtn = document.getElementById('keepCharBtn');
 
     // Pre-select current character if exists
     const charId = grid.dataset.currentCharacter;
@@ -79,6 +87,17 @@
         input.value = charId;
         startBtn.disabled = false;
       }
+    }
+
+    // Handle keep current character button
+    if (keepBtn) {
+      keepBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (charId) {
+          input.value = charId;
+          document.getElementById('chooseForm').submit();
+        }
+      });
     }
 
     grid.addEventListener('click', (e) => {

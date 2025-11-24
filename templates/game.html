@@ -24,6 +24,15 @@
     </audio>
     {% endif %}
     <style>
+        .quit-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #cc4400;
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
@@ -262,15 +271,13 @@
     </style>
 </head>
 <body>
+    <!-- Quit Button -->
+    <button onclick="quitGame()" class="btn quit-btn">🚪 Quit</button>
+    
     <!-- Main container for the game content -->
     <div class="game-container animation-{{ settings.animation_speed or 'normal' }} fade-in">
         <!-- Game Title -->
         <h1 class="game-title slide-in">⚔️ Battle Arena</h1>
-        
-        <!-- Quit Button -->
-        <div style="text-align: right; margin-bottom: 10px;">
-            <button onclick="quitGame()" class="btn" style="background: #cc4400; font-size: 0.9em; padding: 8px 15px;">🚪 Quit</button>
-        </div>
         
         <!-- Timer (shown based on settings) -->
         {% if settings.show_timer %}

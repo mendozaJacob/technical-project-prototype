@@ -571,10 +571,18 @@ def normalize_true_false_answer(answer):
 def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure"):
     # Save to student leaderboard if it's a logged-in student
     if session.get('is_student') and session.get('student_id'):
-        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
-        
-        # Get student information for better leaderboard display
+        # Get actual student name from students.json instead of relying on player_name
         student_id = session.get('student_id')
+        students = load_students()
+        student = next((s for s in students if s['id'] == student_id), None)
+        
+        # Use student's full name if available, otherwise use the passed player_name
+        if student and 'full_name' in student:
+            player_name = student['full_name']
+        elif session.get('student_name'):
+            player_name = session.get('student_name')
+        
+        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
         
         record = {
             "player": player_name,

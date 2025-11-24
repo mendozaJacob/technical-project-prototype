@@ -4396,11 +4396,11 @@ def on_leave_teachers_room():
 # Run the Flask app
 if __name__ == "__main__":
     print("🎮 Starting Quiz Battle: Dungeons of Knowledge")
-    print("🌐 Server running at: http://0.0.0.0:8000")
+    print("🌐 Server running at: http://127.0.0.1:8000")
     print("🎯 Ready for educational adventures!")
     print("📡 Real-time monitoring enabled!")
     try:
-        socketio.run(app, debug=True, host='127.0.0.1', port=5000)
+        socketio.run(app, debug=True, host='127.0.0.1', port=8000)
     except:
         # Fallback if SocketIO is not available
         print("⚠️  SocketIO not available, running without real-time features")

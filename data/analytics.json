@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": 1763780972.4085248,
+    "timestamp": 1763987479.4227445,
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -11,332 +11,23 @@
     }
   },
   {
-    "timestamp": 1763781250.9443688,
-    "event_type": "level_selected",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "level": 1,
-      "player_hp": 100,
-      "enemy_hp": 100
-    }
-  },
-  {
-    "timestamp": 1763781363.3410537,
-    "event_type": "level_selected",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "level": 1,
-      "player_hp": 100,
-      "enemy_hp": 100
-    }
-  },
-  {
-    "timestamp": 1763781806.0473704,
-    "event_type": "game_quit",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "level": 1,
-      "score": 0,
-      "questions_answered": 5,
-      "reason": "player_quit"
-    }
-  },
-  {
-    "timestamp": 1763782083.4844368,
-    "event_type": "test_yourself_quit",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "questions_answered": 0,
-      "correct_answers": 0,
-      "reason": "player_quit"
-    }
-  },
-  {
-    "timestamp": 1763782727.6212993,
-    "event_type": "test_yourself_quit",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "questions_answered": 0,
-      "correct_answers": 0,
-      "score": 0,
-      "reason": "player_quit"
-    }
-  },
-  {
-<<<<<<< HEAD
-    "timestamp": 1763732401.8440287,
-=======
-    "timestamp": 1763959300.431817,
->>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
-    "event_type": "level_selected",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "level": 1,
-      "player_hp": 100,
-      "enemy_hp": 100
-    }
-  },
-  {
-<<<<<<< HEAD
-    "timestamp": 1763732409.8441641,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 1,
-      "user_answer": "hostnamectl set-hostname server1.example.com",
-      "correct_answer": "hostnamectl set-hostname server1.example.com",
-      "is_correct": true,
-      "time_taken": 7.99497127532959,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732415.617604,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 2,
-      "user_answer": "ls",
-      "correct_answer": "ls",
-      "is_correct": true,
-      "time_taken": 5.7702038288116455,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732420.8287084,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 3,
-      "user_answer": "useradd student; echo 'student' | passwd --stdin student",
-      "correct_answer": "useradd student; echo 'student' | passwd --stdin student",
-      "is_correct": true,
-      "time_taken": 5.20676589012146,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732427.9704964,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 4,
-      "user_answer": "mkdir -p /home/student/docs",
-      "correct_answer": "mkdir -p /home/student/docs",
-      "is_correct": true,
-      "time_taken": 7.13912034034729,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732438.6030798,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 5,
-      "user_answer": "mount /dev/sdb1 /mnt/data",
-      "correct_answer": "mount /dev/sdb1 /mnt/data",
-      "is_correct": true,
-      "time_taken": 10.628511667251587,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732447.957587,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 6,
-      "user_answer": "boot",
-      "correct_answer": "systemctl set-default graphical.target",
-      "is_correct": false,
-      "time_taken": 9.350397825241089,
-      "similarity_score": 0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732452.5676355,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 7,
-      "user_answer": "dnf install httpd -y",
-      "correct_answer": "dnf install httpd -y",
-      "is_correct": true,
-      "time_taken": 4.606167316436768,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732457.1379592,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 8,
-      "user_answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
-      "correct_answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
-      "is_correct": true,
-      "time_taken": 4.561561346054077,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732465.8033807,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 9,
-      "user_answer": "setenforce 1; sed -i 's/^selinux=.*/selinux=enforcing/' /etc/selinux/config",
-      "correct_answer": "find / -user student 2>/dev/null",
-      "is_correct": false,
-      "time_taken": 8.660452842712402,
-      "similarity_score": 0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732479.4368048,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 10,
-      "user_answer": "s",
-      "correct_answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
-      "is_correct": false,
-      "time_taken": 13.629268169403076,
-      "similarity_score": 0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763732480.4805527,
+    "timestamp": 1763987480.880934,
     "event_type": "level_completed",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
       "level": 1,
-      "final_score": 165,
-      "player_hp": 70,
-      "enemy_hp": 0,
-      "total_time": 78.62833166122437,
-      "correct_answers": 7,
-      "wrong_answers": 3,
-      "level_completed": true
-    }
-  },
-  {
-    "timestamp": 1763732482.0697076,
-    "event_type": "level_selected",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "level": 2,
+      "final_score": 0,
       "player_hp": 100,
-      "enemy_hp": 100
+      "enemy_hp": 100,
+      "total_time": 1.4383504390716553,
+      "correct_answers": 0,
+      "wrong_answers": 0,
+      "level_completed": false
     }
   },
   {
-    "timestamp": 1763732488.6269226,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 11,
-      "user_answer": "h",
-      "correct_answer": "lvcreate -l 100m -n lv_data vg_system",
-      "is_correct": false,
-      "time_taken": 6.554169178009033,
-      "similarity_score": 0,
-      "level": 2
-    }
-  },
-  {
-    "timestamp": 1763732492.7934866,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 12,
-      "user_answer": "sudo mkdir /home/student/docs",
-      "correct_answer": "mkfs.ext4 /dev/sdc1",
-      "is_correct": false,
-      "time_taken": 4.1578874588012695,
-      "similarity_score": 0,
-      "level": 2
-    }
-  },
-  {
-    "timestamp": 1763732496.2035768,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 13,
-      "user_answer": "useradd student; echo 'student' | passwd --stdin student",
-      "correct_answer": "usermod -ag wheel student",
-      "is_correct": false,
-      "time_taken": 3.4007413387298584,
-      "similarity_score": 0,
-      "level": 2
-    }
-  },
-  {
-    "timestamp": 1763732499.421376,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 14,
-      "user_answer": "ls",
-      "correct_answer": "systemctl start httpd; systemctl enable httpd",
-      "is_correct": false,
-      "time_taken": 3.2091383934020996,
-      "similarity_score": 0,
-      "level": 2
-    }
-  },
-  {
-    "timestamp": 1763732502.7942948,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 15,
-      "user_answer": "systemctl set-default graphical.target",
-      "correct_answer": "setenforce 1; sed -i 's/^selinux=.*/selinux=enforcing/' /etc/selinux/config",
-      "is_correct": false,
-      "time_taken": 3.3701021671295166,
-      "similarity_score": 0,
-      "level": 2
-    }
-  },
-  {
-    "timestamp": 1763810556.6913567,
+    "timestamp": 1763987500.5207884,
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -347,184 +38,23 @@
     }
   },
   {
-    "timestamp": 1763810563.3272717,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 1,
-      "user_answer": "hostnamectl set-hostname server1.example.com",
-      "correct_answer": "hostnamectl set-hostname server1.example.com",
-      "is_correct": true,
-      "time_taken": 6.627006530761719,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810566.3934808,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 2,
-      "user_answer": "ls",
-      "correct_answer": "ls",
-      "is_correct": true,
-      "time_taken": 3.0607593059539795,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810570.380502,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 3,
-      "user_answer": "useradd student; echo 'student' | passwd --stdin student",
-      "correct_answer": "useradd student; echo 'student' | passwd --stdin student",
-      "is_correct": true,
-      "time_taken": 3.9811830520629883,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810576.272562,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 4,
-      "user_answer": "mkdir -p /home/student/docs",
-      "correct_answer": "mkdir -p /home/student/docs",
-      "is_correct": true,
-      "time_taken": 5.886560678482056,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810582.1354697,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 5,
-      "user_answer": "mount /dev/sdb1 /mnt/data",
-      "correct_answer": "mount /dev/sdb1 /mnt/data",
-      "is_correct": true,
-      "time_taken": 5.856927156448364,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810589.3127458,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 6,
-      "user_answer": "systemctl set-default graphical.target",
-      "correct_answer": "systemctl set-default graphical.target",
-      "is_correct": true,
-      "time_taken": 7.170298337936401,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810593.7746303,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 7,
-      "user_answer": "dnf install httpd -y",
-      "correct_answer": "dnf install httpd -y",
-      "is_correct": true,
-      "time_taken": 4.454301834106445,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810597.9279437,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 8,
-      "user_answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
-      "correct_answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
-      "is_correct": true,
-      "time_taken": 4.145097017288208,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810604.1994975,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 9,
-      "user_answer": "find / -user student 2>/dev/null",
-      "correct_answer": "find / -user student 2>/dev/null",
-      "is_correct": true,
-      "time_taken": 6.263823986053467,
-      "similarity_score": 1.0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810616.0351949,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 10,
-      "user_answer": "setenforce 1; sed -i 's/^selinux=.*/selinux=enforcing/' /etc/selinux/config",
-      "correct_answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
-      "is_correct": false,
-      "time_taken": 11.827918529510498,
-      "similarity_score": 0,
-      "level": 1
-    }
-  },
-  {
-    "timestamp": 1763810617.1437287,
+    "timestamp": 1763987500.5415382,
     "event_type": "level_completed",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
       "level": 1,
-      "final_score": 255,
-      "player_hp": 90,
-      "enemy_hp": 0,
-      "total_time": 60.4366672039032,
-      "correct_answers": 9,
-      "wrong_answers": 1,
-      "level_completed": true
-    }
-  },
-  {
-    "timestamp": 1763810618.3194597,
-    "event_type": "level_selected",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "level": 2,
+      "final_score": 0,
       "player_hp": 100,
-      "enemy_hp": 100
+      "enemy_hp": 100,
+      "total_time": 0.016459226608276367,
+      "correct_answers": 0,
+      "wrong_answers": 0,
+      "level_completed": false
     }
   },
   {
-    "timestamp": 1763811736.8603718,
+    "timestamp": 1763987503.6157389,
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -535,81 +65,73 @@
     }
   },
   {
-    "timestamp": 1763811748.4803157,
-=======
-    "timestamp": 1763959312.596516,
->>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
-    "event_type": "answer_submitted",
+    "timestamp": 1763987503.6294942,
+    "event_type": "level_completed",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
-      "question_id": 1,
-      "user_answer": "paris",
-      "correct_answer": "paris",
-      "is_correct": true,
-<<<<<<< HEAD
-      "time_taken": 11.615503311157227,
-=======
-      "time_taken": 12.162914991378784,
->>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
-      "similarity_score": 1.0,
-      "level": 1
+      "level": 1,
+      "final_score": 0,
+      "player_hp": 100,
+      "enemy_hp": 100,
+      "total_time": 0.011772394180297852,
+      "correct_answers": 0,
+      "wrong_answers": 0,
+      "level_completed": false
     }
   },
   {
-<<<<<<< HEAD
-    "timestamp": 1763812094.349407,
+    "timestamp": 1763987613.898223,
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
-      "level": 2,
+      "level": 1,
       "player_hp": 100,
       "enemy_hp": 100
-=======
-    "timestamp": 1763959319.275257,
-    "event_type": "answer_submitted",
-    "player_name": "Anonymous",
-    "session_id": "unknown",
-    "data": {
-      "question_id": 2,
-      "user_answer": "mars",
-      "correct_answer": "mars",
-      "is_correct": true,
-      "time_taken": 6.676263809204102,
-      "similarity_score": 1.0,
-      "level": 1
     }
   },
   {
-    "timestamp": 1763959329.680401,
-    "event_type": "answer_submitted",
+    "timestamp": 1763987613.9114015,
+    "event_type": "level_completed",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
-      "question_id": 3,
-      "user_answer": "pacific",
-      "correct_answer": "pacific ocean",
-      "is_correct": true,
-      "time_taken": 10.403008937835693,
-      "similarity_score": 0.9,
-      "level": 1
+      "level": 1,
+      "final_score": 0,
+      "player_hp": 100,
+      "enemy_hp": 100,
+      "total_time": 0.011121749877929688,
+      "correct_answers": 0,
+      "wrong_answers": 0,
+      "level_completed": false
     }
   },
   {
-    "timestamp": 1763959524.5133343,
-    "event_type": "answer_submitted",
+    "timestamp": 1763987861.2455332,
+    "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
-      "question_id": 5,
-      "user_answer": "au",
-      "correct_answer": "au",
-      "is_correct": true,
-      "time_taken": 18.245821475982666,
-      "similarity_score": 1.0,
-      "level": 1
->>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1763987861.2689636,
+    "event_type": "level_completed",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "final_score": 0,
+      "player_hp": 100,
+      "enemy_hp": 100,
+      "total_time": 0.018732786178588867,
+      "correct_answers": 0,
+      "wrong_answers": 0,
+      "level_completed": false
     }
   }
 ]

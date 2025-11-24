@@ -16,5 +16,50 @@
         "wrong_answers": 1,
         "game_mode": "adventure",
         "date": "2025-11-22 06:23:37"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 1.44,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 07:31:20"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 0.02,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 07:31:40"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 0.01,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 07:31:43"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 0.01,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 07:33:33"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 0.02,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 07:37:41"
     }
 ]

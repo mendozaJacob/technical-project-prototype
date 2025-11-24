@@ -154,6 +154,7 @@
             </table>
         </div>
     <a href="{{ url_for('test_yourself', new=1) }}" class="btn">Retry</a>
+        <a href="{{ url_for('select_level') }}" class="btn">🏰 Back to Level Selection</a>
         {% if session.get('is_student') %}
             <a href="{{ url_for('student_dashboard') }}" class="btn">Back to Student Portal</a>
         {% else %}

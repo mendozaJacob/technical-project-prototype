@@ -15,8 +15,10 @@
         <div style="margin-top:20px;">
             {% if is_student %}
                 <a href="{{ url_for('student_dashboard') }}" class="btn">← Back to Student Portal</a>
+                <a href="{{ url_for('select_level') }}" class="btn">🏰 Back to Level Selection</a>
                 <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
             {% else %}
+                <a href="{{ url_for('select_level') }}" class="btn">🏰 Back to Level Selection</a>
                 <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
                 <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
             {% endif %}

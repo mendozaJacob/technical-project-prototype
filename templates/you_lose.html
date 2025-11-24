@@ -13,7 +13,7 @@
         <p>Level {{ session.get('selected_level', 1) }} Score: <strong>{{ session.get('score', 0) }}</strong></p>
         <div style="margin-top:20px;">
             <a href="{{ url_for('game') }}" class="btn btn-primary">🔄 Retry Level {{ session.get('selected_level', 1) }}</a>
-            <a href="{{ url_for('select_level') }}" class="btn">Choose Different Level</a>
+            <a href="{{ url_for('select_level') }}" class="btn">🏰 Back to Level Selection</a>
             <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
         </div>
     </div>

@@ -7,6 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
     <style>
+        .quit-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #cc4400;
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
         body { font-family: 'Times New Roman', Times, serif; background: #2e3d1f; color: #f3eac2; }
         .container { max-width: 600px; margin: 40px auto; background: #f3eac2; border: 6px solid #4b2e05; border-radius: 24px; box-shadow: 0 0 24px #0008; padding: 32px 24px 24px 24px; text-align: center; }
         .timer { font-size: 1.3em; color: #b22222; margin-bottom: 12px; }
@@ -35,13 +44,11 @@
     </style>
 </head>
 <body>
+    <!-- Quit Button -->
+    <button onclick="quitEndlessMode()" class="btn quit-btn">🚪 Quit</button>
+    
     <div class="container">
     <h1 class="endless-title">🐉 Endless Mode</h1>
-    
-    <!-- Quit Button -->
-    <div style="text-align: right; margin-bottom: 10px;">
-        <button onclick="quitEndlessMode()" class="btn" style="background: #cc4400; font-size: 0.9em; padding: 8px 15px;">🚪 Quit</button>
-    </div>
     
     <div class="timer" id="timer" data-time-left="{{ time_left }}">Time Left: {{ time_left }} sec</div>
     <div class="questions-left">Questions Answered: {{ q_number - 1 }}</div>

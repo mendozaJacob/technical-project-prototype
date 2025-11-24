@@ -1505,6 +1505,12 @@ def result():
         'wrong_answers': session.get('wrong_answers', 0),
         'level_completed': session.get('level_completed', False)
     })
+    
+    # Check if player completed level 10 with 7+ correct answers - show credits
+    current_level = session.get('selected_level', 1)
+    correct_answers = session.get('correct_answers', 0)
+    if current_level == 10 and correct_answers >= 7 and session.get('level_completed', False):
+        return redirect(url_for('credits'))
 
     # If the level is completed, allow to select next level
     next_level = session.get('selected_level', 1) + 1
@@ -1692,6 +1698,27 @@ def you_win():
     is_student = session.get('is_student', False)
     return render_template('you_win.html', is_student=is_student)
 
+
+@app.route('/credits')
+def credits():
+    """Display credits page after completing level 10 with 7+ correct answers"""
+    # Get final score and stats from session
+    settings = get_current_game_settings()
+    bonus = settings['level_bonus'] if session.get('level_completed', False) and session['player_hp'] > 0 else 0
+    final_score = session.get('score', 0) + bonus
+    correct_answers = session.get('correct_answers', 0)
+    wrong_answers = session.get('wrong_answers', 0)
+    total_time = time.time() - session.get("game_start_time", time.time())
+    
+    # Check if student is logged in
+    is_student = session.get('is_student', False)
+    
+    return render_template('credits.html', 
+                         final_score=final_score,
+                         correct_answers=correct_answers,
+                         wrong_answers=wrong_answers,
+                         total_time=round(total_time, 2),
+                         is_student=is_student)
 
 
 @app.route('/you_lose')

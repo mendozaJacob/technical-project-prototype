@@ -8,12 +8,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>💀 You Were Defeated</h1>
-        <p>Your health dropped to zero. Better luck next time!</p>
-        <p>Your final score: <strong>{{ session.get('score', 0) }}</strong></p>
+        <h1>💀 Level Failed</h1>
+        <p>Your health dropped to zero! Don't give up - you can try this level again.</p>
+        <p>Level {{ session.get('selected_level', 1) }} Score: <strong>{{ session.get('score', 0) }}</strong></p>
         <div style="margin-top:20px;">
+            <a href="{{ url_for('game') }}" class="btn btn-primary">🔄 Retry Level {{ session.get('selected_level', 1) }}</a>
+            <a href="{{ url_for('select_level') }}" class="btn">Choose Different Level</a>
             <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
-            <a href="{{ url_for('select_level') }}" class="btn">Try Again</a>
         </div>
     </div>
 </body>

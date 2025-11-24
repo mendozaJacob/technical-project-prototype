@@ -1164,9 +1164,16 @@
     "id": 111,
     "q": "Which command is used to list directory contents in Linux?",
     "answer": "ls",
-    "options": ["ls", "dir", "list", "show"],
+    "options": [
+      "ls",
+      "dir",
+      "list",
+      "show"
+    ],
     "type": "multiple_choice",
-    "keywords": ["ls"],
+    "keywords": [
+      "ls"
+    ],
     "feedback": "The 'ls' command is the standard Unix/Linux command for listing directory contents.",
     "difficulty": "easy",
     "ai_generated": false
@@ -1186,7 +1193,11 @@
     "q": "What does the 'cd' command do in Linux?",
     "answer": "change directory",
     "type": "short_answer",
-    "keywords": ["changes directory", "navigate", "move to directory"],
+    "keywords": [
+      "changes directory",
+      "navigate",
+      "move to directory"
+    ],
     "feedback": "The 'cd' command stands for 'change directory' and is used to navigate between directories in the filesystem.",
     "difficulty": "easy",
     "ai_generated": false
@@ -1195,9 +1206,16 @@
     "id": 114,
     "q": "Which symbol is used to redirect output to a file in Linux?",
     "answer": ">",
-    "options": [">", "<", "|", "&"],
+    "options": [
+      ">",
+      "<",
+      "|",
+      "&"
+    ],
     "type": "multiple_choice",
-    "keywords": [">"],
+    "keywords": [
+      ">"
+    ],
     "feedback": "The '>' symbol is used to redirect output from a command to a file, overwriting the file if it exists.",
     "difficulty": "medium",
     "ai_generated": false

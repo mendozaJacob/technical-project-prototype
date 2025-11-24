@@ -17,6 +17,7 @@
 - [🔧 Customization Guide](#-customization-guide)
 - [📊 Settings System](#-settings-system)
 - [🧑‍🎓 Student Management](#-student-management)
+- [📡 Real-Time Monitoring](#-real-time-monitoring)
 - [📁 Data Format Reference](#-data-format-reference)
 - [🛠️ Advanced Features](#️-advanced-features)
 - [🐛 Troubleshooting](#-troubleshooting)
@@ -52,13 +53,15 @@ Quiz Battle: Dungeons of Knowledge is a comprehensive educational platform that 
 - **Mobile Responsive**: Play on any device
 
 ### 👨‍🏫 For Teachers
-- **Complete Student Management**: Add, edit, and monitor students
+- **📡 Real-Time Student Monitoring**: Watch student answers live as they play with WebSocket technology
+- **Complete Student Management**: Add, edit, and monitor students with individual/batch reset capabilities
 - **Multi-Type Question Creation**: Create Short Answer, Multiple Choice, and True/False questions
 - **AI-Powered Question Generation**: Upload curriculum and generate mixed question types automatically
 - **Enhanced Answer Evaluation**: Advanced fuzzy matching with multiple validation methods
 - **Advanced Settings Control**: Configure 22+ game parameters
-- **Performance Analytics**: Track student progress and performance
+- **Live Performance Analytics**: Track student progress and performance in real-time
 - **Intelligent Grading**: AI-powered answer evaluation with semantic understanding
+- **Advanced Filtering**: Filter live answers by student, game mode, and correctness
 - **Content Management**: Manage questions, levels, and enemies with type-based filtering
 
 ### 🤖 AI Integration
@@ -86,7 +89,7 @@ cd technical-project-prototype
 
 2. **Install dependencies**
 ```bash
-pip install Flask==2.3.3 Werkzeug==2.3.7 requests==2.31.0 whoosh
+pip install Flask==2.3.3 Werkzeug==2.3.7 requests==2.31.0 whoosh Flask-SocketIO
 ```
 
 3. **Configure AI integration (optional)**
@@ -378,6 +381,77 @@ The advanced answer evaluation system includes:
 - **Profile Updates**: Email and password change functionality
 - **Activity Logging**: Track login times and session duration
 
+### 🔄 Teacher Reset Capabilities
+- **Individual Reset**: Reset specific student progress or game sessions
+- **Batch Operations**: Reset multiple students simultaneously
+- **Secure Confirmations**: Type "RESET" confirmations for destructive operations
+- **Detailed Logging**: All reset actions tracked for accountability
+
+## 📡 Real-Time Monitoring
+
+### 🔴 Live Answer Streaming
+**Teachers can watch student answers in real-time as they play:**
+
+#### **Core Features**
+- **📺 Instant Visibility**: See every student answer immediately upon submission
+- **🎮 Multi-Mode Support**: Monitor Adventure, Test Yourself, and Endless modes
+- **🎯 Performance Tracking**: Real-time accuracy rates and engagement metrics
+- **👥 Student Identification**: Clear student names and avatars for easy recognition
+- **⏰ Timestamp Tracking**: Precise timing of each answer submission
+
+#### **Advanced Filtering**
+- **👤 Student Filter**: Focus on specific students
+- **🎮 Game Mode Filter**: View answers from specific game modes only
+- **✅❌ Correctness Filter**: Show only correct or incorrect answers
+- **🔄 Auto-Scroll Toggle**: Automatically scroll to newest answers or disable for review
+- **🧹 Clear Display**: Reset view while preserving stored data
+
+#### **WebSocket Technology**
+- **⚡ Real-Time Updates**: No page refresh needed - answers appear instantly
+- **🔒 Secure Rooms**: Teachers join authenticated WebSocket rooms
+- **📊 Connection Status**: Visual indicators showing connection state
+- **💪 Graceful Fallback**: System works even without WebSocket support
+
+#### **Answer Analysis**
+```
+📊 Live Statistics:
+• Total Answers: 247
+• Correct Answers: 189
+• Accuracy Rate: 76.5%
+• Active Students: 23
+```
+
+#### **Usage Instructions**
+1. **Access**: Teacher Dashboard → "📡 Real-Time Monitoring"
+2. **Connect**: WebSocket automatically connects upon page load
+3. **Monitor**: Answers stream live as students submit responses
+4. **Filter**: Use dropdown filters to focus on specific data
+5. **Analyze**: Watch for patterns in student responses
+
+#### **Visual Interface**
+- **🟢 Correct Answers**: Green-highlighted with checkmark indicators
+- **🔴 Incorrect Answers**: Red-highlighted with X indicators
+- **🎯 Game Mode Badges**: Color-coded badges for each mode
+- **📏 Level Indicators**: Show Adventure mode progression
+- **⏱️ Timestamps**: Precise submission times
+- **🔄 New Answer Animation**: Smooth highlighting for fresh submissions
+
+#### **Teacher Benefits**
+- **🚨 Immediate Intervention**: Spot struggling students instantly
+- **📈 Engagement Monitoring**: See which students are actively participating
+- **❓ Question Analysis**: Identify questions that many students miss
+- **🎯 Performance Assessment**: Real-time understanding of class comprehension
+- **📊 Data-Driven Decisions**: Make instructional adjustments based on live feedback
+
+### 🛠️ Technical Implementation
+- **Flask-SocketIO**: Professional WebSocket integration
+- **JSON Storage**: Efficient answer logging with automatic rotation
+- **Secure Authentication**: Teacher-only access with session validation
+- **Error Handling**: Comprehensive fallback mechanisms
+- **Performance Optimized**: Handles high-frequency answer submissions
+
+**📡 Real-time monitoring transforms traditional teaching into dynamic, responsive instruction!**
+
 ## 📁 Data Format Reference
 
 ### 📝 questions.json Schema
@@ -571,9 +645,11 @@ For help and support:
 
 - **🎮 Start Playing**: [http://localhost:5000](http://localhost:5000)
 - **👨‍🏫 Teacher Portal**: [http://localhost:5000/teacher/login](http://localhost:5000/teacher/login)
+- **📡 Real-Time Monitoring**: [http://localhost:5000/teacher/real-time-monitoring](http://localhost:5000/teacher/real-time-monitoring)
 - **📊 Settings Guide**: See [Settings System](#-settings-system) section
 - **📝 Question Format**: See [Data Format Reference](#-data-format-reference) section
 - **🔧 Customization**: See [Customization Guide](#-customization-guide) section
+- **📡 Live Monitoring**: See [Real-Time Monitoring](#-real-time-monitoring) section
 
 ---
 

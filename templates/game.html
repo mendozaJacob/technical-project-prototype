@@ -267,6 +267,11 @@
         <!-- Game Title -->
         <h1 class="game-title slide-in">⚔️ Battle Arena</h1>
         
+        <!-- Quit Button -->
+        <div style="text-align: right; margin-bottom: 10px;">
+            <button onclick="quitGame()" class="btn" style="background: #cc4400; font-size: 0.9em; padding: 8px 15px;">🚪 Quit</button>
+        </div>
+        
         <!-- Timer (shown based on settings) -->
         {% if settings.show_timer %}
         <div class="timer" id="timer">⏱️ Time Left: {{ time_left }} seconds</div>
@@ -384,6 +389,25 @@
         // Initialize the remaining time from the backend
         let timeLeft = {{ time_left }};
         const timerElement = document.getElementById("timer");
+        
+        // Quit game function with confirmation
+        function quitGame() {
+            const currentLevel = {{ level }};
+            const currentScore = {{ score }};
+            const questionsAnswered = {{ q_number - 1 }};
+            
+            const confirmMessage = `⚠️ Are you sure you want to quit?\n\n` +
+                                 `You will lose your current progress:\n` +
+                                 `• Level: ${currentLevel}\n` +
+                                 `• Score: ${currentScore}\n` +
+                                 `• Questions answered: ${questionsAnswered}\n\n` +
+                                 `Click OK to quit or Cancel to continue playing.`;
+            
+            if (confirm(confirmMessage)) {
+                // User confirmed quit - redirect to level selection
+                window.location.href = '/quit_game';
+            }
+        }
         
         // Question type interaction functions
         function selectOption(letter, optionText) {

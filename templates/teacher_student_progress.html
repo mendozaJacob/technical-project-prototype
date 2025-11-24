@@ -164,7 +164,13 @@
 
         <!-- Student Information -->
         <div class="student-info">
-            <h2 style="margin-top: 0;">👤 Student Information</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">👤 Student Information</h2>
+                <div>
+                    <button onclick="resetStudentProgress()" class="btn" style="background: #cc4400; margin-right: 10px;">🔄 Reset All Progress</button>
+                    <button onclick="resetGameModes()" class="btn" style="background: #cc4400;">🎮 Reset Game Modes</button>
+                </div>
+            </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                 <div>
                     <strong>Full Name:</strong> {{ student.full_name }}<br>
@@ -268,5 +274,43 @@
         </div>
         {% endif %}
     </div>
+
+    <script>
+        function resetStudentProgress() {
+            const studentName = '{{ student.full_name }}';
+            const studentId = '{{ student.id }}';
+            
+            const confirmMessage = `⚠️ Are you sure you want to RESET ALL PROGRESS for ${studentName}?\n\n` +
+                                 `This will permanently delete:\n` +
+                                 `• All game history and scores\n` +
+                                 `• Level completion progress\n` +
+                                 `• Performance statistics\n` +
+                                 `• Achievement records\n\n` +
+                                 `This action CANNOT be undone!\n\n` +
+                                 `Type "RESET" to confirm:`;
+            
+            const confirmation = prompt(confirmMessage);
+            if (confirmation === "RESET") {
+                window.location.href = `/teacher/reset-student-progress/${studentId}`;
+            }
+        }
+        
+        function resetGameModes() {
+            const studentName = '{{ student.full_name }}';
+            const studentId = '{{ student.id }}';
+            
+            const confirmMessage = `⚠️ Reset game mode sessions for ${studentName}?\n\n` +
+                                 `This will clear:\n` +
+                                 `• Any active Test Yourself sessions\n` +
+                                 `• Any active Endless Mode sessions\n` +
+                                 `• Current game state data\n\n` +
+                                 `Their progress history will be preserved.\n\n` +
+                                 `Continue?`;
+            
+            if (confirm(confirmMessage)) {
+                window.location.href = `/teacher/reset-game-modes/${studentId}`;
+            }
+        }
+    </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
     "id": 1,
     "q": "What is the capital city of France?",
     "answer": "Paris",
-    "alternate_answers": [
+    "keywords": [
       "Paris"
     ],
     "feedback": "Paris is the capital and most populous city of France, known for its art, fashion, and landmarks like the Eiffel Tower."
@@ -12,7 +12,7 @@
     "id": 2,
     "q": "Which planet is known as the Red Planet?",
     "answer": "Mars",
-    "alternate_answers": [
+    "keywords": [
       "Mars"
     ],
     "feedback": "Mars is called the Red Planet due to its reddish appearance caused by iron oxide on its surface."
@@ -21,7 +21,7 @@
     "id": 3,
     "q": "What is the largest ocean on Earth?",
     "answer": "Pacific Ocean",
-    "alternate_answers": [
+    "keywords": [
       "Pacific"
     ],
     "feedback": "The Pacific Ocean covers more than one-third of the Earth's surface and is the largest by area."
@@ -30,7 +30,7 @@
     "id": 4,
     "q": "Who painted the Mona Lisa?",
     "answer": "Leonardo da Vinci",
-    "alternate_answers": [
+    "keywords": [
       "Leonardo da Vinci"
     ],
     "feedback": "Leonardo da Vinci, an Italian Renaissance artist, created the Mona Lisa around 1503, and it is housed in the Louvre Museum."
@@ -39,7 +39,7 @@
     "id": 5,
     "q": "What is the chemical symbol for gold?",
     "answer": "Au",
-    "alternate_answers": [
+    "keywords": [
       "Au"
     ],
     "feedback": "Au comes from the Latin word 'aurum,' meaning gold, and it is element number 79 on the periodic table."
@@ -48,7 +48,7 @@
     "id": 6,
     "q": "In which year did the Titanic sink?",
     "answer": "1912",
-    "alternate_answers": [
+    "keywords": [
       "1912"
     ],
     "feedback": "The RMS Titanic sank on April 15, 1912, after hitting an iceberg during its maiden voyage from Southampton to New York City."
@@ -57,7 +57,7 @@
     "id": 7,
     "q": "What is the square root of 144?",
     "answer": "12",
-    "alternate_answers": [
+    "keywords": [
       "12"
     ],
     "feedback": "The square root of 144 is 12, since 12 multiplied by itself equals 144."
@@ -66,7 +66,7 @@
     "id": 8,
     "q": "Which animal is known as the 'King of the Jungle'?",
     "answer": "Lion",
-    "alternate_answers": [
+    "keywords": [
       "Lion"
     ],
     "feedback": "Lions are often called the King of the Jungle due to their strength and role as apex predators in African savannas."
@@ -75,7 +75,7 @@
     "id": 9,
     "q": "What is the longest river in the world?",
     "answer": "Nile River",
-    "alternate_answers": [
+    "keywords": [
       "Nile",
       "The Nile River"
     ],
@@ -85,7 +85,7 @@
     "id": 10,
     "q": "Who wrote 'To Kill a Mockingbird'?",
     "answer": "Harper Lee",
-    "alternate_answers": [
+    "keywords": [
       "Harper Lee"
     ],
     "feedback": "Harper Lee wrote 'To Kill a Mockingbird' in 1960, a novel addressing racial injustice in the American South."
@@ -94,7 +94,7 @@
     "id": 11,
     "q": "What is the capital of Japan?",
     "answer": "Tokyo",
-    "alternate_answers": [
+    "keywords": [
       "Tokyo"
     ],
     "feedback": "Tokyo is the capital and largest city of Japan, serving as its political, economic, and cultural center."
@@ -103,7 +103,7 @@
     "id": 12,
     "q": "Which element has the atomic number 1?",
     "answer": "Hydrogen",
-    "alternate_answers": [
+    "keywords": [
       "Hydrogen"
     ],
     "feedback": "Hydrogen is the lightest and most abundant element in the universe, with atomic number 1."
@@ -112,7 +112,7 @@
     "id": 13,
     "q": "What is the largest planet in our solar system?",
     "answer": "Jupiter",
-    "alternate_answers": [
+    "keywords": [
       "Jupiter"
     ],
     "feedback": "Jupiter is the largest planet, known for its Great Red Spot and numerous moons."
@@ -121,7 +121,7 @@
     "id": 14,
     "q": "Who was the first president of the United States?",
     "answer": "George Washington",
-    "alternate_answers": [
+    "keywords": [
       "George Washington"
     ],
     "feedback": "George Washington served as the first President of the United States from 1789 to 1797."
@@ -130,7 +130,7 @@
     "id": 15,
     "q": "What is the currency of the United Kingdom?",
     "answer": "Pound Sterling",
-    "alternate_answers": [
+    "keywords": [
       "British Pound",
       "GBP"
     ],
@@ -140,7 +140,7 @@
     "id": 16,
     "q": "Which gas do plants absorb from the atmosphere?",
     "answer": "Carbon Dioxide",
-    "alternate_answers": [
+    "keywords": [
       "CO2",
       "Carbon Dioxide"
     ],
@@ -150,7 +150,7 @@
     "id": 17,
     "q": "What is the smallest country in the world?",
     "answer": "Vatican City",
-    "alternate_answers": [
+    "keywords": [
       "Vatican City"
     ],
     "feedback": "Vatican City is the smallest independent state in the world, located within Rome, Italy."
@@ -159,7 +159,7 @@
     "id": 18,
     "q": "Who discovered penicillin?",
     "answer": "Alexander Fleming",
-    "alternate_answers": [
+    "keywords": [
       "Alexander Fleming"
     ],
     "feedback": "Alexander Fleming discovered penicillin in 1928, revolutionizing medicine as the first antibiotic."
@@ -168,7 +168,7 @@
     "id": 19,
     "q": "What is the hardest natural substance on Earth?",
     "answer": "Diamond",
-    "alternate_answers": [
+    "keywords": [
       "Diamond"
     ],
     "feedback": "Diamond is the hardest known natural material, formed from carbon under high pressure and temperature."
@@ -177,7 +177,7 @@
     "id": 20,
     "q": "Which continent is known as the 'Dark Continent'?",
     "answer": "Africa",
-    "alternate_answers": [
+    "keywords": [
       "Africa"
     ],
     "feedback": "Africa is sometimes called the 'Dark Continent' due to its historical mystery to Europeans before extensive exploration."
@@ -186,7 +186,7 @@
     "id": 21,
     "q": "What is the speed of light in a vacuum?",
     "answer": "299,792,458 meters per second",
-    "alternate_answers": [
+    "keywords": [
       "3 x 10^8 m/s",
       "186,282 miles per second"
     ],
@@ -196,7 +196,7 @@
     "id": 22,
     "q": "Who wrote '1984'?",
     "answer": "George Orwell",
-    "alternate_answers": [
+    "keywords": [
       "George Orwell"
     ],
     "feedback": "George Orwell wrote '1984' in 1949, a dystopian novel about totalitarianism and surveillance."
@@ -205,7 +205,7 @@
     "id": 23,
     "q": "What is the largest desert in the world?",
     "answer": "Sahara Desert",
-    "alternate_answers": [
+    "keywords": [
       "Sahara"
     ],
     "feedback": "The Sahara Desert in Africa is the largest hot desert, covering over 9 million square kilometers."
@@ -214,8 +214,8 @@
     "id": 24,
     "q": "Which vitamin is produced when skin is exposed to sunlight?",
     "answer": "Vitamin D",
-    "alternate_answers": [
-      "Vitamin D"
+    "keywords": [
+      "Vitamin D", "D"
     ],
     "feedback": "Vitamin D is synthesized in the skin through exposure to UVB rays from sunlight."
   },
@@ -223,7 +223,7 @@
     "id": 25,
     "q": "What is the capital of Australia?",
     "answer": "Canberra",
-    "alternate_answers": [
+    "keywords": [
       "Canberra"
     ],
     "feedback": "Canberra is the capital of Australia, chosen as a compromise between Sydney and Melbourne."
@@ -232,8 +232,8 @@
     "id": 26,
     "q": "Who painted 'The Starry Night'?",
     "answer": "Vincent van Gogh",
-    "alternate_answers": [
-      "Vincent van Gogh"
+    "keywords": [
+      "Vincent van Gogh", "van Gogh"
     ],
     "feedback": "Vincent van Gogh created 'The Starry Night' in 1889 while in an asylum in Saint-Rémy-de-Provence."
   },
@@ -241,7 +241,7 @@
     "id": 27,
     "q": "What is the most spoken language in the world by number of native speakers?",
     "answer": "Mandarin Chinese",
-    "alternate_answers": [
+    "keywords": [
       "Chinese",
       "Mandarin"
     ],
@@ -251,7 +251,7 @@
     "id": 28,
     "q": "Which planet is closest to the Sun?",
     "answer": "Mercury",
-    "alternate_answers": [
+    "keywords": [
       "Mercury"
     ],
     "feedback": "Mercury is the closest planet to the Sun, with an average distance of about 58 million kilometers."
@@ -260,7 +260,7 @@
     "id": 29,
     "q": "What is the chemical formula for water?",
     "answer": "H2O",
-    "alternate_answers": [
+    "keywords": [
       "H2O"
     ],
     "feedback": "Water's chemical formula is H2O, consisting of two hydrogen atoms and one oxygen atom."
@@ -269,7 +269,7 @@
     "id": 30,
     "q": "Who was the first man to walk on the Moon?",
     "answer": "Neil Armstrong",
-    "alternate_answers": [
+    "keywords": [
       "Neil Armstrong"
     ],
     "feedback": "Neil Armstrong was the first person to walk on the Moon during the Apollo 11 mission in 1969."
@@ -278,7 +278,7 @@
     "id": 31,
     "q": "What is the capital of Brazil?",
     "answer": "Brasília",
-    "alternate_answers": [
+    "keywords": [
       "Brasília"
     ],
     "feedback": "Brasília is the capital of Brazil, designed and built in the 1950s as a planned city."
@@ -287,7 +287,7 @@
     "id": 32,
     "q": "Which organ pumps blood in the human body?",
     "answer": "Heart",
-    "alternate_answers": [
+    "keywords": [
       "Heart"
     ],
     "feedback": "The heart is a muscular organ that pumps blood throughout the body via the circulatory system."
@@ -296,7 +296,7 @@
     "id": 33,
     "q": "What is the largest mammal in the world?",
     "answer": "Blue Whale",
-    "alternate_answers": [
+    "keywords": [
       "Blue Whale"
     ],
     "feedback": "The blue whale is the largest animal ever known to have lived, reaching lengths of up to 30 meters."
@@ -305,7 +305,7 @@
     "id": 34,
     "q": "Who invented the telephone?",
     "answer": "Alexander Graham Bell",
-    "alternate_answers": [
+    "keywords": [
       "Alexander Graham Bell"
     ],
     "feedback": "Alexander Graham Bell patented the telephone in 1876, enabling voice communication over distances."
@@ -314,7 +314,7 @@
     "id": 35,
     "q": "What is the capital of Canada?",
     "answer": "Ottawa",
-    "alternate_answers": [
+    "keywords": [
       "Ottawa"
     ],
     "feedback": "Ottawa is the capital of Canada, located on the Ottawa River in Ontario."
@@ -323,7 +323,7 @@
     "id": 36,
     "q": "Which gas makes up about 78% of Earth's atmosphere?",
     "answer": "Nitrogen",
-    "alternate_answers": [
+    "keywords": [
       "Nitrogen"
     ],
     "feedback": "Nitrogen comprises approximately 78% of the Earth's atmosphere, essential for life."
@@ -332,7 +332,7 @@
     "id": 37,
     "q": "What is the longest bone in the human body?",
     "answer": "Femur",
-    "alternate_answers": [
+    "keywords": [
       "Femur"
     ],
     "feedback": "The femur, or thigh bone, is the longest and strongest bone in the human body."
@@ -341,7 +341,7 @@
     "id": 38,
     "q": "Who wrote 'Pride and Prejudice'?",
     "answer": "Jane Austen",
-    "alternate_answers": [
+    "keywords": [
       "Jane Austen"
     ],
     "feedback": "Jane Austen wrote 'Pride and Prejudice' in 1813, a classic novel of manners and romance."
@@ -350,7 +350,7 @@
     "id": 39,
     "q": "What is the capital of India?",
     "answer": "New Delhi",
-    "alternate_answers": [
+    "keywords": [
       "New Delhi"
     ],
     "feedback": "New Delhi is the capital of India, serving as the seat of the Indian government."
@@ -359,7 +359,7 @@
     "id": 40,
     "q": "Which element is represented by the symbol 'O'?",
     "answer": "Oxygen",
-    "alternate_answers": [
+    "keywords": [
       "Oxygen"
     ],
     "feedback": "Oxygen is a chemical element with symbol O, essential for respiration and combustion."
@@ -368,7 +368,7 @@
     "id": 41,
     "q": "What is the capital of Germany?",
     "answer": "Berlin",
-    "alternate_answers": [
+    "keywords": [
       "Berlin"
     ],
     "feedback": "Berlin is the capital and largest city of Germany, its political and cultural center."
@@ -377,7 +377,7 @@
     "id": 42,
     "q": "Which planet has the most moons?",
     "answer": "Saturn",
-    "alternate_answers": [
+    "keywords": [
       "Saturn"
     ],
     "feedback": "Saturn has over 80 known moons, more than any other planet in our solar system."
@@ -386,7 +386,7 @@
     "id": 43,
     "q": "What is the chemical symbol for sodium?",
     "answer": "Na",
-    "alternate_answers": [
+    "keywords": [
       "Na"
     ],
     "feedback": "Na is the symbol for sodium, a highly reactive alkali metal."
@@ -395,7 +395,7 @@
     "id": 44,
     "q": "Who was the first female Prime Minister of the United Kingdom?",
     "answer": "Margaret Thatcher",
-    "alternate_answers": [
+    "keywords": [
       "Margaret Thatcher"
     ],
     "feedback": "Margaret Thatcher served as Prime Minister of the UK from 1979 to 1990, known as the 'Iron Lady'."
@@ -404,7 +404,7 @@
     "id": 45,
     "q": "What is the capital of Russia?",
     "answer": "Moscow",
-    "alternate_answers": [
+    "keywords": [
       "Moscow"
     ],
     "feedback": "Moscow is the capital of Russia, its largest city and economic hub."
@@ -413,7 +413,7 @@
     "id": 46,
     "q": "Which vitamin is also known as ascorbic acid?",
     "answer": "Vitamin C",
-    "alternate_answers": [
+    "keywords": [
       "Vitamin C"
     ],
     "feedback": "Vitamin C, or ascorbic acid, is essential for immune function and collagen production."
@@ -422,7 +422,7 @@
     "id": 47,
     "q": "What is the largest island in the world?",
     "answer": "Greenland",
-    "alternate_answers": [
+    "keywords": [
       "Greenland"
     ],
     "feedback": "Greenland is the world's largest island, located between the Arctic and Atlantic Oceans."
@@ -431,7 +431,7 @@
     "id": 48,
     "q": "Who directed the movie 'Jurassic Park'?",
     "answer": "Steven Spielberg",
-    "alternate_answers": [
+    "keywords": [
       "Steven Spielberg"
     ],
     "feedback": "Steven Spielberg directed 'Jurassic Park' in 1993, a blockbuster about dinosaurs brought back to life."
@@ -440,7 +440,7 @@
     "id": 49,
     "q": "What is the capital of China?",
     "answer": "Beijing",
-    "alternate_answers": [
+    "keywords": [
       "Beijing"
     ],
     "feedback": "Beijing is the capital of China, home to historical sites like the Forbidden City."
@@ -449,7 +449,7 @@
     "id": 50,
     "q": "Which metal is liquid at room temperature?",
     "answer": "Mercury",
-    "alternate_answers": [
+    "keywords": [
       "Mercury"
     ],
     "feedback": "Mercury is the only metal that is liquid at standard room temperature."
@@ -458,7 +458,7 @@
     "id": 51,
     "q": "What is the capital of Italy?",
     "answer": "Rome",
-    "alternate_answers": [
+    "keywords": [
       "Rome"
     ],
     "feedback": "Rome is the capital of Italy, known for its ancient history and landmarks like the Colosseum."
@@ -467,7 +467,7 @@
     "id": 52,
     "q": "Which scientist developed the theory of relativity?",
     "answer": "Albert Einstein",
-    "alternate_answers": [
+    "keywords": [
       "Albert Einstein"
     ],
     "feedback": "Albert Einstein formulated the theory of relativity, revolutionizing physics in the early 20th century."
@@ -476,7 +476,7 @@
     "id": 53,
     "q": "What is the capital of Mexico?",
     "answer": "Mexico City",
-    "alternate_answers": [
+    "keywords": [
       "Mexico City"
     ],
     "feedback": "Mexico City is the capital of Mexico, one of the largest cities in the world."
@@ -485,7 +485,7 @@
     "id": 54,
     "q": "Which gas is known as laughing gas?",
     "answer": "Nitrous Oxide",
-    "alternate_answers": [
+    "keywords": [
       "N2O",
       "Nitrous Oxide"
     ],
@@ -495,7 +495,7 @@
     "id": 55,
     "q": "What is the capital of South Korea?",
     "answer": "Seoul",
-    "alternate_answers": [
+    "keywords": [
       "Seoul"
     ],
     "feedback": "Seoul is the capital of South Korea, a major economic and cultural hub in East Asia."
@@ -504,7 +504,7 @@
     "id": 56,
     "q": "Who wrote 'The Great Gatsby'?",
     "answer": "F. Scott Fitzgerald",
-    "alternate_answers": [
+    "keywords": [
       "F. Scott Fitzgerald"
     ],
     "feedback": "F. Scott Fitzgerald wrote 'The Great Gatsby' in 1925, a critique of the American Dream."
@@ -513,7 +513,7 @@
     "id": 57,
     "q": "What is the capital of Argentina?",
     "answer": "Buenos Aires",
-    "alternate_answers": [
+    "keywords": [
       "Buenos Aires"
     ],
     "feedback": "Buenos Aires is the capital of Argentina, known for its European-style architecture."
@@ -522,7 +522,7 @@
     "id": 58,
     "q": "Which element has the symbol 'Fe'?",
     "answer": "Iron",
-    "alternate_answers": [
+    "keywords": [
       "Iron"
     ],
     "feedback": "Iron, with symbol Fe, is a common metal used in construction and manufacturing."
@@ -531,7 +531,7 @@
     "id": 59,
     "q": "What is the capital of Egypt?",
     "answer": "Cairo",
-    "alternate_answers": [
+    "keywords": [
       "Cairo"
     ],
     "feedback": "Cairo is the capital of Egypt, located along the Nile River and known for its pyramids."
@@ -540,7 +540,7 @@
     "id": 60,
     "q": "Who was the first woman to win a Nobel Prize?",
     "answer": "Marie Curie",
-    "alternate_answers": [
+    "keywords": [
       "Marie Curie"
     ],
     "feedback": "Marie Curie won the Nobel Prize in Physics in 1903 and Chemistry in 1911 for her work on radioactivity."
@@ -549,7 +549,7 @@
     "id": 61,
     "q": "What is the capital of Spain?",
     "answer": "Madrid",
-    "alternate_answers": [
+    "keywords": [
       "Madrid"
     ],
     "feedback": "Madrid is the capital of Spain, its largest city and a major European cultural center."
@@ -558,7 +558,7 @@
     "id": 62,
     "q": "Which planet is known for its rings?",
     "answer": "Saturn",
-    "alternate_answers": [
+    "keywords": [
       "Saturn"
     ],
     "feedback": "Saturn is famous for its prominent ring system, made mostly of ice and rock particles."
@@ -567,7 +567,7 @@
     "id": 63,
     "q": "What is the chemical symbol for potassium?",
     "answer": "K",
-    "alternate_answers": [
+    "keywords": [
       "K"
     ],
     "feedback": "K is the symbol for potassium, an alkali metal essential for human health."
@@ -576,7 +576,7 @@
     "id": 64,
     "q": "Who wrote 'The Catcher in the Rye'?",
     "answer": "J.D. Salinger",
-    "alternate_answers": [
+    "keywords": [
       "J.D. Salinger"
     ],
     "feedback": "J.D. Salinger wrote 'The Catcher in the Rye' in 1951, a coming-of-age novel."
@@ -585,7 +585,7 @@
     "id": 65,
     "q": "What is the capital of Turkey?",
     "answer": "Ankara",
-    "alternate_answers": [
+    "keywords": [
       "Ankara"
     ],
     "feedback": "Ankara is the capital of Turkey, serving as its political center."
@@ -594,7 +594,7 @@
     "id": 66,
     "q": "Which gas is produced during photosynthesis?",
     "answer": "Oxygen",
-    "alternate_answers": [
+    "keywords": [
       "Oxygen"
     ],
     "feedback": "Plants produce oxygen as a byproduct of photosynthesis, using sunlight, water, and carbon dioxide."
@@ -603,7 +603,7 @@
     "id": 67,
     "q": "What is the capital of Thailand?",
     "answer": "Bangkok",
-    "alternate_answers": [
+    "keywords": [
       "Bangkok"
     ],
     "feedback": "Bangkok is the capital of Thailand, a bustling city known for its temples and markets."
@@ -612,7 +612,7 @@
     "id": 68,
     "q": "Who discovered America in 1492?",
     "answer": "Christopher Columbus",
-    "alternate_answers": [
+    "keywords": [
       "Christopher Columbus"
     ],
     "feedback": "Christopher Columbus reached the Americas in 1492, sponsored by Spain."
@@ -621,7 +621,7 @@
     "id": 69,
     "q": "What is the capital of South Africa?",
     "answer": "Cape Town",
-    "alternate_answers": [
+    "keywords": [
       "Pretoria",
       "Bloemfontein"
     ],
@@ -631,7 +631,7 @@
     "id": 70,
     "q": "Which vitamin helps with blood clotting?",
     "answer": "Vitamin K",
-    "alternate_answers": [
+    "keywords": [
       "Vitamin K"
     ],
     "feedback": "Vitamin K is essential for blood clotting and bone health."
@@ -640,7 +640,7 @@
     "id": 71,
     "q": "What is the capital of Greece?",
     "answer": "Athens",
-    "alternate_answers": [
+    "keywords": [
       "Athens"
     ],
     "feedback": "Athens is the capital of Greece, birthplace of democracy and home to the Acropolis."
@@ -649,7 +649,7 @@
     "id": 72,
     "q": "Who painted 'Guernica'?",
     "answer": "Pablo Picasso",
-    "alternate_answers": [
+    "keywords": [
       "Pablo Picasso"
     ],
     "feedback": "Pablo Picasso painted 'Guernica' in 1937, depicting the horrors of the Spanish Civil War."
@@ -658,7 +658,7 @@
     "id": 73,
     "q": "What is the capital of Portugal?",
     "answer": "Lisbon",
-    "alternate_answers": [
+    "keywords": [
       "Lisbon"
     ],
     "feedback": "Lisbon is the capital of Portugal, known for its historic trams and Atlantic coastline."
@@ -667,7 +667,7 @@
     "id": 74,
     "q": "Which element is used in batteries?",
     "answer": "Lithium",
-    "alternate_answers": [
+    "keywords": [
       "Lithium"
     ],
     "feedback": "Lithium is commonly used in rechargeable batteries due to its light weight and high energy density."
@@ -676,7 +676,7 @@
     "id": 75,
     "q": "What is the capital of Sweden?",
     "answer": "Stockholm",
-    "alternate_answers": [
+    "keywords": [
       "Stockholm"
     ],
     "feedback": "Stockholm is the capital of Sweden, built on 14 islands in the Baltic Sea."
@@ -685,7 +685,7 @@
     "id": 76,
     "q": "Who wrote 'Harry Potter and the Philosopher's Stone'?",
     "answer": "J.K. Rowling",
-    "alternate_answers": [
+    "keywords": [
       "J.K. Rowling"
     ],
     "feedback": "J.K. Rowling wrote the first Harry Potter book in 1997, starting a global phenomenon."
@@ -694,7 +694,7 @@
     "id": 77,
     "q": "What is the capital of Norway?",
     "answer": "Oslo",
-    "alternate_answers": [
+    "keywords": [
       "Oslo"
     ],
     "feedback": "Oslo is the capital of Norway, located at the end of the Oslofjord."
@@ -703,7 +703,7 @@
     "id": 78,
     "q": "Which planet is known as the 'Morning Star' or 'Evening Star'?",
     "answer": "Venus",
-    "alternate_answers": [
+    "keywords": [
       "Venus"
     ],
     "feedback": "Venus is visible as the brightest planet and is called the Morning or Evening Star due to its brightness."
@@ -712,7 +712,7 @@
     "id": 79,
     "q": "What is the capital of Denmark?",
     "answer": "Copenhagen",
-    "alternate_answers": [
+    "keywords": [
       "Copenhagen"
     ],
     "feedback": "Copenhagen is the capital of Denmark, known for its canals and modern architecture."
@@ -721,7 +721,7 @@
     "id": 80,
     "q": "Who invented the light bulb?",
     "answer": "Thomas Edison",
-    "alternate_answers": [
+    "keywords": [
       "Thomas Edison"
     ],
     "feedback": "Thomas Edison patented the practical incandescent light bulb in 1879."
@@ -730,7 +730,7 @@
     "id": 81,
     "q": "What is the capital of the Netherlands?",
     "answer": "Amsterdam",
-    "alternate_answers": [
+    "keywords": [
       "Amsterdam"
     ],
     "feedback": "Amsterdam is the capital of the Netherlands, famous for its canals and museums."
@@ -739,7 +739,7 @@
     "id": 82,
     "q": "Which gas is responsible for the greenhouse effect?",
     "answer": "Carbon Dioxide",
-    "alternate_answers": [
+    "keywords": [
       "CO2",
       "Carbon Dioxide"
     ],
@@ -749,7 +749,7 @@
     "id": 83,
     "q": "What is the capital of Switzerland?",
     "answer": "Bern",
-    "alternate_answers": [
+    "keywords": [
       "Bern"
     ],
     "feedback": "Bern is the capital of Switzerland, known for its medieval old town."
@@ -758,7 +758,7 @@
     "id": 84,
     "q": "Who directed 'The Godfather'?",
     "answer": "Francis Ford Coppola",
-    "alternate_answers": [
+    "keywords": [
       "Francis Ford Coppola"
     ],
     "feedback": "Francis Ford Coppola directed 'The Godfather' in 1972, a classic crime drama."
@@ -767,7 +767,7 @@
     "id": 85,
     "q": "What is the capital of Austria?",
     "answer": "Vienna",
-    "alternate_answers": [
+    "keywords": [
       "Vienna"
     ],
     "feedback": "Vienna is the capital of Austria, renowned for its music and imperial palaces."
@@ -776,7 +776,7 @@
     "id": 86,
     "q": "Which element has the atomic number 6?",
     "answer": "Carbon",
-    "alternate_answers": [
+    "keywords": [
       "Carbon"
     ],
     "feedback": "Carbon, atomic number 6, is the basis of all known life forms."
@@ -785,7 +785,7 @@
     "id": 87,
     "q": "What is the capital of Poland?",
     "answer": "Warsaw",
-    "alternate_answers": [
+    "keywords": [
       "Warsaw"
     ],
     "feedback": "Warsaw is the capital of Poland, rebuilt after World War II destruction."
@@ -794,7 +794,7 @@
     "id": 88,
     "q": "Who wrote 'The Lord of the Rings'?",
     "answer": "J.R.R. Tolkien",
-    "alternate_answers": [
+    "keywords": [
       "J.R.R. Tolkien"
     ],
     "feedback": "J.R.R. Tolkien wrote 'The Lord of the Rings' trilogy, a fantasy epic."
@@ -803,7 +803,7 @@
     "id": 89,
     "q": "What is the capital of Hungary?",
     "answer": "Budapest",
-    "alternate_answers": [
+    "keywords": [
       "Budapest"
     ],
     "feedback": "Budapest is the capital of Hungary, formed by the merger of Buda and Pest."
@@ -812,7 +812,7 @@
     "id": 90,
     "q": "Which vitamin is found in citrus fruits?",
     "answer": "Vitamin C",
-    "alternate_answers": [
+    "keywords": [
       "Vitamin C"
     ],
     "feedback": "Vitamin C is abundant in citrus fruits and helps boost the immune system."
@@ -821,7 +821,7 @@
     "id": 91,
     "q": "What is the capital of Finland?",
     "answer": "Helsinki",
-    "alternate_answers": [
+    "keywords": [
       "Helsinki"
     ],
     "feedback": "Helsinki is the capital of Finland, known for its design and architecture."
@@ -830,7 +830,7 @@
     "id": 92,
     "q": "Who was the first man in space?",
     "answer": "Yuri Gagarin",
-    "alternate_answers": [
+    "keywords": [
       "Yuri Gagarin"
     ],
     "feedback": "Yuri Gagarin became the first human in space in 1961 aboard Vostok 1."
@@ -839,7 +839,7 @@
     "id": 93,
     "q": "What is the capital of Ireland?",
     "answer": "Dublin",
-    "alternate_answers": [
+    "keywords": [
       "Dublin"
     ],
     "feedback": "Dublin is the capital of Ireland, home to Trinity College and the Guinness Storehouse."
@@ -848,7 +848,7 @@
     "id": 94,
     "q": "Which element is used in jewelry and has symbol 'Ag'?",
     "answer": "Silver",
-    "alternate_answers": [
+    "keywords": [
       "Silver"
     ],
     "feedback": "Silver, symbol Ag, is valued for its luster and used in coins and jewelry."
@@ -857,7 +857,7 @@
     "id": 95,
     "q": "What is the capital of New Zealand?",
     "answer": "Wellington",
-    "alternate_answers": [
+    "keywords": [
       "Wellington"
     ],
     "feedback": "Wellington is the capital of New Zealand, located at the southern tip of the North Island."
@@ -866,7 +866,7 @@
     "id": 96,
     "q": "Who painted 'The Persistence of Memory'?",
     "answer": "Salvador Dalí",
-    "alternate_answers": [
+    "keywords": [
       "Salvador Dalí"
     ],
     "feedback": "Salvador Dalí created 'The Persistence of Memory' in 1931, featuring melting clocks."
@@ -875,7 +875,7 @@
     "id": 97,
     "q": "What is the capital of Chile?",
     "answer": "Santiago",
-    "alternate_answers": [
+    "keywords": [
       "Santiago"
     ],
     "feedback": "Santiago is the capital of Chile, nestled in the Andes Mountains."
@@ -884,7 +884,7 @@
     "id": 98,
     "q": "Which gas is used in balloons to make them float?",
     "answer": "Helium",
-    "alternate_answers": [
+    "keywords": [
       "Helium"
     ],
     "feedback": "Helium is lighter than air, making it ideal for filling balloons."
@@ -893,7 +893,7 @@
     "id": 99,
     "q": "What is the capital of Peru?",
     "answer": "Lima",
-    "alternate_answers": [
+    "keywords": [
       "Lima"
     ],
     "feedback": "Lima is the capital of Peru, founded by Spanish conquistadors in 1535."
@@ -902,7 +902,7 @@
     "id": 100,
     "q": "Who wrote 'One Hundred Years of Solitude'?",
     "answer": "Gabriel García Márquez",
-    "alternate_answers": [
+    "keywords": [
       "Gabriel García Márquez"
     ],
     "feedback": "Gabriel García Márquez wrote 'One Hundred Years of Solitude' in 1967, a magical realism masterpiece."

@@ -1,0 +1,22 @@
+[
+    {
+        "player": "Anonymous",
+        "student_id": "0001",
+        "score": 0,
+        "time": 0.0,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-18 13:09:40"
+    },
+    {
+        "player": "Anonymous",
+        "student_id": "0001",
+        "score": 85,
+        "time": 130.93,
+        "correct_answers": 6,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-18 14:04:47"
+    }
+]

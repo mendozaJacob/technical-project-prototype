@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Dungeons of Knowledge - Leaderboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #2e3d1f 0%, #1a2312 100%);
+            color: #f8e5b3;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f3eac2;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 0 24px rgba(0,0,0,0.5);
+            color: #4b2e05;
+        }
+        .leaderboard-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .tab-button {
+            background: #8b7355;
+            color: #f3eac2;
+            border: none;
+            padding: 12px 25px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-family: 'Times New Roman', Times, serif;
+            transition: background 0.3s;
+        }
+        .tab-button:hover {
+            background: #6d4106;
+        }
+        .tab-button.active {
+            background: #4b2e05;
+        }
+        .leaderboard-section {
+            display: none;
+        }
+        .leaderboard-section.active {
+            display: block;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #4b2e05;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fffbe6;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #4b2e05;
+            color: #f3eac2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        tr:hover {
+            background: #e6d7b3;
+        }
+        .rank {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .rank-1 { color: #FFD700; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-style: italic;
+        }
+        .btn {
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-family: 'Times New Roman', Times, serif;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .back-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            table {
+                font-size: 0.9em;
+            }
+            th, td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 30px;">🏆 Student Leaderboards</h1>
+        
+        <!-- Tab Navigation -->
+        <div class="leaderboard-tabs">
+            <button class="tab-button active" onclick="showLeaderboard('adventure')">⚔️ Adventure Mode</button>
+            <button class="tab-button" onclick="showLeaderboard('test_yourself')">🧪 Test Yourself</button>
+            <button class="tab-button" onclick="showLeaderboard('endless')">♾️ Endless Mode</button>
+        </div>
+        
+        <!-- Adventure Mode Leaderboard -->
+        <div id="adventure-leaderboard" class="leaderboard-section active">
+            <h2 class="section-title">⚔️ Adventure Mode Champions</h2>
+            {% if adventure_leaderboard %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Score</th>
+                            <th>Time (s)</th>
+                            <th>Correct</th>
+                            <th>Wrong</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in adventure_leaderboard %}
+                        <tr>
+                            <td class="rank rank-{{ loop.index if loop.index <= 3 else '' }}">{{ loop.index }}</td>
+                            <td>{{ record.player }}</td>
+                            <td><strong>{{ record.score }}</strong></td>
+                            <td>{{ record.time }}</td>
+                            <td>{{ record.correct_answers }}</td>
+                            <td>{{ record.wrong_answers }}</td>
+                            <td>{{ record.date[:10] if record.date else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-data">No adventure mode scores yet. Be the first to complete the adventure!</div>
+            {% endif %}
+        </div>
+        
+        <!-- Test Yourself Leaderboard -->
+        <div id="test_yourself-leaderboard" class="leaderboard-section">
+            <h2 class="section-title">🧪 Test Yourself Champions</h2>
+            {% if test_yourself_leaderboard %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Score</th>
+                            <th>Time (s)</th>
+                            <th>Correct</th>
+                            <th>Wrong</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in test_yourself_leaderboard %}
+                        <tr>
+                            <td class="rank rank-{{ loop.index if loop.index <= 3 else '' }}">{{ loop.index }}</td>
+                            <td>{{ record.player }}</td>
+                            <td><strong>{{ record.score }}</strong></td>
+                            <td>{{ record.time }}</td>
+                            <td>{{ record.correct_answers }}</td>
+                            <td>{{ record.wrong_answers }}</td>
+                            <td>{{ record.date[:10] if record.date else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-data">No test yourself scores yet. Take the test to see your score here!</div>
+            {% endif %}
+        </div>
+        
+        <!-- Endless Mode Leaderboard -->
+        <div id="endless-leaderboard" class="leaderboard-section">
+            <h2 class="section-title">♾️ Endless Mode Champions</h2>
+            {% if endless_leaderboard %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Score</th>
+                            <th>Time (s)</th>
+                            <th>Correct</th>
+                            <th>Wrong</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in endless_leaderboard %}
+                        <tr>
+                            <td class="rank rank-{{ loop.index if loop.index <= 3 else '' }}">{{ loop.index }}</td>
+                            <td>{{ record.player }}</td>
+                            <td><strong>{{ record.score }}</strong></td>
+                            <td>{{ record.time }}</td>
+                            <td>{{ record.correct_answers }}</td>
+                            <td>{{ record.wrong_answers }}</td>
+                            <td>{{ record.date[:10] if record.date else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-data">No endless mode scores yet. See how far you can go in endless mode!</div>
+            {% endif %}
+        </div>
+        
+        <!-- Back button - context aware -->
+        <div class="back-section">
+            {% if is_student %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn">
+                    ← Back to Student Portal
+                </a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn">
+                    🏰 Return Home
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function showLeaderboard(mode) {
+            // Hide all leaderboard sections
+            const sections = document.querySelectorAll('.leaderboard-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all tab buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected leaderboard section
+            document.getElementById(mode + '-leaderboard').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>You Win!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 You Beat the Game!</h1>
+        <p>Congratulations — you've completed all available levels and defeated every enemy.</p>
+        <p>Your final score: <strong>{{ session.get('score', 0) }}</strong></p>
+        <p>Time played: <strong>{{ (time.time() - session.get('game_start_time', time.time()))|round(2) }}s</strong></p>
+        <div style="margin-top:20px;">
+            {% if is_student %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn">← Back to Student Portal</a>
+                <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
+                <a href="{{ url_for('leaderboard') }}" class="btn">View Leaderboard</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

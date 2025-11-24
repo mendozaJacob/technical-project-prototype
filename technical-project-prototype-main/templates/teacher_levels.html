@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Configuration</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #333; 
+            margin: 0;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 40px; 
+        }
+        .page-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .btn {
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .btn-success {
+            background: #4a7c59;
+        }
+        .btn-success:hover {
+            background: #3d6b4a;
+        }
+        .btn-danger {
+            background: #b22222;
+        }
+        .btn-danger:hover {
+            background: #8b0000;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .level-card {
+            background: white;
+            border: 2px solid #4b2e05;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .level-card:hover {
+            transform: translateY(-2px);
+        }
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .level-title {
+            color: #4b2e05;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 0;
+        }
+        .level-number {
+            background: #4b2e05;
+            color: #f3eac2;
+            padding: 8px 12px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .level-info {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .level-info strong {
+            color: #4b2e05;
+        }
+        .question-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .question-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .question-item:last-child {
+            border-bottom: none;
+        }
+        .question-text {
+            flex: 1;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        .difficulty-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+        .difficulty-easy { background: #4a7c59; color: white; }
+        .difficulty-medium { background: #e67e22; color: white; }
+        .difficulty-hard { background: #b22222; color: white; }
+        .level-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: #4b2e05;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #4b2e05;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #f3eac2;
+            margin: 5% auto;
+            padding: 30px;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #4b2e05;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .question-selector {
+            background: #e8dcc6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .question-checkbox {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .question-checkbox input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .stats-overview {
+            background: #e8dcc6;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+        .stat-item {
+            color: #4b2e05;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.9em;
+        }
+        .level-progress {
+            margin: 15px 0;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 12px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4a7c59;
+            transition: width 0.3s ease;
+        }
+        .enemy-info {
+            background: #f0f4f8;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .enemy-avatar {
+            font-size: 1.5em;
+        }
+        .enemy-details {
+            flex: 1;
+        }
+        .enemy-name {
+            font-weight: bold;
+            color: #4b2e05;
+        }
+        .enemy-taunt {
+            font-size: 0.9em;
+            color: #333;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-controls">
+            <h1 class="page-title">🎮 Level Configuration</h1>
+            <div>
+                <a href="{{ url_for('teacher_dashboard') }}" class="btn">← Dashboard</a>
+                <button onclick="openModal('addLevelModal')" class="btn btn-success">➕ Add Level</button>
+            </div>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="stats-overview">
+            <h3 style="color: #4b2e05; text-align: center; margin-bottom: 20px;">📊 Level Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ levels|length }}</div>
+                    <div class="stat-label">Total Levels</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_questions }}</div>
+                    <div class="stat-label">Total Questions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ avg_questions_per_level }}</div>
+                    <div class="stat-label">Avg Questions/Level</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ enemies|length }}</div>
+                    <div class="stat-label">Unique Enemies</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Levels Grid -->
+        <div class="levels-grid">
+            {% for level in levels %}
+            <div class="level-card">
+                <div class="level-header">
+                    <h3 class="level-title">Level {{ level.level }}</h3>
+                    <div class="level-number">{{ level.level }}</div>
+                </div>
+
+                <!-- Enemy Information -->
+                {% set enemy = enemies|selectattr("level", "equalto", level.level)|first %}
+                {% if enemy %}
+                <div class="enemy-info">
+                    <div class="enemy-avatar">{{ enemy.avatar }}</div>
+                    <div class="enemy-details">
+                        <div class="enemy-name">{{ enemy.name }}</div>
+                        <div class="enemy-taunt">"{{ enemy.taunt }}"</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="level-info">
+                    <strong>Questions:</strong> {{ level.questions|length }}<br>
+                    <strong>Range:</strong> {{ enemy.range if enemy else 'Not Set' }}<br>
+                    <strong>Difficulty:</strong> 
+                    {% set difficulties = [] %}
+                    {% for q_id in level.questions %}
+                        {% if questions_dict.get(q_id) and questions_dict.get(q_id).get('difficulty') %}
+                            {% set _ = difficulties.append(questions_dict.get(q_id).get('difficulty')) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if difficulties %}
+                        {{ difficulties|unique|join(', ')|title }}
+                    {% else %}
+                        Not Set
+                    {% endif %}
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="level-progress">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Completion</span>
+                        <span>{{ level.questions|length }}/10 questions</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (level.questions|length / 10 * 100)|round }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Questions List -->
+                <div class="question-list">
+                    {% for q_id in level.questions %}
+                        {% set question = questions_dict.get(q_id) %}
+                        {% if question %}
+                        <div class="question-item">
+                            <div class="question-text">{{ question.q[:50] }}{% if question.q|length > 50 %}...{% endif %}</div>
+                            <span class="difficulty-badge difficulty-{{ question.get('difficulty', 'medium') }}">
+                                {{ question.get('difficulty', 'Medium').title() }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if level.questions|length == 0 %}
+                    <div style="text-align: center; color: #444; font-style: italic;">No questions assigned</div>
+                    {% endif %}
+                </div>
+
+                <div class="level-actions">
+                    <button onclick="editLevel({{ level.level }})" class="btn btn-small">✏️ Edit</button>
+                    <button onclick="manageQuestions({{ level.level }})" class="btn btn-small">📚 Questions</button>
+                    <button onclick="deleteLevel({{ level.level }})" class="btn btn-small btn-danger">🗑️ Delete</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add Level Modal -->
+    <div id="addLevelModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addLevelModal')">&times;</span>
+            <h2 style="color: #4b2e05;">Add New Level</h2>
+            <form action="{{ url_for('teacher_add_level') }}" method="POST">
+                <div class="form-group">
+                    <label for="levelNumber">Level Number:</label>
+                    <input type="number" id="levelNumber" name="level_number" min="1" max="50" required>
+                </div>
+                <div class="form-group">
+                    <label for="enemySelect">Assign Enemy:</label>
+                    <select id="enemySelect" name="enemy_id">
+                        <option value="">Select an enemy...</option>
+                        {% for enemy in enemies %}
+                        <option value="{{ enemy.level }}">{{ enemy.avatar }} {{ enemy.name }} (Level {{ enemy.level }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Questions:</label>
+                    <div class="question-selector">
+                        {% for question in available_questions %}
+                        <div class="question-checkbox">
+                            <input type="checkbox" id="q{{ question.id }}" name="questions" value="{{ question.id }}">
+                            <label for="q{{ question.id }}">
+                                <strong>Q{{ question.id }}:</strong> {{ question.q[:60] }}{% if question.q|length > 60 %}...{% endif %}
+                                <span class="difficulty-badge difficulty-{{ question.get('difficulty', 'medium') }}">
+                                    {{ question.get('difficulty', 'Medium').title() }}
+                                </span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success">💾 Create Level</button>
+                    <button type="button" onclick="closeModal('addLevelModal')" class="btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Level Modal -->
+    <div id="editLevelModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editLevelModal')">&times;</span>
+            <h2 style="color: #4b2e05;">Edit Level</h2>
+            <form action="{{ url_for('teacher_edit_level') }}" method="POST">
+                <input type="hidden" id="editLevelNumber" name="level_number">
+                <div class="form-group">
+                    <label for="editEnemySelect">Assign Enemy:</label>
+                    <select id="editEnemySelect" name="enemy_id">
+                        <option value="">Select an enemy...</option>
+                        {% for enemy in enemies %}
+                        <option value="{{ enemy.level }}">{{ enemy.avatar }} {{ enemy.name }} (Level {{ enemy.level }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Questions:</label>
+                    <div class="question-selector" id="editQuestionSelector">
+                        <!-- Questions will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success">💾 Update Level</button>
+                    <button type="button" onclick="closeModal('editLevelModal')" class="btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Questions Modal -->
+    <div id="questionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('questionsModal')">&times;</span>
+            <h2 style="color: #4b2e05;">Manage Questions for Level <span id="questionsLevelNumber"></span></h2>
+            <form action="{{ url_for('teacher_level_questions') }}" method="POST">
+                <input type="hidden" id="questionsLevelId" name="level_number">
+                <div class="form-group">
+                    <label>Available Questions:</label>
+                    <div class="question-selector" id="questionsSelector">
+                        <!-- Questions will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success">💾 Update Questions</button>
+                    <button type="button" onclick="closeModal('questionsModal')" class="btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function editLevel(levelNumber) {
+            document.getElementById('editLevelNumber').value = levelNumber;
+            
+            // Load level data
+            fetch(`/teacher/get-level/${levelNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('editEnemySelect').value = data.enemy_id || '';
+                    
+                    // Populate questions
+                    const selector = document.getElementById('editQuestionSelector');
+                    selector.innerHTML = '';
+                    
+                    {% for question in available_questions %}
+                    const div{{ question.id }} = document.createElement('div');
+                    div{{ question.id }}.className = 'question-checkbox';
+                    div{{ question.id }}.innerHTML = `
+                        <input type="checkbox" id="editQ{{ question.id }}" name="questions" value="{{ question.id }}" ${data.questions.includes({{ question.id }}) ? 'checked' : ''}>
+                        <label for="editQ{{ question.id }}">
+                            <strong>Q{{ question.id }}:</strong> {{ question.q[:60] }}{% if question.q|length > 60 %}...{% endif %}
+                            <span class="difficulty-badge difficulty-{{ question.get('difficulty', 'medium') }}">
+                                {{ question.get('difficulty', 'Medium').title() }}
+                            </span>
+                        </label>
+                    `;
+                    selector.appendChild(div{{ question.id }});
+                    {% endfor %}
+                    
+                    openModal('editLevelModal');
+                })
+                .catch(error => {
+                    alert('Error loading level data');
+                });
+        }
+
+        function manageQuestions(levelNumber) {
+            document.getElementById('questionsLevelNumber').textContent = levelNumber;
+            document.getElementById('questionsLevelId').value = levelNumber;
+            
+            // Load current questions for this level
+            fetch(`/teacher/get-level/${levelNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    const selector = document.getElementById('questionsSelector');
+                    selector.innerHTML = '';
+                    
+                    {% for question in available_questions %}
+                    const div{{ question.id }} = document.createElement('div');
+                    div{{ question.id }}.className = 'question-checkbox';
+                    div{{ question.id }}.innerHTML = `
+                        <input type="checkbox" id="questQ{{ question.id }}" name="questions" value="{{ question.id }}" ${data.questions.includes({{ question.id }}) ? 'checked' : ''}>
+                        <label for="questQ{{ question.id }}">
+                            <strong>Q{{ question.id }}:</strong> {{ question.q[:60] }}{% if question.q|length > 60 %}...{% endif %}
+                            <span class="difficulty-badge difficulty-{{ question.get('difficulty', 'medium') }}">
+                                {{ question.get('difficulty', 'Medium').title() }}
+                            </span>
+                        </label>
+                    `;
+                    selector.appendChild(div{{ question.id }});
+                    {% endfor %}
+                    
+                    openModal('questionsModal');
+                })
+                .catch(error => {
+                    alert('Error loading level data');
+                });
+        }
+
+        function deleteLevel(levelNumber) {
+            if (confirm(`Are you sure you want to delete Level ${levelNumber}? This action cannot be undone.`)) {
+                fetch(`/teacher/delete-level/${levelNumber}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting level: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error deleting level');
+                });
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Quiz Battle: Dungeons of Knowledge - Character Selection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e1e2f, #2c3e50);
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 { font-size: 2em; margin-bottom: 20px; }
+
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      justify-items: center;
+      margin: 30px auto;
+      max-width: 500px;
+    }
+
+    .character { width: 80px; height: 80px; border: 3px solid transparent; border-radius: 10px; cursor: pointer; transition: transform 0.2s, border 0.2s; display:flex; align-items:center; justify-content:center; background:#fff1; }
+    .character img { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; }
+    .character:hover { transform: scale(1.06); }
+    .selected { border: 3px solid #00eaff; box-shadow: 0 0 10px #00eaff; }
+
+    button { margin-top: 20px; padding: 10px 30px; font-size: 1.2em; background: #00eaff; color: #1e1e2f; border: none; border-radius: 10px; cursor: pointer; transition: background 0.3s; }
+    button:hover { background: #00bcd4; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  {% if student_name %}
+    <h1>{{ student_name }}'s Character</h1>
+    {% if current_character %}
+      <p style="color: #00eaff; margin-bottom: 20px;">Current Character: #{{ current_character }} | Select a different character below to change it</p>
+    {% else %}
+      <p style="color: #00eaff; margin-bottom: 20px;">Choose your character for all future games</p>
+    {% endif %}
+  {% else %}
+    <h1>Choose Your Character</h1>
+  {% endif %}
+
+  <form method="post" id="chooseForm">
+    <div class="character-grid" id="characterGrid"{% if current_character %} data-current-character="{{ current_character }}"{% endif %}>
+      {% for i in range(1, total_characters + 1) %}
+        <div class="character" data-character="{{ i }}">
+          <img src="{{ url_for('static', filename='characters/character' ~ i ~ '.png') }}" alt="Character {{ i }}" data-fallback="{{ url_for('static', filename='placeholder.png') }}" onerror="handleImageError(this)">
+        </div>
+      {% endfor %}
+    </div>
+
+    <input type="hidden" name="character" id="characterInput" value="">
+    <button id="startGameBtn" disabled>{% if student_name %}Save Character{% else %}Start Game{% endif %}</button>
+  </form>
+
+  <script>
+    function handleImageError(img) {
+      img.src = img.dataset.fallback;
+    }
+
+    const grid = document.getElementById('characterGrid');
+    const input = document.getElementById('characterInput');
+    const startBtn = document.getElementById('startGameBtn');
+
+    // Pre-select current character if exists
+    const charId = grid.dataset.currentCharacter;
+    if (charId) {
+      const currentChar = document.querySelector('[data-character="' + charId + '"]');
+      if (currentChar) {
+        currentChar.classList.add('selected');
+        input.value = charId;
+        startBtn.disabled = false;
+      }
+    }
+
+    grid.addEventListener('click', (e) => {
+      const charDiv = e.target.closest('.character');
+      if (!charDiv) return;
+      document.querySelectorAll('.character').forEach(c => c.classList.remove('selected'));
+      charDiv.classList.add('selected');
+      const id = charDiv.dataset.character;
+      input.value = id;
+      startBtn.disabled = false;
+      // Button text is set by the initial HTML
+    });
+  </script>
+</body>
+</html>

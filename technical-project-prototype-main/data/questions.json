@@ -1,0 +1,1215 @@
+[
+  {
+    "id": 1,
+    "q": "Configure your Host Name to server1.example.com",
+    "answer": "hostnamectl set-hostname server1.example.com",
+    "keywords": [
+      "hostname",
+      "hostnamectl"
+    ],
+    "feedback": "hostnamectl is the systemd command for managing the system hostname, ensuring the change is persistent across reboots on modern Linux distributions like RHEL."
+  },
+  {
+    "id": 2,
+    "q": "Which command lists the files in your current directory?",
+    "answer": "ls",
+    "keywords": [
+      "ls",
+      "list files"
+    ],
+    "feedback": "ls is the standard command to list directory contents, providing a quick overview of files and subdirectories in the current working directory."
+  },
+  {
+    "id": 3,
+    "q": "Create a user named student with password student",
+    "answer": "useradd student; echo 'student' | passwd --stdin student",
+    "keywords": [
+      "useradd",
+      "create user",
+      "passwd"
+    ],
+    "feedback": "useradd creates the user account with default settings, and passwd sets the password using stdin redirection for non-interactive scripting."
+  },
+  {
+    "id": 4,
+    "q": "How do you create a new directory named /home/student/docs?",
+    "answer": "mkdir -p /home/student/docs",
+    "keywords": [
+      "mkdir",
+      "create directory"
+    ],
+    "feedback": "mkdir -p creates the directory and any necessary parent directories, preventing errors if intermediate paths do not exist."
+  },
+  {
+    "id": 5,
+    "q": "Mount the /dev/sdb1 filesystem to /mnt/data",
+    "answer": "mount /dev/sdb1 /mnt/data",
+    "keywords": [
+      "mount",
+      "filesystem"
+    ],
+    "feedback": "mount attaches the filesystem on the specified device to the mount point, making the storage accessible at that location in the directory tree."
+  },
+  {
+    "id": 6,
+    "q": "Configure the system to boot into graphical mode",
+    "answer": "systemctl set-default graphical.target",
+    "keywords": [
+      "systemctl",
+      "graphical target"
+    ],
+    "feedback": "systemctl set-default changes the default systemd target to graphical.target, enabling the GUI environment on boot."
+  },
+  {
+    "id": 7,
+    "q": "Install the httpd package",
+    "answer": "dnf install httpd -y",
+    "keywords": [
+      "dnf",
+      "install package",
+      "httpd"
+    ],
+    "feedback": "dnf is the package manager for RHEL-based systems, and -y assumes yes to prompts for automated installation of the Apache HTTP server package."
+  },
+  {
+    "id": 8,
+    "q": "Create a cron job to run /usr/bin/backup.sh daily at 2 AM",
+    "answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
+    "keywords": [
+      "crontab",
+      "cron job",
+      "schedule"
+    ],
+    "feedback": "crontab -e edits the user's cron table, and the cron syntax '0 2 * * *' schedules the script to run at 2 AM every day."
+  },
+  {
+    "id": 9,
+    "q": "Find all files owned by user student",
+    "answer": "find / -user student 2>/dev/null",
+    "keywords": [
+      "find",
+      "user files"
+    ],
+    "feedback": "find searches the filesystem starting from root, filtering by user ownership, with stderr redirected to suppress permission errors."
+  },
+  {
+    "id": 10,
+    "q": "Configure firewall to allow SSH",
+    "answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
+    "keywords": [
+      "firewall-cmd",
+      "SSH",
+      "firewall"
+    ],
+    "feedback": "firewall-cmd manages firewalld, adding the SSH service permanently and reloading to apply changes without restarting the service."
+  },
+  {
+    "id": 11,
+    "q": "Create a logical volume named lv_data of size 100M in volume group vg_system",
+    "answer": "lvcreate -L 100M -n lv_data vg_system",
+    "keywords": [
+      "lvcreate",
+      "LVM",
+      "logical volume"
+    ],
+    "feedback": "lvcreate is the LVM command to create logical volumes, -L specifies the size, -n names the volume, and vg_system is the target volume group for flexible storage management."
+  },
+  {
+    "id": 12,
+    "q": "Format /dev/sdc1 with ext4 filesystem",
+    "answer": "mkfs.ext4 /dev/sdc1",
+    "keywords": [
+      "mkfs",
+      "ext4",
+      "format"
+    ],
+    "feedback": "mkfs.ext4 formats the partition with the ext4 filesystem, which is the default journaling filesystem for RHEL, providing reliability and performance."
+  },
+  {
+    "id": 13,
+    "q": "Add the user student to the wheel group",
+    "answer": "usermod -aG wheel student",
+    "keywords": [
+      "usermod",
+      "group",
+      "wheel"
+    ],
+    "feedback": "usermod modifies user accounts, -aG appends the user to additional groups without removing existing ones, and wheel is the standard sudo group in RHEL."
+  },
+  {
+    "id": 14,
+    "q": "Start and enable the httpd service",
+    "answer": "systemctl start httpd; systemctl enable httpd",
+    "keywords": [
+      "systemctl",
+      "httpd",
+      "service"
+    ],
+    "feedback": "systemctl manages systemd services, 'start' runs the service immediately, and 'enable' configures it to start automatically on boot."
+  },
+  {
+    "id": 15,
+    "q": "Configure SELinux to enforcing mode",
+    "answer": "setenforce 1; sed -i 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config",
+    "keywords": [
+      "SELinux",
+      "setenforce",
+      "enforcing"
+    ],
+    "feedback": "setenforce changes the runtime SELinux mode, and sed edits the config file for persistence, enforcing security policies on the system."
+  },
+  {
+    "id": 16,
+    "q": "Create a swap file of 512M and activate it",
+    "answer": "dd if=/dev/zero of=/swapfile bs=1M count=512; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile",
+    "keywords": [
+      "swap",
+      "mkswap",
+      "swapon"
+    ],
+    "feedback": "dd creates a file filled with zeros, chmod sets secure permissions, mkswap formats it as swap space, and swapon activates it for memory paging."
+  },
+  {
+    "id": 17,
+    "q": "Archive and compress the /home directory to /tmp/home_backup.tar.gz",
+    "answer": "tar -czf /tmp/home_backup.tar.gz /home",
+    "keywords": [
+      "tar",
+      "compress",
+      "archive"
+    ],
+    "feedback": "tar creates archives, -c creates, -z compresses with gzip, -f specifies the output file, for efficient backup and storage."
+  },
+  {
+    "id": 18,
+    "q": "Configure the system time zone to America/New_York",
+    "answer": "timedatectl set-timezone America/New_York",
+    "keywords": [
+      "timedatectl",
+      "timezone"
+    ],
+    "feedback": "timedatectl is the systemd command for time management, setting the timezone persistently across reboots."
+  },
+  {
+    "id": 19,
+    "q": "Set the password for user student to never expire",
+    "answer": "chage -M -1 student",
+    "keywords": [
+      "chage",
+      "password expire"
+    ],
+    "feedback": "chage manages password aging policies, -M -1 sets the maximum age to unlimited, disabling password expiration for the user."
+  },
+  {
+    "id": 20,
+    "q": "List all active network interfaces",
+    "answer": "nmcli device status",
+    "keywords": [
+      "nmcli",
+      "network interfaces"
+    ],
+    "feedback": "nmcli is the NetworkManager command-line tool, 'device status' lists all network devices and their connection states."
+  },
+  {
+    "id": 21,
+    "q": "Configure a static IP address 192.168.1.100/24 for interface enp0s3",
+    "answer": "nmcli con mod enp0s3 ipv4.addresses 192.168.1.100/24 ipv4.method manual; nmcli con up enp0s3",
+    "keywords": [
+      "nmcli",
+      "static IP",
+      "network"
+    ],
+    "feedback": "nmcli modifies NetworkManager connections, setting the IP address and method to manual for static configuration, then brings the connection up."
+  },
+  {
+    "id": 22,
+    "q": "Create a new partition on /dev/sdb using fdisk",
+    "answer": "fdisk /dev/sdb; n; p; 1; <default>; <default>; w",
+    "keywords": [
+      "fdisk",
+      "partition",
+      "disk"
+    ],
+    "feedback": "fdisk is an interactive partition editor, n creates a new partition, p specifies primary, and w writes changes to disk."
+  },
+  {
+    "id": 23,
+    "q": "Extend the filesystem on /dev/vg_system/lv_data to use all free space",
+    "answer": "lvextend -l +100%FREE /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data",
+    "keywords": [
+      "lvextend",
+      "resize2fs",
+      "extend filesystem"
+    ],
+    "feedback": "lvextend expands the logical volume to use all free space in the volume group, then resize2fs adjusts the filesystem size accordingly."
+  },
+  {
+    "id": 24,
+    "q": "Install and enable the vsftpd service",
+    "answer": "dnf install vsftpd -y; systemctl enable vsftpd; systemctl start vsftpd",
+    "keywords": [
+      "vsftpd",
+      "FTP",
+      "service"
+    ],
+    "feedback": "dnf installs the FTP server package, systemctl enables and starts the service for file transfer capabilities."
+  },
+  {
+    "id": 25,
+    "q": "Change the ownership of /home/student/docs to user admin",
+    "answer": "chown -R admin:admin /home/student/docs",
+    "keywords": [
+      "chown",
+      "ownership"
+    ],
+    "feedback": "chown recursively changes ownership to the specified user and group, ensuring proper access control."
+  },
+  {
+    "id": 26,
+    "q": "Set permissions on /etc/shadow to 000",
+    "answer": "chmod 000 /etc/shadow",
+    "keywords": [
+      "chmod",
+      "permissions",
+      "shadow"
+    ],
+    "feedback": "chmod sets the file to no permissions, restricting access to the shadow password file for security."
+  },
+  {
+    "id": 27,
+    "q": "Create a simple shell script /usr/local/bin/hello.sh that prints 'Hello World' and make it executable",
+    "answer": "echo '#!/bin/bash\necho \"Hello World\"' > /usr/local/bin/hello.sh; chmod +x /usr/local/bin/hello.sh",
+    "keywords": [
+      "shell script",
+      "bash",
+      "executable"
+    ],
+    "feedback": "echo creates the script with shebang and content, chmod +x makes it executable for running as a command."
+  },
+  {
+    "id": 28,
+    "q": "List all processes using more than 10% CPU",
+    "answer": "top -p $(pgrep -f .) | awk '$9 > 10'",
+    "keywords": [
+      "top",
+      "processes",
+      "CPU"
+    ],
+    "feedback": "top displays processes, pgrep gets all PIDs, awk filters those exceeding 10% CPU usage."
+  },
+  {
+    "id": 29,
+    "q": "Configure the system to use NTP for time synchronization",
+    "answer": "dnf install chrony -y; systemctl enable chronyd; systemctl start chronyd",
+    "keywords": [
+      "chrony",
+      "NTP",
+      "time sync"
+    ],
+    "feedback": "chrony is the NTP client for RHEL, installed and enabled to synchronize system time with NTP servers."
+  },
+  {
+    "id": 30,
+    "q": "Create a new file system mount point /var/www and mount /dev/sdd1 there with defaults",
+    "answer": "mkdir /var/www; mount /dev/sdd1 /var/www; echo '/dev/sdd1 /var/www ext4 defaults 0 0' >> /etc/fstab",
+    "keywords": [
+      "mount point",
+      "fstab"
+    ],
+    "feedback": "mkdir creates the mount point, mount attaches the device, and fstab entry ensures persistence across reboots."
+  },
+  {
+    "id": 31,
+    "q": "Disable the firewall for HTTP service",
+    "answer": "firewall-cmd --permanent --remove-service=http; firewall-cmd --reload",
+    "keywords": [
+      "firewall-cmd",
+      "disable service"
+    ],
+    "feedback": "firewall-cmd removes the HTTP service from the permanent configuration and reloads to apply changes, disabling web traffic."
+  },
+  {
+    "id": 32,
+    "q": "Find and kill a process with PID 1234",
+    "answer": "kill 1234",
+    "keywords": [
+      "kill",
+      "process"
+    ],
+    "feedback": "kill sends a SIGTERM signal to terminate the process with the specified PID gracefully."
+  },
+  {
+    "id": 33,
+    "q": "Configure sudo for user student without password",
+    "answer": "echo 'student ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers",
+    "keywords": [
+      "sudoers",
+      "sudo"
+    ],
+    "feedback": "echo appends a sudoers entry allowing the user to run all commands without password authentication."
+  },
+  {
+    "id": 34,
+    "q": "Backup the /etc directory using rsync to /backup/etc",
+    "answer": "rsync -av /etc/ /backup/etc/",
+    "keywords": [
+      "rsync",
+      "backup"
+    ],
+    "feedback": "rsync synchronizes files with archive mode (-a) and verbose output (-v), preserving permissions and timestamps."
+  },
+  {
+    "id": 35,
+    "q": "Set the SELinux context for /var/www to httpd_sys_content_t",
+    "answer": "semanage fcontext -a -t httpd_sys_content_t '/var/www(/.*)?'; restorecon -Rv /var/www",
+    "keywords": [
+      "semanage",
+      "SELinux context"
+    ],
+    "feedback": "semanage adds a file context rule, and restorecon applies it recursively to set proper SELinux labels for web content."
+  },
+  {
+    "id": 36,
+    "q": "List all mounted file systems",
+    "answer": "df -hT",
+    "keywords": [
+      "df",
+      "mounted filesystems"
+    ],
+    "feedback": "df displays disk space usage with human-readable (-h) and filesystem type (-T) information."
+  },
+  {
+    "id": 37,
+    "q": "Create a group named developers and add user student to it",
+    "answer": "groupadd developers; usermod -aG developers student",
+    "keywords": [
+      "groupadd",
+      "group"
+    ],
+    "feedback": "groupadd creates the group, and usermod appends the user to the group without removing existing memberships."
+  },
+  {
+    "id": 38,
+    "q": "Reboot the system immediately",
+    "answer": "reboot",
+    "keywords": [
+      "reboot",
+      "shutdown"
+    ],
+    "feedback": "reboot initiates an immediate system restart using systemd."
+  },
+  {
+    "id": 39,
+    "q": "Check the status of the sshd service",
+    "answer": "systemctl status sshd",
+    "keywords": [
+      "systemctl",
+      "service status"
+    ],
+    "feedback": "systemctl status shows the current state, uptime, and recent logs for the SSH daemon service."
+  },
+  {
+    "id": 40,
+    "q": "Update all packages on the system",
+    "answer": "dnf update -y",
+    "keywords": [
+      "dnf",
+      "update packages"
+    ],
+    "feedback": "dnf update downloads and installs available updates for all packages, with -y assuming yes to prompts."
+  },
+  {
+    "id": 41,
+    "q": "Create a volume group named vg_data using /dev/sdb",
+    "answer": "vgcreate vg_data /dev/sdb",
+    "keywords": [
+      "vgcreate",
+      "volume group",
+      "LVM"
+    ],
+    "feedback": "vgcreate creates a volume group from the specified physical volume, enabling logical volume management for flexible storage."
+  },
+  {
+    "id": 42,
+    "q": "Reduce the size of logical volume lv_data by 50M",
+    "answer": "umount /dev/vg_system/lv_data; e2fsck -f /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data 150M; lvreduce -L 200M /dev/vg_system/lv_data",
+    "keywords": [
+      "lvreduce",
+      "resize2fs",
+      "reduce LV"
+    ],
+    "feedback": "umount detaches the filesystem, e2fsck checks for errors, resize2fs shrinks the filesystem, and lvreduce reduces the logical volume size."
+  },
+  {
+    "id": 43,
+    "q": "Configure NFS export for /exports/share to 192.168.1.0/24 with read-write access",
+    "answer": "echo '/exports/share 192.168.1.0/24(rw,sync)' >> /etc/exports; exportfs -ra",
+    "keywords": [
+      "NFS",
+      "exports",
+      "share"
+    ],
+    "feedback": "echo adds an NFS export entry to /etc/exports, and exportfs reloads the NFS configuration to share the directory with read-write access."
+  },
+  {
+    "id": 44,
+    "q": "Install and configure Samba for anonymous access to /samba/share",
+    "answer": "dnf install samba -y; mkdir /samba/share; chmod 777 /samba/share; echo '[share]\\npath = /samba/share\\nbrowseable = yes\\nguest ok = yes\\nread only = no' > /etc/samba/smb.conf; systemctl enable smb; systemctl start smb",
+    "keywords": [
+      "Samba",
+      "SMB",
+      "share"
+    ],
+    "feedback": "dnf installs Samba, mkdir creates the share directory, chmod sets permissions, echo configures smb.conf, and systemctl enables and starts the SMB service."
+  },
+  {
+    "id": 45,
+    "q": "Set up auditing for file access on /var/log/audit.log",
+    "answer": "auditctl -w /var/log/audit.log -p wa -k log-watch",
+    "keywords": [
+      "auditctl",
+      "auditing"
+    ],
+    "feedback": "auditctl sets up auditing rules to watch file access (write and attribute changes) on the specified log file with a custom key."
+  },
+  {
+    "id": 46,
+    "q": "Configure the system to ignore IPv6",
+    "answer": "echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf; sysctl -p",
+    "keywords": [
+      "IPv6",
+      "sysctl"
+    ],
+    "feedback": "echo adds a sysctl parameter to disable IPv6 on all interfaces, and sysctl -p applies the changes persistently."
+  },
+  {
+    "id": 47,
+    "q": "Create a symbolic link from /tmp/link to /etc/passwd",
+    "answer": "ln -s /etc/passwd /tmp/link",
+    "keywords": [
+      "ln",
+      "symbolic link"
+    ],
+    "feedback": "ln -s creates a symbolic link pointing to the target file, allowing access via the link path."
+  },
+  {
+    "id": 48,
+    "q": "List all users in the system",
+    "answer": "getent passwd",
+    "keywords": [
+      "getent",
+      "users"
+    ],
+    "feedback": "getent passwd retrieves all user entries from the passwd database, including local and remote users."
+  },
+  {
+    "id": 49,
+    "q": "Configure the firewall to allow port 8080/tcp",
+    "answer": "firewall-cmd --permanent --add-port=8080/tcp; firewall-cmd --reload",
+    "keywords": [
+      "firewall-cmd",
+      "port"
+    ],
+    "feedback": "firewall-cmd adds a permanent rule to allow TCP traffic on port 8080 and reloads the firewall configuration."
+  },
+  {
+    "id": 50,
+    "q": "Delete the user student and its home directory",
+    "answer": "userdel -r student",
+    "keywords": [
+      "userdel",
+      "delete user"
+    ],
+    "feedback": "userdel -r removes the user account and recursively deletes their home directory and mail spool."
+  },
+  {
+    "id": 51,
+    "q": "Create a hard link named backup in /tmp to /etc/hosts",
+    "answer": "ln /etc/hosts /tmp/backup",
+    "keywords": [
+      "ln",
+      "hard link"
+    ],
+    "feedback": "ln creates a hard link to the target file, sharing the same inode and data blocks for efficient space usage."
+  },
+  {
+    "id": 52,
+    "q": "Check disk usage for the root filesystem",
+    "answer": "df -h /",
+    "keywords": [
+      "df",
+      "disk usage"
+    ],
+    "feedback": "df displays disk space usage with human-readable format (-h) for the specified filesystem."
+  },
+  {
+    "id": 53,
+    "q": "Install the vim-enhanced package",
+    "answer": "dnf install vim-enhanced -y",
+    "keywords": [
+      "dnf",
+      "vim"
+    ],
+    "feedback": "dnf installs the enhanced Vim package, which includes additional features and syntax highlighting."
+  },
+  {
+    "id": 54,
+    "q": "Configure the system to boot into single-user mode by default",
+    "answer": "systemctl set-default rescue.target",
+    "keywords": [
+      "systemctl",
+      "rescue target"
+    ],
+    "feedback": "systemctl set-default changes the default systemd target to rescue.target, enabling single-user mode on boot."
+  },
+  {
+    "id": 55,
+    "q": "Find all empty directories in /home",
+    "answer": "find /home -type d -empty",
+    "keywords": [
+      "find",
+      "empty directories"
+    ],
+    "feedback": "find searches for directories (-type d) that are empty (-empty) within the /home directory."
+  },
+  {
+    "id": 56,
+    "q": "Set the umask for the root user to 027",
+    "answer": "echo 'umask 027' >> /root/.bashrc",
+    "keywords": [
+      "umask",
+      "permissions"
+    ],
+    "feedback": "echo appends the umask setting to the root user's bashrc file, setting default permissions for new files."
+  },
+  {
+    "id": 57,
+    "q": "Configure the hostname resolution for server2.example.com in /etc/hosts",
+    "answer": "echo '192.168.1.101 server2.example.com' >> /etc/hosts",
+    "keywords": [
+      "/etc/hosts",
+      "hostname resolution"
+    ],
+    "feedback": "echo adds a static hostname entry to /etc/hosts for local name resolution."
+  },
+  {
+    "id": 58,
+    "q": "List all services that are enabled",
+    "answer": "systemctl list-unit-files --type=service | grep enabled",
+    "keywords": [
+      "systemctl",
+      "enabled services"
+    ],
+    "feedback": "systemctl lists all service unit files, and grep filters for those that are enabled."
+  },
+  {
+    "id": 59,
+    "q": "Create a new LVM physical volume on /dev/sde",
+    "answer": "pvcreate /dev/sde",
+    "keywords": [
+      "pvcreate",
+      "physical volume"
+    ],
+    "feedback": "pvcreate initializes the specified device as a physical volume for LVM."
+  },
+  {
+    "id": 60,
+    "q": "Mount an ISO file /tmp/rhel.iso to /mnt/iso",
+    "answer": "mkdir /mnt/iso; mount -o loop /tmp/rhel.iso /mnt/iso",
+    "keywords": [
+      "mount",
+      "ISO",
+      "loop"
+    ],
+    "feedback": "mkdir creates the mount point, and mount with loop option attaches the ISO file as a filesystem."
+  },
+  {
+    "id": 61,
+    "q": "Configure the firewall to allow DNS service",
+    "answer": "firewall-cmd --permanent --add-service=dns; firewall-cmd --reload",
+    "keywords": [
+      "firewall-cmd",
+      "DNS"
+    ],
+    "feedback": "firewall-cmd adds the DNS service to the permanent firewall configuration and reloads the rules."
+  },
+  {
+    "id": 62,
+    "q": "Change the group ownership of /var/log to adm",
+    "answer": "chgrp -R adm /var/log",
+    "keywords": [
+      "chgrp",
+      "group ownership"
+    ],
+    "feedback": "chgrp recursively changes the group ownership of /var/log to adm."
+  },
+  {
+    "id": 63,
+    "q": "Create a cron job to clean /tmp every Sunday at 3 AM",
+    "answer": "crontab -e; 0 3 * * 0 rm -rf /tmp/*",
+    "keywords": [
+      "crontab",
+      "weekly cron"
+    ],
+    "feedback": "crontab -e edits the user's cron table, scheduling the command to run weekly on Sunday at 3 AM."
+  },
+  {
+    "id": 64,
+    "q": "Verify the integrity of the package database",
+    "answer": "dnf verify",
+    "keywords": [
+      "dnf",
+      "verify packages"
+    ],
+    "feedback": "dnf verify checks the integrity of installed packages against the package database."
+  },
+  {
+    "id": 65,
+    "q": "Set SELinux to permissive mode temporarily",
+    "answer": "setenforce 0",
+    "keywords": [
+      "SELinux",
+      "permissive"
+    ],
+    "feedback": "setenforce changes SELinux to permissive mode, allowing violations to be logged but not enforced."
+  },
+  {
+    "id": 66,
+    "q": "List all kernel modules currently loaded",
+    "answer": "lsmod",
+    "keywords": [
+      "lsmod",
+      "kernel modules"
+    ],
+    "feedback": "lsmod lists all currently loaded kernel modules."
+  },
+  {
+    "id": 67,
+    "q": "Configure a DHCP client for interface enp0s3",
+    "answer": "nmcli con mod enp0s3 ipv4.method auto; nmcli con up enp0s3",
+    "keywords": [
+      "nmcli",
+      "DHCP"
+    ],
+    "feedback": "nmcli sets the interface to use automatic IP configuration (DHCP) and brings the connection up."
+  },
+  {
+    "id": 68,
+    "q": "Create a file /etc/motd with content 'Welcome to RHCSA Lab'",
+    "answer": "echo 'Welcome to RHCSA Lab' > /etc/motd",
+    "keywords": [
+      "motd",
+      "message of the day"
+    ],
+    "feedback": "echo creates or overwrites the message of the day file with the specified content."
+  },
+  {
+    "id": 69,
+    "q": "Install the mariadb-server package and start it",
+    "answer": "dnf install mariadb-server -y; systemctl enable mariadb; systemctl start mariadb",
+    "keywords": [
+      "mariadb",
+      "database",
+      "service"
+    ],
+    "feedback": "dnf installs MariaDB server, systemctl enables and starts the service."
+  },
+  {
+    "id": 70,
+    "q": "Find all files modified in the last 7 days",
+    "answer": "find / -mtime -7 2>/dev/null",
+    "keywords": [
+      "find",
+      "modified files"
+    ],
+    "feedback": "find searches for files modified within the last 7 days, redirecting errors to suppress permission issues."
+  },
+  {
+    "id": 71,
+    "q": "Configure the system to use a proxy server at 192.168.1.1:8080",
+    "answer": "echo 'http_proxy=http://192.168.1.1:8080' >> /etc/environment; source /etc/environment",
+    "keywords": [
+      "proxy",
+      "environment"
+    ],
+    "feedback": "echo adds proxy settings to /etc/environment, and source applies them to the current session."
+  },
+  {
+    "id": 72,
+    "q": "Create a new partition table on /dev/sdf using parted",
+    "answer": "parted /dev/sdf mklabel gpt",
+    "keywords": [
+      "parted",
+      "partition table"
+    ],
+    "feedback": "parted creates a new GPT partition table on the specified device."
+  },
+  {
+    "id": 73,
+    "q": "Enable the firewalld service and set it to start on boot",
+    "answer": "systemctl enable firewalld; systemctl start firewalld",
+    "keywords": [
+      "firewalld",
+      "enable service"
+    ],
+    "feedback": "systemctl enables and starts the firewalld service for automatic startup and immediate activation."
+  },
+  {
+    "id": 74,
+    "q": "List all logical volumes in the system",
+    "answer": "lvdisplay",
+    "keywords": [
+      "lvdisplay",
+      "logical volumes"
+    ],
+    "feedback": "lvdisplay shows detailed information about all logical volumes in the system."
+  },
+  {
+    "id": 75,
+    "q": "Set the password aging for user student to 30 days maximum",
+    "answer": "chage -M 30 student",
+    "keywords": [
+      "chage",
+      "password aging"
+    ],
+    "feedback": "chage sets the maximum password age to 30 days for the user."
+  },
+  {
+    "id": 76,
+    "q": "Configure the NFS client to mount /exports/share from server.example.com to /mnt/nfs",
+    "answer": "mkdir /mnt/nfs; mount -t nfs server.example.com:/exports/share /mnt/nfs; echo 'server.example.com:/exports/share /mnt/nfs nfs defaults 0 0' >> /etc/fstab",
+    "keywords": [
+      "NFS",
+      "mount client"
+    ],
+    "feedback": "mkdir creates mount point, mount attaches NFS share, and fstab entry ensures persistence."
+  },
+  {
+    "id": 77,
+    "q": "Check the current SELinux policy version",
+    "answer": "sestatus",
+    "keywords": [
+      "sestatus",
+      "SELinux policy"
+    ],
+    "feedback": "sestatus displays the current SELinux status, including policy version and mode."
+  },
+  {
+    "id": 78,
+    "q": "Create a bootable USB from an ISO file using dd",
+    "answer": "dd if=/path/to/rhel.iso of=/dev/sdg bs=4M status=progress",
+    "keywords": [
+      "dd",
+      "bootable USB"
+    ],
+    "feedback": "dd copies the ISO to the USB device with progress reporting for creating bootable media."
+  },
+  {
+    "id": 79,
+    "q": "List all available repositories",
+    "answer": "dnf repolist",
+    "keywords": [
+      "dnf",
+      "repositories"
+    ],
+    "feedback": "dnf repolist lists all enabled repositories and their details."
+  },
+  {
+    "id": 80,
+    "q": "Troubleshoot and restart the network service if connectivity is lost",
+    "answer": "systemctl restart NetworkManager; nmcli device connect enp0s3",
+    "keywords": [
+      "NetworkManager",
+      "troubleshoot network"
+    ],
+    "feedback": "systemctl restarts NetworkManager, and nmcli reconnects the specified device."
+  },
+  {
+    "id": 81,
+    "q": "Tune the kernel parameter vm.swappiness to 10 for better memory management",
+    "answer": "echo 'vm.swappiness = 10' >> /etc/sysctl.conf; sysctl -p",
+    "keywords": [
+      "sysctl vm.swappiness=10 (temporary)",
+      "Edit /etc/sysctl.d/99-custom.conf for overrides"
+    ],
+    "feedback": "echo adds the swappiness setting to sysctl.conf, and sysctl -p applies the kernel parameter."
+  },
+  {
+    "id": 82,
+    "q": "Create a BTRFS subvolume named data in /mnt/btrfs and set it as default",
+    "answer": "mkfs.btrfs /dev/sdb1; mount /dev/sdb1 /mnt/btrfs; btrfs subvolume create /mnt/btrfs/data; umount /mnt/btrfs; echo '/dev/sdb1 /mnt/btrfs btrfs defaults,subvol=/data 0 0' >> /etc/fstab",
+    "keywords": [
+      "btrfs subvolume snapshot /mnt/btrfs/data (for backups)",
+      "Use mkfs.btrfs -f for force format"
+    ],
+    "feedback": "mkfs.btrfs formats the device, btrfs creates subvolume, and fstab sets it as default mount."
+  },
+  {
+    "id": 83,
+    "q": "Install Podman and run a simple nginx container on port 8080",
+    "answer": "dnf install podman -y; podman run -d -p 8080:80 --name web nginx",
+    "keywords": [
+      "podman run -it for interactive mode",
+      "Use docker.io if Podman compatibility needed"
+    ],
+    "feedback": "dnf installs Podman, podman runs nginx container in detached mode mapped to port 8080."
+  },
+  {
+    "id": 84,
+    "q": "Find and delete all files larger than 100M in /var/log older than 30 days",
+    "answer": "find /var/log -type f -size +100M -mtime +30 -delete",
+    "keywords": [
+      "find /var/log -type f -size +100M -mtime +30 -exec rm {} \\; (explicit delete)",
+      "Use -print first to list before deleting"
+    ],
+    "feedback": "find locates and deletes large old files in /var/log to free space."
+  },
+  {
+    "id": 85,
+    "q": "Configure disk quotas for user student on /home with 500M soft limit and 1G hard limit",
+    "answer": "dnf install quota -y; sed -i 's/0 1/1 1/' /etc/fstab; mount -o remount /home; quotacheck -cug /home; quotaon -vug /home; edquota -u student (set limits: blocks soft 500000, hard 1000000)",
+    "keywords": [
+      "repquota -u student (to check after)",
+      "Use quota tools for group quotas with -g"
+    ],
+    "feedback": "dnf installs quota tools, enables quotas on /home, and sets limits for the user."
+  },
+  {
+    "id": 86,
+    "q": "Create a custom firewall zone named internal and assign interface enp0s8 to it",
+    "answer": "firewall-cmd --permanent --new-zone=internal; firewall-cmd --permanent --zone=internal --add-interface=enp0s8; firewall-cmd --reload",
+    "keywords": [
+      "firewall-cmd --zone=internal --add-source=192.168.2.0/24 (for IP-based)",
+      "Use --change-interface to reassign"
+    ],
+    "feedback": "firewall-cmd creates a new zone and assigns the interface to it permanently."
+  },
+  {
+    "id": 87,
+    "q": "List and set the SELinux boolean httpd_can_network_connect to on",
+    "answer": "getsebool -a | grep httpd; setsebool -P httpd_can_network_connect on",
+    "keywords": [
+      "semanage boolean -m --on httpd_can_network_connect (permanent)",
+      "Use getsebool httpd_* for filtered list"
+    ],
+    "feedback": "getsebool lists booleans, setsebool enables the boolean permanently."
+  },
+  {
+    "id": 88,
+    "q": "Boot the system into rescue mode from GRUB and fix a broken /etc/fstab",
+    "answer": "At GRUB menu, press e; append 'rd.break' to linux line; Ctrl+X; mount -o remount,rw /sysroot; chroot /sysroot; vi /etc/fstab (fix); touch /.autorelabel; exit; reboot",
+    "keywords": [
+      "Use systemd unit for emergency.target",
+      "dracut -f for initramfs rebuild if needed"
+    ],
+    "feedback": "GRUB edit appends rd.break for rescue mode, chroot allows fixing fstab, autorelabel for SELinux."
+  },
+  {
+    "id": 89,
+    "q": "Install the 'Development Tools' package group",
+    "answer": "dnf groupinstall 'Development Tools' -y",
+    "keywords": [
+      "dnf group list (to see available groups)",
+      "yum groupinstall on older systems"
+    ],
+    "feedback": "dnf groupinstall installs the Development Tools group, including compilers and build tools."
+  },
+  {
+    "id": 90,
+    "q": "Configure network bonding for interfaces enp0s3 and enp0s8 in active-backup mode",
+    "answer": "nmcli con add type bond ifname bond0 mode active-backup; nmcli con add type ethernet ifname enp0s3 master bond0; nmcli con add type ethernet ifname enp0s8 master bond0; nmcli con up bond0",
+    "keywords": [
+      "mode balance-rr for round-robin",
+      "Edit /etc/sysconfig/network-scripts/ifcfg-bond0 manually"
+    ],
+    "feedback": "nmcli creates a bond interface in active-backup mode and adds slave interfaces."
+  },
+  {
+    "id": 91,
+    "q": "Configure iSCSI initiator to discover and login to target iqn.2016-06.example.com:storage",
+    "answer": "dnf install iscsi-initiator-utils -y; echo 'iqn.2016-06.example.com:storage' > /etc/iscsi/initiatorname.iscsi; iscsiadm -m discovery -t sendtargets -p 192.168.1.200; iscsiadm -m node -T iqn.2016-06.example.com:storage -p 192.168.1.200 -l",
+    "keywords": [
+      "iscsiadm --mode node --logout (to disconnect)",
+      "Use open-iscsi service: systemctl enable iscsid"
+    ],
+    "feedback": "dnf installs iSCSI tools, configures initiator, discovers and logs in to target."
+  },
+  {
+    "id": 92,
+    "q": "Create a basic Kickstart file /tmp/ks.cfg for automated installation with minimal packages",
+    "answer": "vi /tmp/ks.cfg with content: url --url=http://mirror.example.com; lang en_US; keyboard us; rootpw --plaintext rootpass; clearpart --all; part / --fstype=ext4 --size=10240; %packages @core; %end",
+    "keywords": [
+      "ksvalidator /tmp/ks.cfg (to validate)",
+      "Use %pre for pre-install scripts"
+    ],
+    "feedback": "vi creates a Kickstart file with basic installation directives for automated setup."
+  },
+  {
+    "id": 93,
+    "q": "Write a bash script /usr/local/bin/check_disk.sh that alerts if / is over 80% full",
+    "answer": "echo '#!/bin/bash\\ndf -h / | awk \"NR==2 {if (\\$5+0 > 80) print \\\\\\\"Disk usage critical: \\\\\\\" \\$5 \\\\\\\" on /\\\\\\\"}\"' > /usr/local/bin/check_disk.sh; chmod +x /usr/local/bin/check_disk.sh",
+    "keywords": [
+      "Use threshold 90 for stricter check",
+      "Integrate with cron: 0 * * * * /usr/local/bin/check_disk.sh"
+    ],
+    "feedback": "echo creates a script that checks disk usage and alerts if over 80%, makes it executable."
+  },
+  {
+    "id": 94,
+    "q": "Configure logrotate for /var/log/messages to rotate weekly and keep 4 weeks",
+    "answer": "echo '/var/log/messages {\nweekly\nrotate 4\ncompress\nmissingok\n}' > /etc/logrotate.d/messages",
+    "keywords": [
+      "daily instead of weekly",
+      "postrotate /bin/kill -HUP `cat /var/run/syslogd.pid` (for signal)"
+    ],
+    "feedback": "echo creates a logrotate config to rotate messages weekly, keeping 4 copies compressed."
+  },
+  {
+    "id": 95,
+    "q": "Use rsync to mirror /data to remote server user@backup.example.com:/backup with compression",
+    "answer": "rsync -avz --delete /data/ user@backup.example.com:/backup/",
+    "keywords": [
+      "--exclude='*.tmp' to skip files",
+      "rsync -avz /data/ /local/backup/ (local mirror)"
+    ],
+    "feedback": "rsync mirrors the directory to remote server with archive, compression, and deletion of extra files."
+  },
+  {
+    "id": 96,
+    "q": "Troubleshoot and relabel SELinux contexts after a filesystem move",
+    "answer": "restorecon -Rv /new/location; semanage fcontext -a -t default_t '/new/location(/.*)?'",
+    "keywords": [
+      "restorecon",
+      "semanage",
+      "SELinux contexts"
+    ],
+    "feedback": "restorecon relabels files recursively to match policy, semanage adds a file context rule for the new location."
+  },
+  {
+    "id": 97,
+    "q": "Monitor system performance with sar and generate a daily report",
+    "answer": "dnf install sysstat -y; systemctl enable sysstat; crontab -e; 0 0 * * * /usr/lib64/sa/sa1 1 1; echo 'sar -A -f /var/log/sa/saDD' > /tmp/report.sh",
+    "keywords": [
+      "sar -u 1 5 (CPU every 5s for 1 min)",
+      "mpstat for multi-processor stats"
+    ],
+    "feedback": "dnf installs sysstat for sar, systemctl enables service, crontab schedules data collection, script generates comprehensive report."
+  },
+  {
+    "id": 98,
+    "q": "Create an incremental backup of /etc using tar to /backup/etc-incremental.tar",
+    "answer": "tar --listed-incremental=/backup/etc-snapshot --create --gzip -f /backup/etc-incremental.tar /etc",
+    "keywords": [
+      "--one-file-system to avoid crossing mounts",
+      "Use rsync --backup for incremental alternative"
+    ],
+    "feedback": "tar uses listed-incremental to create backups of only changed files since the last snapshot."
+  },
+  {
+    "id": 99,
+    "q": "Mount /dev/sde1 with noatime and nodiratime options for performance",
+    "answer": "mount -o noatime,nodiratime /dev/sde1 /mnt/perf; echo '/dev/sde1 /mnt/perf ext4 defaults,noatime,nodiratime 0 0' >> /etc/fstab",
+    "keywords": [
+      "-o remount,noatime (for existing mount)",
+      "Use relatime for balanced performance"
+    ],
+    "feedback": "mount with noatime options disables access time updates to improve performance, fstab entry makes it persistent."
+  },
+  {
+    "id": 100,
+    "q": "Troubleshoot a failed boot by accessing the rescue environment and repairing GRUB",
+    "answer": "Boot from install media > Troubleshooting > Rescue; chroot /mnt/sysimage; grub2-mkconfig -o /boot/grub2/grub.cfg; grub2-install /dev/sda; exit; reboot",
+    "keywords": [
+      "efibootmgr -v (for EFI systems)",
+      "dracut --force /boot/initramfs-$(uname -r).img if kernel issue"
+    ],
+    "feedback": "Boot into rescue mode from install media, chroot into the system, regenerate GRUB config and reinstall bootloader."
+  },
+  {
+    "id": 101,
+    "q": "What is the primary purpose of understanding the OSI and TCP/IP models in network communication?",
+    "answer": "These models help us understand how network devices communicate and how data flows across a network.",
+    "keywords": [
+      "network models",
+      "communication",
+      "data flow"
+    ],
+    "feedback": "The OSI and TCP/IP models provide a standardized framework for understanding the functions of a network and the protocols involved in data transmission.",
+    "ai_generated": true
+  },
+  {
+    "id": 102,
+    "q": "Name one essential concept mentioned for achieving robust cybersecurity.",
+    "answer": "One essential concept is encryption (or firewalls, or intrusion detection systems).",
+    "keywords": [
+      "encryption",
+      "firewalls",
+      "IDS",
+      "cybersecurity concepts"
+    ],
+    "feedback": "Encryption scrambles data to prevent unauthorized access, firewalls control network traffic, and intrusion detection systems monitor for malicious activity, all crucial for robust cybersecurity.",
+    "ai_generated": true
+  },
+  {
+    "id": 103,
+    "q": "What is a common type of network attack mentioned in the content?",
+    "answer": "A common type of network attack is a DoS (Denial of Service) attack (or spoofing, or MITM - Man-in-the-Middle).",
+    "keywords": [
+      "DoS",
+      "spoofing",
+      "MITM",
+      "network attacks"
+    ],
+    "feedback": "DoS attacks aim to make a service unavailable by overwhelming it, while spoofing involves disguising as another entity, and MITM intercepts communication between two parties.",
+    "ai_generated": true
+  },
+  {
+    "id": 104,
+    "q": "Which mechanism is mentioned for secure remote access and authentication?",
+    "answer": "VPNs (Virtual Private Networks) are mentioned for secure remote access and authentication (also RADIUS or TACACS+).",
+    "keywords": [
+      "VPN",
+      "remote access",
+      "authentication",
+      "RADIUS",
+      "TACACS+"
+    ],
+    "feedback": "VPNs create a secure, encrypted connection over a less secure network, allowing users to safely access organizational resources from external locations.",
+    "ai_generated": true
+  },
+  {
+    "id": 105,
+    "q": "Why is cryptography important in securing communication channels?",
+    "answer": "Cryptography is important because it protects the confidentiality, integrity, and authenticity of data transmitted over communication channels.",
+    "keywords": [
+      "cryptography",
+      "communication security",
+      "confidentiality",
+      "integrity",
+      "authenticity"
+    ],
+    "feedback": "Cryptography uses techniques like encryption and digital signatures to transform information, making it unreadable to unauthorized parties and verifying its origin and content.",
+    "ai_generated": true
+  },
+  {
+    "id": 106,
+    "q": "At which OSI model layers does Link Encryption primarily operate?",
+    "answer": "Link Encryption primarily operates at the Data Link and Physical layers of the OSI model.",
+    "keywords": [
+      "Link Encryption",
+      "OSI model",
+      "Data Link layer",
+      "Physical layer"
+    ],
+    "feedback": "Link Encryption encrypts all data on a communication link at these lower layers, protecting against eavesdropping as data travels between network devices.",
+    "ai_generated": true
+  },
+  {
+    "id": 107,
+    "q": "What part of communication does End-to-End Encryption typically leave unencrypted?",
+    "answer": "End-to-End Encryption typically leaves routing information, such as headers and addresses, unencrypted.",
+    "keywords": [
+      "End-to-End Encryption",
+      "unencrypted",
+      "routing information",
+      "headers",
+      "addresses"
+    ],
+    "feedback": "While End-to-End Encryption secures the payload (the actual message content), it deliberately leaves routing information visible so that network devices can properly direct the data.",
+    "ai_generated": true
+  },
+  {
+    "id": 108,
+    "q": "Why is email security considered critical for business communication?",
+    "answer": "Email security is critical for business communication because email natively lacks security without encryption, digital signatures, or keys, making it vulnerable.",
+    "keywords": [
+      "email security",
+      "business communication",
+      "vulnerability",
+      "encryption",
+      "digital signatures"
+    ],
+    "feedback": "Businesses rely heavily on email for sensitive exchanges, so implementing security measures is essential to protect against data breaches, phishing, and other cyber threats.",
+    "ai_generated": true
+  },
+  {
+    "id": 109,
+    "q": "Name one key feature provided by PGP (Pretty Good Privacy).",
+    "answer": "PGP provides confidentiality (or integrity, or authenticity).",
+    "keywords": [
+      "PGP",
+      "Pretty Good Privacy",
+      "confidentiality",
+      "integrity",
+      "authenticity"
+    ],
+    "feedback": "PGP is a comprehensive encryption program designed to ensure the privacy, integrity, and authenticity of data, particularly for email and file transfers, using various cryptographic methods.",
+    "ai_generated": true
+  },
+  {
+    "id": 110,
+    "q": "What is the main purpose of S/MIME (Secure MIME)?",
+    "answer": "The main purpose of S/MIME is to encrypt and digitally sign messages and attachments for email security.",
+    "keywords": [
+      "S/MIME",
+      "Secure MIME",
+      "email security",
+      "encrypt",
+      "digitally sign"
+    ],
+    "feedback": "S/MIME extends the MIME standard to add cryptographic security services, ensuring that email content is confidential, has integrity, and is authenticated through digital signatures and encryption.",
+    "ai_generated": true
+  },
+  {
+    "id": 111,
+    "q": "Which command is used to list directory contents in Linux?",
+    "answer": "ls",
+    "options": ["ls", "dir", "list", "show"],
+    "type": "multiple_choice",
+    "keywords": ["ls"],
+    "feedback": "The 'ls' command is the standard Unix/Linux command for listing directory contents.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 112,
+    "q": "Linux is an open-source operating system.",
+    "answer": "true",
+    "type": "true_false",
+    "keywords": [],
+    "feedback": "Linux is indeed an open-source operating system, meaning its source code is freely available and can be modified.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 113,
+    "q": "What does the 'cd' command do in Linux?",
+    "answer": "change directory",
+    "type": "short_answer",
+    "keywords": ["changes directory", "navigate", "move to directory"],
+    "feedback": "The 'cd' command stands for 'change directory' and is used to navigate between directories in the filesystem.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 114,
+    "q": "Which symbol is used to redirect output to a file in Linux?",
+    "answer": ">",
+    "options": [">", "<", "|", "&"],
+    "type": "multiple_choice",
+    "keywords": [">"],
+    "feedback": "The '>' symbol is used to redirect output from a command to a file, overwriting the file if it exists.",
+    "difficulty": "medium",
+    "ai_generated": false
+  },
+  {
+    "id": 115,
+    "q": "The root directory in Linux is represented by a forward slash (/).",
+    "answer": "true",
+    "type": "true_false",
+    "keywords": [],
+    "feedback": "The root directory in Linux is indeed represented by a single forward slash (/), which is the top-most directory in the filesystem hierarchy.",
+    "difficulty": "easy",
+    "ai_generated": false
+  }
+]

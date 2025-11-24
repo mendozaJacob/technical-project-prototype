@@ -1,1 +1,20 @@
-[]
+[
+    {
+        "player": "Anonymous",
+        "score": 165,
+        "time": 78.63,
+        "correct_answers": 7,
+        "wrong_answers": 3,
+        "game_mode": "adventure",
+        "date": "2025-11-21 08:41:20"
+    },
+    {
+        "player": "Anonymous",
+        "score": 255,
+        "time": 60.44,
+        "correct_answers": 9,
+        "wrong_answers": 1,
+        "game_mode": "adventure",
+        "date": "2025-11-22 06:23:37"
+    }
+]

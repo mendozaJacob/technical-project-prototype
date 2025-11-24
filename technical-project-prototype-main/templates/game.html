@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Metadata and linking the CSS file -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Dungeons of Knowledge - Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    {% if settings.sound_effects %}
+    <!-- Sound Effects -->
+    <audio id="correctSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/correct.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/correct.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="wrongSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/wrong.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/wrong.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="tickSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/tick.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/tick.wav') }}" type="audio/wav">
+    </audio>
+    {% endif %}
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #f3eac2; 
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container { 
+            max-width: 800px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 32px 24px 24px 24px; 
+            text-align: center; 
+        }
+        .game-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            font-weight: bold; 
+            background: #fffbe6; 
+            border-radius: 16px; 
+            padding: 18px 0 14px 0; 
+            margin-bottom: 18px;
+            letter-spacing: 2px;
+        }
+        .timer { 
+            font-size: 1.3em; 
+            color: #b22222; 
+            margin-bottom: 12px; 
+        }
+        .questions-left { 
+            font-size: 1.2em; 
+            color: #4b2e05; 
+            background: #ffeebc;
+            border-radius: 10px;
+            padding: 10px 0;
+            margin-bottom: 18px;
+        }
+        .character-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        .character-info {
+            flex: 1;
+            text-align: center;
+        }
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: contain;
+            border: 3px solid #4b2e05;
+            margin-bottom: 8px;
+        }
+        .character-avatar.placeholder {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            background: #fffbe6;
+            color: #4b2e05;
+            border-radius: 12px;
+            border: 3px solid #4b2e05;
+        }
+        .character-name {
+            font-weight: bold;
+            color: #4b2e05;
+            margin-bottom: 5px;
+        }
+        .hp-bar {
+            width: 100%;
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #4b2e05;
+            margin-bottom: 5px;
+        }
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+            text-align: center;
+            line-height: 16px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .enemy-hp-fill {
+            background: linear-gradient(90deg, #f44336, #ff9800);
+        }
+        .question {
+            font-size: 1.4em; 
+            margin: 24px 0; 
+            color: #4b2e05; 
+            background: #fffbe6; 
+            border-radius: 12px; 
+            padding: 18px 12px; 
+            box-shadow: 0 2px 8px #0002; 
+        }
+        .btn { 
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        
+        /* Question Type Styles */
+        .answer-options {
+            margin: 20px 0;
+        }
+        
+        .option-button {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .option-button:hover {
+            background: #ffeebc;
+            transform: scale(1.02);
+        }
+        
+        .option-button.selected {
+            background: #4b2e05;
+            color: #f3eac2;
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            font-size: 1.2em;
+            min-width: 30px;
+        }
+        
+        .option-text {
+            flex: 1;
+        }
+        
+        .tf-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .tf-button {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            padding: 20px 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 120px;
+        }
+        
+        .tf-button:hover {
+            background: #ffeebc;
+            transform: scale(1.05);
+        }
+        
+        .tf-button.selected {
+            background: #4b2e05;
+            color: #f3eac2;
+        }
+        
+        .tf-icon {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .tf-text {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .selected-answer {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .short-answer-input {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            background: #ccc;
+            transform: none;
+        }
+        input[type="text"] {
+            font-family: 'Times New Roman', Times, serif;
+            padding: 12px;
+            border: 2px solid #4b2e05;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 300px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for the game content -->
+    <div class="game-container animation-{{ settings.animation_speed or 'normal' }} fade-in">
+        <!-- Game Title -->
+        <h1 class="game-title slide-in">⚔️ Battle Arena</h1>
+        
+        <!-- Timer (shown based on settings) -->
+        {% if settings.show_timer %}
+        <div class="timer" id="timer">⏱️ Time Left: {{ time_left }} seconds</div>
+        {% endif %}
+
+        <!-- Questions Progress (shown based on settings) -->
+        {% if settings.show_progress %}
+        <div class="questions-left">Question {{ q_number }} of {{ total }} | Level {{ level }}</div>
+        {% endif %}
+        
+
+        
+        <!-- Character Stats Section -->
+        <div class="character-stats">
+            <!-- Player Info -->
+            <div class="character-info">
+                {% if session.get('character') %}
+                <img class="character-avatar" src="{{ url_for('static', filename='characters/character' ~ session.get('character') ~ '.png') }}" alt="Player avatar">
+                {% else %}
+                <div class="character-avatar placeholder">🧑</div>
+                {% endif %}
+                <div class="character-name">Player</div>
+                <div class="hp-bar">
+                    <div class="hp-fill" style="width: {{ player_hp }}%;">{{ player_hp }}/100 HP</div>
+                </div>
+                <div style="color: #4b2e05; font-weight: bold;">⭐ Score: {{ score }}</div>
+            </div>
+            
+            <!-- Enemy Info -->
+            <div class="character-info">
+                {% if enemy_image %}
+                    <img class="character-avatar" src="{{ enemy_image }}" alt="Enemy avatar">
+                {% else %}
+                    <div class="character-avatar placeholder">{{ enemy.avatar }}</div>
+                {% endif %}
+                <div class="character-name">{{ enemy.name }}</div>
+                <div class="hp-bar">
+                    <div class="hp-fill enemy-hp-fill" style="width: {{ enemy_hp }}%;">{{ enemy_hp }}/100 HP</div>
+                </div>
+                {% if enemy_defeated %}
+                <div style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">💀 DEFEATED! Earn bonus points!</div>
+                {% else %}
+                <div style="color: #4b2e05; font-style: italic;">"{{ enemy.taunt }}"</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Question Section -->
+        <div class="question">{{ question['q'] }}</div>
+        
+        {% if settings.debug_mode %}
+        <!-- Debug Information -->
+        <div style="background: #ffeeee; border: 2px solid #ff0000; border-radius: 8px; padding: 10px; margin: 10px 0; font-size: 0.9em; color: #333;">
+            <strong>🐛 DEBUG MODE</strong><br>
+            <strong>Answer:</strong> {{ question.answer }}<br>
+            <strong>Keywords:</strong> {{ question.keywords }}<br>
+            <strong>Question ID:</strong> {{ question.id }}<br>
+            <strong>Question Type:</strong> {{ question.get('type', 'short_answer') }}<br>
+            <strong>Session Timer:</strong> {{ session.get('current_timer', 'N/A') }}s<br>
+            <strong>Time Left:</strong> {{ time_left }}s<br>
+            <strong>Q Index:</strong> {{ session.get('q_index', 0) }}/{{ total }}<br>
+            <strong>Adaptive Difficulty:</strong> {{ settings.adaptive_difficulty }}<br>
+            <strong>Performance:</strong> {{ session.get('correct_answers', 0) }}C / {{ session.get('wrong_answers', 0) }}W
+        </div>
+        {% endif %}
+        
+        <!-- Answer Form -->
+        <form method="POST" id="answerForm">
+            {% set question_type = question.get('type', 'short_answer') %}
+            
+            {% if question_type == 'multiple_choice' %}
+                <!-- Multiple Choice Options -->
+                <div class="answer-options">
+                    {% for i in range(question.options|length) %}
+                    {% set option_letter = ['A', 'B', 'C', 'D'][i] %}
+                    <div class="option-button" onclick="selectOption('{{ option_letter|lower }}', '{{ question.options[i] }}')">
+                        <span class="option-letter">{{ option_letter }})</span>
+                        <span class="option-text">{{ question.options[i] }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="answer" id="selectedAnswer" required>
+                <div class="selected-answer" id="selectedAnswerDisplay" style="display: none;">
+                    Selected: <span id="selectedAnswerText"></span>
+                </div>
+                <button type="submit" class="btn" id="submitButton" disabled>Attack!</button>
+                
+            {% elif question_type == 'true_false' %}
+                <!-- True/False Buttons -->
+                <div class="tf-buttons">
+                    <div class="tf-button" onclick="selectTrueFalse('True')">
+                        <span class="tf-icon">✓</span>
+                        <span class="tf-text">True</span>
+                    </div>
+                    <div class="tf-button" onclick="selectTrueFalse('False')">
+                        <span class="tf-icon">✗</span>
+                        <span class="tf-text">False</span>
+                    </div>
+                </div>
+                <input type="hidden" name="answer" id="tfAnswer" required>
+                <div class="selected-answer" id="tfSelectedDisplay" style="display: none;">
+                    Selected: <span id="tfSelectedText"></span>
+                </div>
+                <button type="submit" class="btn" id="tfSubmitButton" disabled>Attack!</button>
+                
+            {% else %}
+                <!-- Short Answer Input -->
+                <input type="text" name="answer" placeholder="Type your answer..." required class="short-answer-input">
+                <button type="submit" class="btn">Attack!</button>
+            {% endif %}
+        </form>
+    </div>
+
+    <script>
+        // Initialize the remaining time from the backend
+        let timeLeft = {{ time_left }};
+        const timerElement = document.getElementById("timer");
+        
+        // Question type interaction functions
+        function selectOption(letter, optionText) {
+            // Clear previous selections
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select current option
+            event.target.closest('.option-button').classList.add('selected');
+            
+            // Set the answer values
+            document.getElementById('selectedAnswer').value = optionText;
+            document.getElementById('selectedAnswerDisplay').style.display = 'block';
+            document.getElementById('selectedAnswerText').textContent = letter.toUpperCase() + ') ' + optionText;
+            
+            // Enable submit button
+            document.getElementById('submitButton').disabled = false;
+        }
+        
+        function selectTrueFalse(answer) {
+            // Clear previous selections
+            document.querySelectorAll('.tf-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select current option
+            event.target.closest('.tf-button').classList.add('selected');
+            
+            // Set the answer values
+            document.getElementById('tfAnswer').value = answer;
+            document.getElementById('tfSelectedDisplay').style.display = 'block';
+            document.getElementById('tfSelectedText').textContent = answer;
+            
+            // Enable submit button
+            document.getElementById('tfSubmitButton').disabled = false;
+        }
+
+        // Countdown logic to update the timer every second
+        const countdown = setInterval(() => {
+            if (timeLeft > 0) {
+                // Decrease the time left and update the timer text
+                timeLeft--;
+                if (timerElement) {
+                    timerElement.innerText = "⏱️ Time Left: " + timeLeft + " seconds";
+                }
+            } else {
+                // Stop the countdown when time reaches 0
+                clearInterval(countdown);
+                if (timerElement) {
+                    timerElement.innerText = "⏳ Time's up!";
+                }
+                // Redirect to refresh the page and trigger server-side timeout logic
+                window.location.reload();
+            }
+            
+            {% if settings.sound_effects %}
+            // Play tick sound every 5 seconds when time is running low
+            if (timeLeft <= 10 && timeLeft % 5 === 0) {
+                const tickSound = document.getElementById('tickSound');
+                if (tickSound) {
+                    tickSound.play().catch(e => console.log('Could not play tick sound:', e));
+                }
+            }
+            {% endif %}
+        }, 1000); // Run the function every 1000ms (1 second)
+        
+        {% if settings.sound_effects %}
+        // Add sound effects to form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Don't prevent form submission, just play sound
+            // We can't determine if answer is correct here, so we'll add sounds to feedback page
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

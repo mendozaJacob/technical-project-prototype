@@ -116,53 +116,11 @@
                         <button class="level-btn unlocked" name="level" value="{{ level.level }}">
                             <span class="icon">⚔️</span>
                             <span class="number">{{ level.level }}</span>
-                            {% if level.level == 1 %}
-                                <span class="label">Basic Linux commands & system setup</span>
-                            {% elif level.level == 2 %}
-                                <span class="label">File systems, users, networking basics</span>
-                            {% elif level.level == 3 %}
-                                <span class="label">Mounting, LVM basics, packages</span>
-                            {% elif level.level == 4 %}
-                                <span class="label">Firewall, systemctl, disk usage</span>
-                            {% elif level.level == 5 %}
-                                <span class="label">Storage, users, firewall deep dive</span>
-                            {% elif level.level == 6 %}
-                                <span class="label">Links, cron, SELinux, packages</span>
-                            {% elif level.level == 7 %}
-                                <span class="label">Networking, time, file find</span>
-                            {% elif level.level == 8 %}
-                                <span class="label">Advanced networking, troubleshooting</span>
-                            {% elif level.level == 9 %}
-                                <span class="label">Performance tuning, containers, bonding</span>
-                            {% elif level.level == 10 %}
-                                <span class="label">System automation, backup, boot repair</span>
-                            {% endif %}
                         </button>
                     {% else %}
                         <button class="level-btn locked" disabled>
                             <span class="icon">🔒</span>
                             <span class="number">{{ level.level }}</span>
-                            {% if level.level == 1 %}
-                                <span class="label">Basic Linux commands & system setup</span>
-                            {% elif level.level == 2 %}
-                                <span class="label">File systems, users, networking basics</span>
-                            {% elif level.level == 3 %}
-                                <span class="label">Mounting, LVM basics, packages</span>
-                            {% elif level.level == 4 %}
-                                <span class="label">Firewall, systemctl, disk usage</span>
-                            {% elif level.level == 5 %}
-                                <span class="label">Storage, users, firewall deep dive</span>
-                            {% elif level.level == 6 %}
-                                <span class="label">Links, cron, SELinux, packages</span>
-                            {% elif level.level == 7 %}
-                                <span class="label">Networking, time, file find</span>
-                            {% elif level.level == 8 %}
-                                <span class="label">Advanced networking, troubleshooting</span>
-                            {% elif level.level == 9 %}
-                                <span class="label">Performance tuning, containers, bonding</span>
-                            {% elif level.level == 10 %}
-                                <span class="label">System automation, backup, boot repair</span>
-                            {% endif %}
                         </button>
                     {% endif %}
                 {% endfor %}

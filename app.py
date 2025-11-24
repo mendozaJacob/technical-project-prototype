@@ -1661,10 +1661,26 @@ def leaderboard():
     test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
     endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
     
-    # Sort each category by score (highest first), then by time (lowest first)
-    adventure_leaderboard = sorted(adventure_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    test_yourself_leaderboard = sorted(test_yourself_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    endless_leaderboard = sorted(endless_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    # Get best score per player for each mode
+    def get_best_scores(data, limit=50):
+        player_best = {}
+        for entry in data:
+            player_name = entry.get("player", "Anonymous")
+            if player_name not in player_best:
+                player_best[player_name] = entry
+            else:
+                # Keep entry with higher score, or if same score, lower time
+                current_best = player_best[player_name]
+                if (entry["score"] > current_best["score"] or 
+                    (entry["score"] == current_best["score"] and entry["time"] < current_best["time"])):
+                    player_best[player_name] = entry
+        # Sort by score (highest first), then by time (lowest first)
+        sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
+        return sorted_players[:limit]
+    
+    adventure_leaderboard = get_best_scores(adventure_data, 50)
+    test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
+    endless_leaderboard = get_best_scores(endless_data, 50)
 
     # Check if student is logged in to provide proper navigation context
     is_student = session.get('is_student', False)
@@ -1689,10 +1705,26 @@ def guest_leaderboard():
     test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
     endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
     
-    # Sort each category by score (highest first), then by time (lowest first)
-    adventure_leaderboard = sorted(adventure_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    test_yourself_leaderboard = sorted(test_yourself_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    endless_leaderboard = sorted(endless_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    # Get best score per player for each mode
+    def get_best_scores(data, limit=50):
+        player_best = {}
+        for entry in data:
+            player_name = entry.get("player", "Anonymous")
+            if player_name not in player_best:
+                player_best[player_name] = entry
+            else:
+                # Keep entry with higher score, or if same score, lower time
+                current_best = player_best[player_name]
+                if (entry["score"] > current_best["score"] or 
+                    (entry["score"] == current_best["score"] and entry["time"] < current_best["time"])):
+                    player_best[player_name] = entry
+        # Sort by score (highest first), then by time (lowest first)
+        sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
+        return sorted_players[:limit]
+    
+    adventure_leaderboard = get_best_scores(adventure_data, 50)
+    test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
+    endless_leaderboard = get_best_scores(endless_data, 50)
 
     return render_template("guest_leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,

@@ -1054,7 +1054,11 @@ def choose_character():
             # After choosing a character, start the game
             return redirect(url_for('game'))
     
-    return render_template('choose_character.html', total_characters=total_characters)
+    # Check if guest player has a current character to display
+    current_char = session.get('character')
+    return render_template('choose_character.html', 
+                         total_characters=total_characters,
+                         current_character=current_char)
 
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])

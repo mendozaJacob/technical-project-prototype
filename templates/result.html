@@ -20,6 +20,7 @@
         {% else %}
             <a href="{{ url_for('index') }}" class="btn">Play Again</a>
         {% endif %}
+        <a href="{{ url_for('select_level') }}" class="btn">🏰 Back to Level Selection</a>
         {% if can_advance %}
             <form method="post" action="{{ url_for('select_level') }}">
                 <input type="hidden" name="level" value="{{ next_level }}">

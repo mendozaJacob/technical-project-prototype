@@ -518,12 +518,12 @@ def check_answer_fuzzy(user_answer, question_data, similarity_threshold=0.8):
         # 1. Check for partial matches (substring)
         if len(user_answer) > 3:  # Only for longer answers
             if user_answer in correct_answer or correct_answer in user_answer:
-                return True, "Partial match!", 0.9
+                return True, "Partial match!", 0.8
             
             # Check partial matches with keywords
             for keyword in keywords:
                 if user_answer in keyword or keyword in user_answer:
-                    return True, f"Partial match with '{keyword}'!", 0.9
+                    return True, f"Partial match with '{keyword}'!", 0.8
         
         # 2. Fuzzy matching with correct answer
         correct_similarity = difflib.SequenceMatcher(None, user_answer, correct_answer).ratio()
@@ -571,10 +571,18 @@ def normalize_true_false_answer(answer):
 def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure"):
     # Save to student leaderboard if it's a logged-in student
     if session.get('is_student') and session.get('student_id'):
-        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
-        
-        # Get student information for better leaderboard display
+        # Get actual student name from students.json instead of relying on player_name
         student_id = session.get('student_id')
+        students = load_students()
+        student = next((s for s in students if s['id'] == student_id), None)
+        
+        # Use student's full name if available, otherwise use the passed player_name
+        if student and 'full_name' in student:
+            player_name = student['full_name']
+        elif session.get('student_name'):
+            player_name = session.get('student_name')
+        
+        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
         
         record = {
             "player": player_name,
@@ -1317,6 +1325,24 @@ def game():
             # Use fuzzy matching for answer checking
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
             
+            # If student and AI grading is enabled, use AI as fallback for uncertain answers
+            if session.get('is_student') and session.get('ai_grading_enabled', False):
+                # Use AI grading for short answers with low confidence (< 0.9)
+                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
+                    try:
+                        ai_result = grade_answer_with_ai(
+                            question=question.get('q', ''),
+                            correct_answer=correct_answer,
+                            student_answer=user_answer,
+                            confidence_threshold=75
+                        )
+                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
+                            is_correct = True
+                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
+                            similarity_score = ai_result.get('confidence', 0) / 100.0
+                    except Exception as e:
+                        print(f"AI grading error: {e}")
+            
             # Log student answer in real-time
             if 'student_id' in session:
                 log_student_answer(
@@ -1497,6 +1523,12 @@ def result():
         'wrong_answers': session.get('wrong_answers', 0),
         'level_completed': session.get('level_completed', False)
     })
+    
+    # Check if player completed level 10 with 7+ correct answers - show credits
+    current_level = session.get('selected_level', 1)
+    correct_answers = session.get('correct_answers', 0)
+    if current_level == 10 and correct_answers >= 7 and session.get('level_completed', False):
+        return redirect(url_for('credits'))
 
     # If the level is completed, allow to select next level
     next_level = session.get('selected_level', 1) + 1
@@ -1629,10 +1661,26 @@ def leaderboard():
     test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
     endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
     
-    # Sort each category by score (highest first), then by time (lowest first)
-    adventure_leaderboard = sorted(adventure_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    test_yourself_leaderboard = sorted(test_yourself_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    endless_leaderboard = sorted(endless_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    # Get best score per player for each mode
+    def get_best_scores(data, limit=50):
+        player_best = {}
+        for entry in data:
+            player_name = entry.get("player", "Anonymous")
+            if player_name not in player_best:
+                player_best[player_name] = entry
+            else:
+                # Keep entry with higher score, or if same score, lower time
+                current_best = player_best[player_name]
+                if (entry["score"] > current_best["score"] or 
+                    (entry["score"] == current_best["score"] and entry["time"] < current_best["time"])):
+                    player_best[player_name] = entry
+        # Sort by score (highest first), then by time (lowest first)
+        sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
+        return sorted_players[:limit]
+    
+    adventure_leaderboard = get_best_scores(adventure_data, 50)
+    test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
+    endless_leaderboard = get_best_scores(endless_data, 50)
 
     # Check if student is logged in to provide proper navigation context
     is_student = session.get('is_student', False)
@@ -1657,10 +1705,26 @@ def guest_leaderboard():
     test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
     endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
     
-    # Sort each category by score (highest first), then by time (lowest first)
-    adventure_leaderboard = sorted(adventure_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    test_yourself_leaderboard = sorted(test_yourself_data, key=lambda x: (-x["score"], x["time"]))[:10]
-    endless_leaderboard = sorted(endless_data, key=lambda x: (-x["score"], x["time"]))[:10]
+    # Get best score per player for each mode
+    def get_best_scores(data, limit=50):
+        player_best = {}
+        for entry in data:
+            player_name = entry.get("player", "Anonymous")
+            if player_name not in player_best:
+                player_best[player_name] = entry
+            else:
+                # Keep entry with higher score, or if same score, lower time
+                current_best = player_best[player_name]
+                if (entry["score"] > current_best["score"] or 
+                    (entry["score"] == current_best["score"] and entry["time"] < current_best["time"])):
+                    player_best[player_name] = entry
+        # Sort by score (highest first), then by time (lowest first)
+        sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
+        return sorted_players[:limit]
+    
+    adventure_leaderboard = get_best_scores(adventure_data, 50)
+    test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
+    endless_leaderboard = get_best_scores(endless_data, 50)
 
     return render_template("guest_leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,
@@ -1684,6 +1748,27 @@ def you_win():
     is_student = session.get('is_student', False)
     return render_template('you_win.html', is_student=is_student)
 
+
+@app.route('/credits')
+def credits():
+    """Display credits page after completing level 10 with 7+ correct answers"""
+    # Get final score and stats from session
+    settings = get_current_game_settings()
+    bonus = settings['level_bonus'] if session.get('level_completed', False) and session['player_hp'] > 0 else 0
+    final_score = session.get('score', 0) + bonus
+    correct_answers = session.get('correct_answers', 0)
+    wrong_answers = session.get('wrong_answers', 0)
+    total_time = time.time() - session.get("game_start_time", time.time())
+    
+    # Check if student is logged in
+    is_student = session.get('is_student', False)
+    
+    return render_template('credits.html', 
+                         final_score=final_score,
+                         correct_answers=correct_answers,
+                         wrong_answers=wrong_answers,
+                         total_time=round(total_time, 2),
+                         is_student=is_student)
 
 
 @app.route('/you_lose')
@@ -1926,44 +2011,71 @@ def test_yourself():
 
     correct_count = session.get('test_correct', 0)
     if request.method == 'POST':
-        user_answer = request.form.get('answer', '').strip().lower()
-        correct_answer = question.get('answer', '').strip().lower()
-        # Normalize keywords
-        raw_keywords = question.get('keywords', [])
-        if isinstance(raw_keywords, str):
-            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-        else:
-            keywords = [str(k).strip().lower() for k in raw_keywords]
-        # Use fuzzy matching for test mode
-        is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-        
-        # Log student answer in real-time
-        if 'student_id' in session:
-            log_student_answer(
-                student_id=session['student_id'],
-                student_name=session.get('student_name', 'Unknown'),
-                question_id=question.get('id', 'unknown'),
-                question_text=question.get('q', ''),
-                student_answer=user_answer,
-                correct_answer=correct_answer,
-                is_correct=is_correct,
-                game_mode='test_yourself'
-            )
-        
-        session['test_user_answers'].append({
-            'question': question.get('q', ''),
-            'user_answer': user_answer,
-            'correct_answer': correct_answer,
-            'correct': is_correct,
-            'feedback': question.get('feedback', 'No additional information available.'),
-            'match_type': feedback_type,
-            'similarity': similarity_score
-        })
-        if is_correct:
-            session['test_correct'] = correct_count + 1
-        session['test_q_index'] = q_index + 1
-        print(f"[DEBUG] POST: test_q_index={session['test_q_index']}, test_questions={len(test_questions)}, test_user_answers={len(session['test_user_answers'])}")
-        return redirect(url_for('test_yourself'))
+        try:
+            user_answer = request.form.get('answer', '').strip().lower()
+            correct_answer = question.get('answer', '').strip().lower()
+            # Normalize keywords
+            raw_keywords = question.get('keywords', [])
+            if isinstance(raw_keywords, str):
+                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+            else:
+                keywords = [str(k).strip().lower() for k in raw_keywords]
+            # Use fuzzy matching for test mode
+            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            # If student and AI grading is enabled, use AI as fallback for uncertain answers
+            if session.get('is_student') and session.get('ai_grading_enabled', False):
+                # Use AI grading for short answers with low confidence (< 0.9)
+                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
+                    try:
+                        ai_result = grade_answer_with_ai(
+                            question=question.get('q', ''),
+                            correct_answer=correct_answer,
+                            student_answer=user_answer,
+                            confidence_threshold=75
+                        )
+                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
+                            is_correct = True
+                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
+                            similarity_score = ai_result.get('confidence', 0) / 100.0
+                    except Exception as e:
+                        print(f"AI grading error: {e}")
+            
+            # Log student answer in real-time
+            if 'student_id' in session:
+                log_student_answer(
+                    student_id=session['student_id'],
+                    student_name=session.get('student_name', 'Unknown'),
+                    question_id=question.get('id', 'unknown'),
+                    question_text=question.get('q', ''),
+                    student_answer=user_answer,
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                    game_mode='test_yourself'
+                )
+            
+            session['test_user_answers'].append({
+                'question': question.get('q', ''),
+                'user_answer': user_answer,
+                'correct_answer': correct_answer,
+                'correct': is_correct,
+                'feedback': question.get('feedback', 'No additional information available.'),
+                'match_type': feedback_type,
+                'similarity': similarity_score
+            })
+            # Limit to last 50 entries to prevent session overflow
+            if len(session['test_user_answers']) > 50:
+                session['test_user_answers'] = session['test_user_answers'][-50:]
+            if is_correct:
+                session['test_correct'] = correct_count + 1
+            session['test_q_index'] = q_index + 1
+            print(f"[DEBUG] POST: test_q_index={session['test_q_index']}, test_questions={len(test_questions)}, test_user_answers={len(session['test_user_answers'])}")
+            return redirect(url_for('test_yourself'))
+        except Exception as e:
+            print(f"[ERROR] Test yourself mode POST error: {str(e)}")
+            # Force game over on error to prevent crash
+            session['test_q_index'] = 40
+            return redirect(url_for('test_yourself_result'))
 
     return render_template('test_yourself.html',
                           question=question,
@@ -2211,75 +2323,116 @@ def endless_game():
             return redirect(url_for('endless_result'))
         
         session['endless_question_start'] = time.time()
+        # Select a different question (not the same one)
+        current_q_id = question.get('id')
         endless_questions = get_questions_for_pool('endless_mode')
-        if endless_questions:
-            session['endless_current_question'] = random.choice(endless_questions)
+        if not endless_questions:
+            endless_questions = questions
+        # Filter out the current question to ensure a new one
+        available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+        if available_questions:
+            session['endless_current_question'] = random.choice(available_questions)
         else:
-            session['endless_current_question'] = random.choice(questions)
+            # Fallback if only one question exists
+            session['endless_current_question'] = random.choice(endless_questions)
         return redirect(url_for('endless_game'))
     
     # Handle answer submission
     if request.method == 'POST':
-        user_answer = request.form.get('answer', '').strip().lower()
-        correct_answer = question.get('answer', '').strip().lower()
-        raw_keywords = question.get('keywords', [])
-        if isinstance(raw_keywords, str):
-            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-        else:
-            keywords = [str(k).strip().lower() for k in raw_keywords]
-        # Use fuzzy matching for endless mode
-        is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-        
-        # Log student answer in real-time
-        if 'student_id' in session:
-            log_student_answer(
-                student_id=session['student_id'],
-                student_name=session.get('student_name', 'Unknown'),
-                question_id=question.get('id', 'unknown'),
-                question_text=question.get('q', ''),
-                student_answer=user_answer,
-                correct_answer=correct_answer,
-                is_correct=is_correct,
-                game_mode='endless'
-            )
-        
-        # Store feedback for this question
-        question_feedback = question.get('feedback', 'No additional information available.')
-        if 'endless_feedback_list' not in session:
-            session['endless_feedback_list'] = []
-        
-        feedback_entry = {
-            'question': question.get('q', ''),
-            'user_answer': user_answer,
-            'correct_answer': correct_answer,
-            'correct': is_correct,
-            'feedback': question_feedback,
-            'match_type': feedback_type,
-            'similarity': similarity_score
-        }
-        session['endless_feedback_list'].append(feedback_entry)
-        
-        session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
-        if is_correct:
-            session['endless_score'] = session.get('endless_score', 0) + 10
-            session['endless_streak'] = session.get('endless_streak', 0) + 1
-            session['endless_correct'] = session.get('endless_correct', 0) + 1
-            if session['endless_streak'] > session.get('endless_highest_streak', 0):
-                session['endless_highest_streak'] = session['endless_streak']
-            # HP regen after 5 correct in a row
-            if session['endless_streak'] % 5 == 0:
-                session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
-        else:
-            session['endless_hp'] = session.get('endless_hp', 100) - 10
-            session['endless_streak'] = 0
-            session['endless_wrong'] = session.get('endless_wrong', 0) + 1
-        session['endless_question_start'] = time.time()
-        endless_questions = get_questions_for_pool('endless_mode')
-        if endless_questions:
-            session['endless_current_question'] = random.choice(endless_questions)
-        else:
-            session['endless_current_question'] = random.choice(questions)
-        return redirect(url_for('endless_game'))
+        try:
+            user_answer = request.form.get('answer', '').strip().lower()
+            correct_answer = question.get('answer', '').strip().lower()
+            raw_keywords = question.get('keywords', [])
+            if isinstance(raw_keywords, str):
+                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+            else:
+                keywords = [str(k).strip().lower() for k in raw_keywords]
+            # Use fuzzy matching for endless mode
+            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            # If student and AI grading is enabled, use AI as fallback for uncertain answers
+            if session.get('is_student') and session.get('ai_grading_enabled', False):
+                # Use AI grading for short answers with low confidence (< 0.9)
+                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
+                    try:
+                        ai_result = grade_answer_with_ai(
+                            question=question.get('q', ''),
+                            correct_answer=correct_answer,
+                            student_answer=user_answer,
+                            confidence_threshold=75
+                        )
+                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
+                            is_correct = True
+                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
+                            similarity_score = ai_result.get('confidence', 0) / 100.0
+                    except Exception as e:
+                        print(f"AI grading error: {e}")
+            
+            # Log student answer in real-time
+            if 'student_id' in session:
+                log_student_answer(
+                    student_id=session['student_id'],
+                    student_name=session.get('student_name', 'Unknown'),
+                    question_id=question.get('id', 'unknown'),
+                    question_text=question.get('q', ''),
+                    student_answer=user_answer,
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                    game_mode='endless'
+                )
+            
+            # Store feedback for this question
+            question_feedback = question.get('feedback', 'No additional information available.')
+            if 'endless_feedback_list' not in session:
+                session['endless_feedback_list'] = []
+            
+            feedback_entry = {
+                'question': question.get('q', ''),
+                'user_answer': user_answer,
+                'correct_answer': correct_answer,
+                'correct': is_correct,
+                'feedback': question_feedback,
+                'match_type': feedback_type,
+                'similarity': similarity_score
+            }
+            session['endless_feedback_list'].append(feedback_entry)
+            # Limit to last 50 entries to prevent session overflow
+            if len(session['endless_feedback_list']) > 50:
+                session['endless_feedback_list'] = session['endless_feedback_list'][-50:]
+            
+            session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
+            if is_correct:
+                session['endless_score'] = session.get('endless_score', 0) + 10
+                session['endless_streak'] = session.get('endless_streak', 0) + 1
+                session['endless_correct'] = session.get('endless_correct', 0) + 1
+                if session['endless_streak'] > session.get('endless_highest_streak', 0):
+                    session['endless_highest_streak'] = session['endless_streak']
+                # HP regen after 5 correct in a row
+                if session['endless_streak'] % 5 == 0:
+                    session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
+            else:
+                session['endless_hp'] = session.get('endless_hp', 100) - 10
+                session['endless_streak'] = 0
+                session['endless_wrong'] = session.get('endless_wrong', 0) + 1
+            session['endless_question_start'] = time.time()
+            # Select a different question (not the same one)
+            current_q_id = question.get('id')
+            endless_questions = get_questions_for_pool('endless_mode')
+            if not endless_questions:
+                endless_questions = questions
+            # Filter out the current question to ensure a new one
+            available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+            if available_questions:
+                session['endless_current_question'] = random.choice(available_questions)
+            else:
+                # Fallback if only one question exists
+                session['endless_current_question'] = random.choice(endless_questions)
+            return redirect(url_for('endless_game'))
+        except Exception as e:
+            print(f"[ERROR] Endless mode POST error: {str(e)}")
+            # Force game over on error to prevent crash
+            session['endless_hp'] = 0
+            return redirect(url_for('endless_result'))
     
     return render_template('endless.html',
                           question=question,
@@ -2691,6 +2844,8 @@ def teacher_update_ai_config():
 @app.route('/teacher/test-ai-grading', methods=['POST'])
 @teacher_required
 def teacher_test_ai_grading():
+    # This route is for teachers only to test AI grading functionality
+    # Student AI grading happens automatically during gameplay when enabled
     question = request.form.get('test_question')
     correct_answer = request.form.get('correct_answer')
     student_answer = request.form.get('student_answer')

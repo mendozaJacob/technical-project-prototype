@@ -68,7 +68,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1763732401.8440287,
+=======
+    "timestamp": 1763959300.431817,
+>>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -79,6 +83,7 @@
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1763732409.8441641,
     "event_type": "answer_submitted",
     "player_name": "Anonymous",
@@ -531,6 +536,9 @@
   },
   {
     "timestamp": 1763811748.4803157,
+=======
+    "timestamp": 1763959312.596516,
+>>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
     "event_type": "answer_submitted",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -539,12 +547,17 @@
       "user_answer": "paris",
       "correct_answer": "paris",
       "is_correct": true,
+<<<<<<< HEAD
       "time_taken": 11.615503311157227,
+=======
+      "time_taken": 12.162914991378784,
+>>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
       "similarity_score": 1.0,
       "level": 1
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1763812094.349407,
     "event_type": "level_selected",
     "player_name": "Anonymous",
@@ -553,6 +566,50 @@
       "level": 2,
       "player_hp": 100,
       "enemy_hp": 100
+=======
+    "timestamp": 1763959319.275257,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 2,
+      "user_answer": "mars",
+      "correct_answer": "mars",
+      "is_correct": true,
+      "time_taken": 6.676263809204102,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763959329.680401,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 3,
+      "user_answer": "pacific",
+      "correct_answer": "pacific ocean",
+      "is_correct": true,
+      "time_taken": 10.403008937835693,
+      "similarity_score": 0.9,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763959524.5133343,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 5,
+      "user_answer": "au",
+      "correct_answer": "au",
+      "is_correct": true,
+      "time_taken": 18.245821475982666,
+      "similarity_score": 1.0,
+      "level": 1
+>>>>>>> 42ed61fd36dcd02b29dd2edb9ff55f1e45cd65bd
     }
   }
 ]

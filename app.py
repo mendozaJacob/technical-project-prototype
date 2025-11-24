@@ -2220,11 +2220,18 @@ def endless_game():
             return redirect(url_for('endless_result'))
         
         session['endless_question_start'] = time.time()
+        # Select a different question (not the same one)
+        current_q_id = question.get('id')
         endless_questions = get_questions_for_pool('endless_mode')
-        if endless_questions:
-            session['endless_current_question'] = random.choice(endless_questions)
+        if not endless_questions:
+            endless_questions = questions
+        # Filter out the current question to ensure a new one
+        available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+        if available_questions:
+            session['endless_current_question'] = random.choice(available_questions)
         else:
-            session['endless_current_question'] = random.choice(questions)
+            # Fallback if only one question exists
+            session['endless_current_question'] = random.choice(endless_questions)
         return redirect(url_for('endless_game'))
     
     # Handle answer submission
@@ -2287,11 +2294,18 @@ def endless_game():
                 session['endless_streak'] = 0
                 session['endless_wrong'] = session.get('endless_wrong', 0) + 1
             session['endless_question_start'] = time.time()
+            # Select a different question (not the same one)
+            current_q_id = question.get('id')
             endless_questions = get_questions_for_pool('endless_mode')
-            if endless_questions:
-                session['endless_current_question'] = random.choice(endless_questions)
+            if not endless_questions:
+                endless_questions = questions
+            # Filter out the current question to ensure a new one
+            available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+            if available_questions:
+                session['endless_current_question'] = random.choice(available_questions)
             else:
-                session['endless_current_question'] = random.choice(questions)
+                # Fallback if only one question exists
+                session['endless_current_question'] = random.choice(endless_questions)
             return redirect(url_for('endless_game'))
         except Exception as e:
             print(f"[ERROR] Endless mode POST error: {str(e)}")

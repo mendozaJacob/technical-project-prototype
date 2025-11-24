@@ -1325,6 +1325,24 @@ def game():
             # Use fuzzy matching for answer checking
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
             
+            # If student and AI grading is enabled, use AI as fallback for uncertain answers
+            if session.get('is_student') and session.get('ai_grading_enabled', False):
+                # Use AI grading for short answers with low confidence (< 0.9)
+                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
+                    try:
+                        ai_result = grade_answer_with_ai(
+                            question=question.get('q', ''),
+                            correct_answer=correct_answer,
+                            student_answer=user_answer,
+                            confidence_threshold=75
+                        )
+                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
+                            is_correct = True
+                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
+                            similarity_score = ai_result.get('confidence', 0) / 100.0
+                    except Exception as e:
+                        print(f"AI grading error: {e}")
+            
             # Log student answer in real-time
             if 'student_id' in session:
                 log_student_answer(
@@ -1973,6 +1991,24 @@ def test_yourself():
             # Use fuzzy matching for test mode
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
             
+            # If student and AI grading is enabled, use AI as fallback for uncertain answers
+            if session.get('is_student') and session.get('ai_grading_enabled', False):
+                # Use AI grading for short answers with low confidence (< 0.9)
+                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
+                    try:
+                        ai_result = grade_answer_with_ai(
+                            question=question.get('q', ''),
+                            correct_answer=correct_answer,
+                            student_answer=user_answer,
+                            confidence_threshold=75
+                        )
+                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
+                            is_correct = True
+                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
+                            similarity_score = ai_result.get('confidence', 0) / 100.0
+                    except Exception as e:
+                        print(f"AI grading error: {e}")
+            
             # Log student answer in real-time
             if 'student_id' in session:
                 log_student_answer(
@@ -2281,6 +2317,24 @@ def endless_game():
                 keywords = [str(k).strip().lower() for k in raw_keywords]
             # Use fuzzy matching for endless mode
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            # If student and AI grading is enabled, use AI as fallback for uncertain answers
+            if session.get('is_student') and session.get('ai_grading_enabled', False):
+                # Use AI grading for short answers with low confidence (< 0.9)
+                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
+                    try:
+                        ai_result = grade_answer_with_ai(
+                            question=question.get('q', ''),
+                            correct_answer=correct_answer,
+                            student_answer=user_answer,
+                            confidence_threshold=75
+                        )
+                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
+                            is_correct = True
+                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
+                            similarity_score = ai_result.get('confidence', 0) / 100.0
+                    except Exception as e:
+                        print(f"AI grading error: {e}")
             
             # Log student answer in real-time
             if 'student_id' in session:
@@ -2758,6 +2812,8 @@ def teacher_update_ai_config():
 @app.route('/teacher/test-ai-grading', methods=['POST'])
 @teacher_required
 def teacher_test_ai_grading():
+    # This route is for teachers only to test AI grading functionality
+    # Student AI grading happens automatically during gameplay when enabled
     question = request.form.get('test_question')
     correct_answer = request.form.get('correct_answer')
     student_answer = request.form.get('student_answer')

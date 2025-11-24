@@ -971,13 +971,9 @@ def select_level():
                 session['redirect_after_character'] = 'game'
                 return redirect(url_for('choose_character'))
         else:
-            # Non-student user (guest) - check if they already have a character
-            if session.get('character'):
-                # Guest already has a character, go directly to game
-                return redirect(url_for('game'))
-            else:
-                # Guest needs to choose a character first
-                return redirect(url_for('choose_character'))
+            # Non-student user (guest) - always let them choose/change character for each new game
+            session['redirect_after_character'] = 'game'
+            return redirect(url_for('choose_character'))
 
     # Pass unlocked info to template (GET request)
     return render_template('select_level.html', levels=levels, highest_unlocked=highest_unlocked)

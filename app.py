@@ -1926,44 +1926,53 @@ def test_yourself():
 
     correct_count = session.get('test_correct', 0)
     if request.method == 'POST':
-        user_answer = request.form.get('answer', '').strip().lower()
-        correct_answer = question.get('answer', '').strip().lower()
-        # Normalize keywords
-        raw_keywords = question.get('keywords', [])
-        if isinstance(raw_keywords, str):
-            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-        else:
-            keywords = [str(k).strip().lower() for k in raw_keywords]
-        # Use fuzzy matching for test mode
-        is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-        
-        # Log student answer in real-time
-        if 'student_id' in session:
-            log_student_answer(
-                student_id=session['student_id'],
-                student_name=session.get('student_name', 'Unknown'),
-                question_id=question.get('id', 'unknown'),
-                question_text=question.get('q', ''),
-                student_answer=user_answer,
-                correct_answer=correct_answer,
-                is_correct=is_correct,
-                game_mode='test_yourself'
-            )
-        
-        session['test_user_answers'].append({
-            'question': question.get('q', ''),
-            'user_answer': user_answer,
-            'correct_answer': correct_answer,
-            'correct': is_correct,
-            'feedback': question.get('feedback', 'No additional information available.'),
-            'match_type': feedback_type,
-            'similarity': similarity_score
-        })
-        if is_correct:
-            session['test_correct'] = correct_count + 1
-        session['test_q_index'] = q_index + 1
-        print(f"[DEBUG] POST: test_q_index={session['test_q_index']}, test_questions={len(test_questions)}, test_user_answers={len(session['test_user_answers'])}")
-        return redirect(url_for('test_yourself'))
+        try:
+            user_answer = request.form.get('answer', '').strip().lower()
+            correct_answer = question.get('answer', '').strip().lower()
+            # Normalize keywords
+            raw_keywords = question.get('keywords', [])
+            if isinstance(raw_keywords, str):
+                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+            else:
+                keywords = [str(k).strip().lower() for k in raw_keywords]
+            # Use fuzzy matching for test mode
+            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            # Log student answer in real-time
+            if 'student_id' in session:
+                log_student_answer(
+                    student_id=session['student_id'],
+                    student_name=session.get('student_name', 'Unknown'),
+                    question_id=question.get('id', 'unknown'),
+                    question_text=question.get('q', ''),
+                    student_answer=user_answer,
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                    game_mode='test_yourself'
+                )
+            
+            session['test_user_answers'].append({
+                'question': question.get('q', ''),
+                'user_answer': user_answer,
+                'correct_answer': correct_answer,
+                'correct': is_correct,
+                'feedback': question.get('feedback', 'No additional information available.'),
+                'match_type': feedback_type,
+                'similarity': similarity_score
+            })
+            # Limit to last 50 entries to prevent session overflow
+            if len(session['test_user_answers']) > 50:
+                session['test_user_answers'] = session['test_user_answers'][-50:]
+            if is_correct:
+                session['test_correct'] = correct_count + 1
+            session['test_q_index'] = q_index + 1
+            print(f"[DEBUG] POST: test_q_index={session['test_q_index']}, test_questions={len(test_questions)}, test_user_answers={len(session['test_user_answers'])}")
+            return redirect(url_for('test_yourself'))
+        except Exception as e:
+            print(f"[ERROR] Test yourself mode POST error: {str(e)}")
+            # Force game over on error to prevent crash
+            session['test_q_index'] = 40
+            return redirect(url_for('test_yourself_result'))
 
     return render_template('test_yourself.html',
                           question=question,
@@ -2220,66 +2229,75 @@ def endless_game():
     
     # Handle answer submission
     if request.method == 'POST':
-        user_answer = request.form.get('answer', '').strip().lower()
-        correct_answer = question.get('answer', '').strip().lower()
-        raw_keywords = question.get('keywords', [])
-        if isinstance(raw_keywords, str):
-            keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-        else:
-            keywords = [str(k).strip().lower() for k in raw_keywords]
-        # Use fuzzy matching for endless mode
-        is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-        
-        # Log student answer in real-time
-        if 'student_id' in session:
-            log_student_answer(
-                student_id=session['student_id'],
-                student_name=session.get('student_name', 'Unknown'),
-                question_id=question.get('id', 'unknown'),
-                question_text=question.get('q', ''),
-                student_answer=user_answer,
-                correct_answer=correct_answer,
-                is_correct=is_correct,
-                game_mode='endless'
-            )
-        
-        # Store feedback for this question
-        question_feedback = question.get('feedback', 'No additional information available.')
-        if 'endless_feedback_list' not in session:
-            session['endless_feedback_list'] = []
-        
-        feedback_entry = {
-            'question': question.get('q', ''),
-            'user_answer': user_answer,
-            'correct_answer': correct_answer,
-            'correct': is_correct,
-            'feedback': question_feedback,
-            'match_type': feedback_type,
-            'similarity': similarity_score
-        }
-        session['endless_feedback_list'].append(feedback_entry)
-        
-        session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
-        if is_correct:
-            session['endless_score'] = session.get('endless_score', 0) + 10
-            session['endless_streak'] = session.get('endless_streak', 0) + 1
-            session['endless_correct'] = session.get('endless_correct', 0) + 1
-            if session['endless_streak'] > session.get('endless_highest_streak', 0):
-                session['endless_highest_streak'] = session['endless_streak']
-            # HP regen after 5 correct in a row
-            if session['endless_streak'] % 5 == 0:
-                session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
-        else:
-            session['endless_hp'] = session.get('endless_hp', 100) - 10
-            session['endless_streak'] = 0
-            session['endless_wrong'] = session.get('endless_wrong', 0) + 1
-        session['endless_question_start'] = time.time()
-        endless_questions = get_questions_for_pool('endless_mode')
-        if endless_questions:
-            session['endless_current_question'] = random.choice(endless_questions)
-        else:
-            session['endless_current_question'] = random.choice(questions)
-        return redirect(url_for('endless_game'))
+        try:
+            user_answer = request.form.get('answer', '').strip().lower()
+            correct_answer = question.get('answer', '').strip().lower()
+            raw_keywords = question.get('keywords', [])
+            if isinstance(raw_keywords, str):
+                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
+            else:
+                keywords = [str(k).strip().lower() for k in raw_keywords]
+            # Use fuzzy matching for endless mode
+            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
+            
+            # Log student answer in real-time
+            if 'student_id' in session:
+                log_student_answer(
+                    student_id=session['student_id'],
+                    student_name=session.get('student_name', 'Unknown'),
+                    question_id=question.get('id', 'unknown'),
+                    question_text=question.get('q', ''),
+                    student_answer=user_answer,
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                    game_mode='endless'
+                )
+            
+            # Store feedback for this question
+            question_feedback = question.get('feedback', 'No additional information available.')
+            if 'endless_feedback_list' not in session:
+                session['endless_feedback_list'] = []
+            
+            feedback_entry = {
+                'question': question.get('q', ''),
+                'user_answer': user_answer,
+                'correct_answer': correct_answer,
+                'correct': is_correct,
+                'feedback': question_feedback,
+                'match_type': feedback_type,
+                'similarity': similarity_score
+            }
+            session['endless_feedback_list'].append(feedback_entry)
+            # Limit to last 50 entries to prevent session overflow
+            if len(session['endless_feedback_list']) > 50:
+                session['endless_feedback_list'] = session['endless_feedback_list'][-50:]
+            
+            session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
+            if is_correct:
+                session['endless_score'] = session.get('endless_score', 0) + 10
+                session['endless_streak'] = session.get('endless_streak', 0) + 1
+                session['endless_correct'] = session.get('endless_correct', 0) + 1
+                if session['endless_streak'] > session.get('endless_highest_streak', 0):
+                    session['endless_highest_streak'] = session['endless_streak']
+                # HP regen after 5 correct in a row
+                if session['endless_streak'] % 5 == 0:
+                    session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
+            else:
+                session['endless_hp'] = session.get('endless_hp', 100) - 10
+                session['endless_streak'] = 0
+                session['endless_wrong'] = session.get('endless_wrong', 0) + 1
+            session['endless_question_start'] = time.time()
+            endless_questions = get_questions_for_pool('endless_mode')
+            if endless_questions:
+                session['endless_current_question'] = random.choice(endless_questions)
+            else:
+                session['endless_current_question'] = random.choice(questions)
+            return redirect(url_for('endless_game'))
+        except Exception as e:
+            print(f"[ERROR] Endless mode POST error: {str(e)}")
+            # Force game over on error to prevent crash
+            session['endless_hp'] = 0
+            return redirect(url_for('endless_result'))
     
     return render_template('endless.html',
                           question=question,

@@ -54,6 +54,132 @@ BASE_DAMAGE = initial_settings.get('base_damage', 10)
 BASE_ENEMY_HP = initial_settings.get('base_enemy_hp', 50)
 LEVEL_TIME_LIMIT = initial_settings.get('question_time_limit', 30)
 
+# Function to generate dynamic enemy taunts based on question
+def generate_enemy_taunt(question, enemy_name):
+    """Generate a dynamic taunt based on the question content"""
+    question_text = question.get('q', '').lower()
+    keywords = question.get('keywords', [])
+    
+    # Extract key topics from question
+    if isinstance(keywords, str):
+        keywords = [k.strip().lower() for k in keywords.split(',')]
+    else:
+        keywords = [str(k).strip().lower() for k in keywords]
+    
+    # Topic-based taunts
+    taunt_templates = {
+        'ls': [
+            "Can you even list a directory?",
+            "Let's see if you know what 'ls' does!",
+            "Basic commands? This should be easy... or not!"
+        ],
+        'cd': [
+            "Lost in the filesystem already?",
+            "Can you navigate directories?",
+            "Where do you think you're going?"
+        ],
+        'chmod': [
+            "Permissions confuse you, don't they?",
+            "Can you handle file permissions?",
+            "Let's test your permission knowledge!"
+        ],
+        'systemctl': [
+            "Service management is my domain!",
+            "Can you control system services?",
+            "Let's see your systemctl skills!"
+        ],
+        'firewall': [
+            "Your firewall knowledge is weak!",
+            "Can you protect this system?",
+            "Let's test your security skills!"
+        ],
+        'user': [
+            "User management is tricky, isn't it?",
+            "Can you handle users and groups?",
+            "Let's see if you can manage users!"
+        ],
+        'network': [
+            "Networking will be your downfall!",
+            "Can you configure network settings?",
+            "Let's test your network knowledge!"
+        ],
+        'mount': [
+            "Can you mount filesystems?",
+            "Storage management is complex!",
+            "Let's see your mounting skills!"
+        ],
+        'selinux': [
+            "SELinux is too advanced for you!",
+            "Can you handle security contexts?",
+            "Security-Enhanced Linux will defeat you!"
+        ],
+        'lvm': [
+            "Logical volumes will confuse you!",
+            "Can you manage LVM?",
+            "Storage management is my specialty!"
+        ],
+        'cron': [
+            "Can you schedule tasks?",
+            "Time-based jobs are tricky!",
+            "Let's test your automation skills!"
+        ],
+        'package': [
+            "Package management is complex!",
+            "Can you install software?",
+            "Let's see your package skills!"
+        ],
+        'grep': [
+            "Can you search through text?",
+            "Let's test your pattern matching!",
+            "Grep will be your challenge!"
+        ],
+        'find': [
+            "Can you find files?",
+            "Let's see your search skills!",
+            "File searching will defeat you!"
+        ],
+        'tar': [
+            "Archiving is too complex for you!",
+            "Can you handle tar archives?",
+            "Let's test your compression knowledge!"
+        ],
+        'dns': [
+            "DNS will confuse you!",
+            "Can you resolve hostnames?",
+            "Let's test your name resolution skills!"
+        ],
+        'boot': [
+            "Boot processes are tricky!",
+            "Can you fix boot issues?",
+            "System startup will challenge you!"
+        ]
+    }
+    
+    # Find matching topic
+    for keyword in keywords:
+        for topic, taunts in taunt_templates.items():
+            if topic in keyword or topic in question_text:
+                import random
+                return random.choice(taunts)
+    
+    # Check question text for topics
+    for topic, taunts in taunt_templates.items():
+        if topic in question_text:
+            import random
+            return random.choice(taunts)
+    
+    # Generic taunts based on enemy name
+    generic_taunts = [
+        f"{enemy_name} challenges your knowledge!",
+        "This question will test your skills!",
+        "Can you answer this correctly?",
+        "Let's see what you know!",
+        "Prove your expertise!"
+    ]
+    
+    import random
+    return random.choice(generic_taunts)
+
 # Define the schema for the Whoosh search index
 schema = Schema(
     id=ID(stored=True, unique=True),
@@ -1445,6 +1571,9 @@ def game():
     # Get current settings for display options
     settings = get_current_game_settings()
     
+    # Generate dynamic taunt based on the current question
+    enemy_taunt = generate_enemy_taunt(question, enemy.get('name', 'Unknown Enemy'))
+    
     return render_template('game.html',
                            question=question,
                            score=session['score'],
@@ -1456,6 +1585,7 @@ def game():
                            level=current_level,
                            enemy=enemy,
                            enemy_image=enemy_image,
+                           enemy_taunt=enemy_taunt,
                            time_left=time_left,
                            settings=settings)
 

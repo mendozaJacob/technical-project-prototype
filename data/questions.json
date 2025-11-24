@@ -132,7 +132,10 @@
     "answer": "Pound Sterling",
     "keywords": [
       "British Pound",
-      "GBP"
+      "GBP", 
+      "Pound",
+      "Sterling",
+      
     ],
     "feedback": "The Pound Sterling, often called the British Pound, is the official currency of the UK."
   },
@@ -184,11 +187,12 @@
   },
   {
     "id": 21,
-    "q": "What is the speed of light in a vacuum?",
+    "q": "What is the speed of light in a vacuum in meters per second?",
     "answer": "299,792,458 meters per second",
     "keywords": [
       "3 x 10^8 m/s",
-      "186,282 miles per second"
+      "186,282 miles per second",
+      "299,792,458"
     ],
     "feedback": "The speed of light in a vacuum is approximately 299,792,458 meters per second, a fundamental constant in physics."
   },

@@ -518,12 +518,12 @@ def check_answer_fuzzy(user_answer, question_data, similarity_threshold=0.8):
         # 1. Check for partial matches (substring)
         if len(user_answer) > 3:  # Only for longer answers
             if user_answer in correct_answer or correct_answer in user_answer:
-                return True, "Partial match!", 0.9
+                return True, "Partial match!", 0.8
             
             # Check partial matches with keywords
             for keyword in keywords:
                 if user_answer in keyword or keyword in user_answer:
-                    return True, f"Partial match with '{keyword}'!", 0.9
+                    return True, f"Partial match with '{keyword}'!", 0.8
         
         # 2. Fuzzy matching with correct answer
         correct_similarity = difflib.SequenceMatcher(None, user_answer, correct_answer).ratio()

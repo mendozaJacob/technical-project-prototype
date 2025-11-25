@@ -1065,17 +1065,14 @@ def select_level():
                     novice_idx = 0
                 session['enemy_index'] = int(novice_idx)
             else:
-                # Keep current enemy progression when selecting different levels
-                # But ensure enemy index corresponds roughly to the selected level
+                # Set enemy to match the selected level
                 try:
                     with open('data/enemies.json', encoding='utf-8') as ef:
                         enemies_list = json.load(ef)
                     
-                    # Try to find an enemy that matches the selected level
+                    # Set enemy index to match the selected level
                     level_based_index = min(selected_level - 1, len(enemies_list) - 1)
-                    
-                    # Use the higher of current progression or level-based index
-                    session['enemy_index'] = max(current_enemy_index, level_based_index)
+                    session['enemy_index'] = level_based_index
                 except Exception:
                     # Keep current enemy index if file can't be read
                     pass

@@ -2595,7 +2595,15 @@ def endless_game():
         
         session['endless_current_question'] = new_question
         
-        # Update session with history (already includes current question)
+        # Add newly selected question to history to prevent immediate repetition
+        new_q_id = new_question.get('id')
+        if new_q_id and new_q_id not in recent_q_ids:
+            recent_q_ids.append(new_q_id)
+            # Keep only last 30
+            if len(recent_q_ids) > 30:
+                recent_q_ids = recent_q_ids[-30:]
+        
+        # Update session with updated history
         session['endless_recent_questions'] = recent_q_ids
         
         return redirect(url_for('endless_game'))
@@ -2720,8 +2728,18 @@ def endless_game():
             
             session['endless_current_question'] = new_question
             
-            # Update session with history (already includes current question)
+            # Add newly selected question to history to prevent immediate repetition
+            new_q_id = new_question.get('id')
+            if new_q_id and new_q_id not in recent_q_ids:
+                recent_q_ids.append(new_q_id)
+                # Keep only last 30
+                if len(recent_q_ids) > 30:
+                    recent_q_ids = recent_q_ids[-30:]
+            
+            # Update session with updated history
             session['endless_recent_questions'] = recent_q_ids
+            
+            print(f"[DEBUG] Updated history length: {len(recent_q_ids)}")
             
             return redirect(url_for('endless_game'))
         except Exception as e:

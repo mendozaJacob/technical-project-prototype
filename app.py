@@ -2458,14 +2458,19 @@ def endless_start():
     session['endless_wrong'] = 0
     session['endless_start_time'] = time.time()
     session['endless_question_start'] = time.time()
+    session['endless_recent_questions'] = []  # Track recent questions to avoid repetition
     
     # Use questions from endless mode pool
     endless_questions = get_questions_for_pool('endless_mode')
     if endless_questions:
-        session['endless_current_question'] = random.choice(endless_questions)
+        selected_question = random.choice(endless_questions)
+        session['endless_current_question'] = selected_question
+        session['endless_recent_questions'] = [selected_question.get('id')]
     elif questions:
         # Fallback to all questions if pool is empty
-        session['endless_current_question'] = random.choice(questions)
+        selected_question = random.choice(questions)
+        session['endless_current_question'] = selected_question
+        session['endless_recent_questions'] = [selected_question.get('id')]
     else:
         flash('No questions available. Please contact your teacher to add questions.', 'error')
         return redirect(url_for('index'))
@@ -2545,8 +2550,7 @@ def endless_game():
             return redirect(url_for('endless_result'))
         
         session['endless_question_start'] = time.time()
-        # Select a different question (not the same one)
-        current_q_id = question.get('id')
+        # Select a different question avoiding recent ones
         endless_questions = get_questions_for_pool('endless_mode')
         if not endless_questions:
             endless_questions = questions
@@ -2555,13 +2559,29 @@ def endless_game():
             flash('No questions available. Game cannot continue.', 'error')
             return redirect(url_for('endless_result'))
         
-        # Filter out the current question to ensure a new one
-        available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+        # Get recent questions to avoid (last 20)
+        recent_q_ids = session.get('endless_recent_questions', [])
+        
+        # Filter out recently asked questions
+        available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+        
+        # If we've exhausted all questions, reset the recent list but keep the last 5
+        if not available_questions:
+            session['endless_recent_questions'] = recent_q_ids[-5:] if len(recent_q_ids) > 5 else []
+            available_questions = [q for q in endless_questions if q.get('id') not in session['endless_recent_questions']]
+        
+        # Select new question
         if available_questions:
-            session['endless_current_question'] = random.choice(available_questions)
+            new_question = random.choice(available_questions)
         else:
-            # Fallback if only one question exists
-            session['endless_current_question'] = random.choice(endless_questions)
+            new_question = random.choice(endless_questions)
+        
+        session['endless_current_question'] = new_question
+        
+        # Add to recent questions list (keep last 20)
+        recent_q_ids.append(new_question.get('id'))
+        session['endless_recent_questions'] = recent_q_ids[-20:]
+        
         return redirect(url_for('endless_game'))
     
     # Handle answer submission
@@ -2642,18 +2662,34 @@ def endless_game():
                 session['endless_streak'] = 0
                 session['endless_wrong'] = session.get('endless_wrong', 0) + 1
             session['endless_question_start'] = time.time()
-            # Select a different question (not the same one)
-            current_q_id = question.get('id')
+            # Select a different question avoiding recent ones
             endless_questions = get_questions_for_pool('endless_mode')
             if not endless_questions:
                 endless_questions = questions
-            # Filter out the current question to ensure a new one
-            available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+            
+            # Get recent questions to avoid (last 20)
+            recent_q_ids = session.get('endless_recent_questions', [])
+            
+            # Filter out recently asked questions
+            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+            
+            # If we've exhausted all questions, reset the recent list but keep the last 5
+            if not available_questions:
+                session['endless_recent_questions'] = recent_q_ids[-5:] if len(recent_q_ids) > 5 else []
+                available_questions = [q for q in endless_questions if q.get('id') not in session['endless_recent_questions']]
+            
+            # Select new question
             if available_questions:
-                session['endless_current_question'] = random.choice(available_questions)
+                new_question = random.choice(available_questions)
             else:
-                # Fallback if only one question exists
-                session['endless_current_question'] = random.choice(endless_questions)
+                new_question = random.choice(endless_questions)
+            
+            session['endless_current_question'] = new_question
+            
+            # Add to recent questions list (keep last 20)
+            recent_q_ids.append(new_question.get('id'))
+            session['endless_recent_questions'] = recent_q_ids[-20:]
+            
             return redirect(url_for('endless_game'))
         except Exception as e:
             print(f"[ERROR] Endless mode POST error: {str(e)}")

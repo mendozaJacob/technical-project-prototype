@@ -1065,17 +1065,14 @@ def select_level():
                     novice_idx = 0
                 session['enemy_index'] = int(novice_idx)
             else:
-                # Keep current enemy progression when selecting different levels
-                # But ensure enemy index corresponds roughly to the selected level
+                # Set enemy to match the selected level
                 try:
                     with open('data/enemies.json', encoding='utf-8') as ef:
                         enemies_list = json.load(ef)
                     
-                    # Try to find an enemy that matches the selected level
+                    # Set enemy index to match the selected level
                     level_based_index = min(selected_level - 1, len(enemies_list) - 1)
-                    
-                    # Use the higher of current progression or level-based index
-                    session['enemy_index'] = max(current_enemy_index, level_based_index)
+                    session['enemy_index'] = level_based_index
                 except Exception:
                     # Keep current enemy index if file can't be read
                     pass
@@ -1354,9 +1351,13 @@ def game():
 
     # Attach enemy_image into the template context
 
-    # Initialize the timer for the current question
-    if "level_start_time" not in session:
+    # Initialize or reset the timer for the current question
+    # Always reset timer on GET request (when returning from feedback)
+    if request.method == 'GET' or "level_start_time" not in session:
         session["level_start_time"] = time.time()
+        # Initialize current_timer if not set
+        if "current_timer" not in session:
+            session["current_timer"] = settings.get('question_time_limit', 30)
 
     # Calculate remaining time
     settings = get_current_game_settings()
@@ -2139,22 +2140,44 @@ def test_yourself():
         flash('No questions available. Please contact your teacher.', 'error')
         return redirect(url_for('index'))
     
-    id_to_question = {q['id']: q for q in questions}
-    test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
+    try:
+        id_to_question = {q['id']: q for q in questions}
+        test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
+    except Exception as e:
+        print(f"[ERROR] Failed to rebuild test_questions: {e}")
+        session['test_q_index'] = 40
+        return redirect(url_for('test_yourself_result'))
     
-    if not test_questions or q_index >= 40 or total_seconds_left <= 0:
+    # Check if we've reached the end or time is up
+    if not test_questions or q_index >= len(test_questions) or q_index >= 40 or total_seconds_left <= 0:
         print(f"[DEBUG] REDIRECT TO RESULT: test_q_index={q_index}, test_questions={len(test_questions)}, total_seconds_left={total_seconds_left}, test_user_answers={len(session.get('test_user_answers', []))}")
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
 
     # Skip invalid questions
-    while q_index < len(test_questions) and not test_questions[q_index].get('q'):
-        q_index += 1
-        session['test_q_index'] = q_index
-    if q_index >= len(test_questions):
+    while q_index < len(test_questions) and q_index < 40:
+        try:
+            if test_questions[q_index].get('q') and str(test_questions[q_index].get('q')).strip():
+                break
+            q_index += 1
+            session['test_q_index'] = q_index
+        except (IndexError, KeyError):
+            q_index += 1
+            session['test_q_index'] = q_index
+    
+    if q_index >= len(test_questions) or q_index >= 40:
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
-    question = test_questions[q_index]
+    
+    # Safety check for question existence
+    try:
+        question = test_questions[q_index]
+        if not question or not question.get('q') or not str(question.get('q')).strip():
+            raise IndexError("Invalid question")
+    except (IndexError, KeyError) as e:
+        print(f"[ERROR] Question access error at index {q_index}: {e}")
+        session['test_q_index'] = 40
+        return redirect(url_for('test_yourself_result'))
 
     correct_count = session.get('test_correct', 0)
     if request.method == 'POST':
@@ -2202,17 +2225,17 @@ def test_yourself():
                 )
             
             session['test_user_answers'].append({
-                'question': question.get('q', ''),
-                'user_answer': user_answer,
-                'correct_answer': correct_answer,
+                'question': question.get('q', '')[:200],  # Truncate long questions
+                'user_answer': user_answer[:200],  # Truncate long answers
+                'correct_answer': correct_answer[:200],
                 'correct': is_correct,
-                'feedback': question.get('feedback', 'No additional information available.'),
-                'match_type': feedback_type,
+                'feedback': question.get('feedback', 'No additional information available.')[:300],
+                'match_type': feedback_type[:100] if isinstance(feedback_type, str) else str(feedback_type)[:100],
                 'similarity': similarity_score
             })
-            # Limit to last 50 entries to prevent session overflow
-            if len(session['test_user_answers']) > 50:
-                session['test_user_answers'] = session['test_user_answers'][-50:]
+            # Limit to last 40 entries to prevent session overflow
+            if len(session['test_user_answers']) > 40:
+                session['test_user_answers'] = session['test_user_answers'][-40:]
             if is_correct:
                 session['test_correct'] = correct_count + 1
             session['test_q_index'] = q_index + 1
@@ -2455,7 +2478,26 @@ def endless_game():
         else:
             flash('No questions available. Please contact your teacher.', 'error')
             return redirect(url_for('index'))
-    question = session['endless_current_question']
+    
+    # Safety check for question
+    try:
+        question = session.get('endless_current_question')
+        if not question or not isinstance(question, dict) or not question.get('q'):
+            # Reset and get new question
+            endless_questions = get_questions_for_pool('endless_mode')
+            if not endless_questions:
+                endless_questions = questions
+            if endless_questions:
+                question = random.choice(endless_questions)
+                session['endless_current_question'] = question
+            else:
+                flash('No questions available. Game cannot continue.', 'error')
+                return redirect(url_for('endless_result'))
+    except Exception as e:
+        print(f"[ERROR] Endless question error: {e}")
+        flash('An error occurred. Ending game.', 'error')
+        session['endless_hp'] = 0
+        return redirect(url_for('endless_result'))
     
     # Get session variables
     streak = session.get('endless_streak', 0)

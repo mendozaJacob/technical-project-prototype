@@ -2559,16 +2559,21 @@ def endless_game():
             flash('No questions available. Game cannot continue.', 'error')
             return redirect(url_for('endless_result'))
         
-        # Get recent questions to avoid (last 30)
-        recent_q_ids = session.get('endless_recent_questions', [])
+        # Get recent questions to avoid (last 30) - make a copy to avoid reference issues
+        recent_q_ids = list(session.get('endless_recent_questions', []))
+        
+        # Add current question to history before selecting new one
+        current_q_id = question.get('id')
+        if current_q_id not in recent_q_ids:
+            recent_q_ids.append(current_q_id)
         
         # Filter out recently asked questions
         available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
         
         # If we've exhausted all questions, reset the recent list but keep the last 10
         if not available_questions:
-            session['endless_recent_questions'] = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
-            available_questions = [q for q in endless_questions if q.get('id') not in session['endless_recent_questions']]
+            recent_q_ids = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
+            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
         
         # Select new question
         if available_questions:
@@ -2578,7 +2583,7 @@ def endless_game():
         
         session['endless_current_question'] = new_question
         
-        # Add to recent questions list (keep last 30)
+        # Add new question to recent list and update session (keep last 30)
         recent_q_ids.append(new_question.get('id'))
         session['endless_recent_questions'] = recent_q_ids[-30:]
         
@@ -2667,16 +2672,21 @@ def endless_game():
             if not endless_questions:
                 endless_questions = questions
             
-            # Get recent questions to avoid (last 30)
-            recent_q_ids = session.get('endless_recent_questions', [])
+            # Get recent questions to avoid (last 30) - make a copy to avoid reference issues
+            recent_q_ids = list(session.get('endless_recent_questions', []))
+            
+            # Add current question to history before selecting new one
+            current_q_id = question.get('id')
+            if current_q_id not in recent_q_ids:
+                recent_q_ids.append(current_q_id)
             
             # Filter out recently asked questions
             available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
             
             # If we've exhausted all questions, reset the recent list but keep the last 10
             if not available_questions:
-                session['endless_recent_questions'] = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
-                available_questions = [q for q in endless_questions if q.get('id') not in session['endless_recent_questions']]
+                recent_q_ids = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
+                available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
             
             # Select new question
             if available_questions:
@@ -2686,7 +2696,7 @@ def endless_game():
             
             session['endless_current_question'] = new_question
             
-            # Add to recent questions list (keep last 30)
+            # Add new question to recent list and update session (keep last 30)
             recent_q_ids.append(new_question.get('id'))
             session['endless_recent_questions'] = recent_q_ids[-30:]
             

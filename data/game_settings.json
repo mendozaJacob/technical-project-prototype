@@ -1,7 +1,7 @@
 {
   "base_player_hp": 100,
   "base_enemy_hp": 100,
-  "base_damage": 5,
+  "base_damage": 7,
   "question_time_limit": 60,
   "questions_per_level": 10,
   "points_correct": 10,

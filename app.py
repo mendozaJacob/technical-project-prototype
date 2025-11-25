@@ -1354,9 +1354,13 @@ def game():
 
     # Attach enemy_image into the template context
 
-    # Initialize the timer for the current question
-    if "level_start_time" not in session:
+    # Initialize or reset the timer for the current question
+    # Always reset timer on GET request (when returning from feedback)
+    if request.method == 'GET' or "level_start_time" not in session:
         session["level_start_time"] = time.time()
+        # Initialize current_timer if not set
+        if "current_timer" not in session:
+            session["current_timer"] = settings.get('question_time_limit', 30)
 
     # Calculate remaining time
     settings = get_current_game_settings()

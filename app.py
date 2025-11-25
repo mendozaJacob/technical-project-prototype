@@ -694,7 +694,7 @@ def normalize_true_false_answer(answer):
     return answer_lower
 
 # Helper function to save leaderboard data
-def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure"):
+def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure", level=None):
     # Save to student leaderboard if it's a logged-in student
     if session.get('is_student') and session.get('student_id'):
         # Get actual student name from students.json instead of relying on player_name
@@ -708,7 +708,7 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
         elif session.get('student_name'):
             player_name = session.get('student_name')
         
-        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
+        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}, level: {level}")
         
         record = {
             "player": player_name,
@@ -720,6 +720,10 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
             "game_mode": game_mode,
             "date": time.strftime("%Y-%m-%d %H:%M:%S")
         }
+        
+        # Add level for adventure mode
+        if game_mode == "adventure" and level is not None:
+            record["level"] = level
         
         try:
             with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
@@ -734,7 +738,7 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
     
     # Save to guest leaderboard if it's a guest player (not a student)
     else:
-        print(f"Saving guest leaderboard data: {player_name}, mode: {game_mode}")
+        print(f"Saving guest leaderboard data: {player_name}, mode: {game_mode}, level: {level}")
         
         record = {
             "player": player_name,
@@ -745,6 +749,10 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
             "game_mode": game_mode,
             "date": time.strftime("%Y-%m-%d %H:%M:%S")
         }
+        
+        # Add level for adventure mode
+        if game_mode == "adventure" and level is not None:
+            record["level"] = level
         
         try:
             with open(GUEST_LEADERBOARD_FILE, "r", encoding="utf-8") as f:
@@ -1623,7 +1631,8 @@ def result():
         total_time=total_time,
         correct_answers=session.get('correct_answers', 0),
         wrong_answers=session.get('wrong_answers', 0),
-        game_mode="adventure"
+        game_mode="adventure",
+        level=session.get('selected_level', 1)
     )
     
     # Save student progress if logged in
@@ -1820,7 +1829,15 @@ def leaderboard():
         sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
         return sorted_players[:limit]
     
+    # For adventure mode, create per-level leaderboards
+    adventure_levels = {}
+    for level_num in range(1, 11):  # Levels 1-10
+        level_data = [entry for entry in adventure_data if entry.get("level") == level_num]
+        adventure_levels[level_num] = get_best_scores(level_data, 10)  # Top 10 per level
+    
+    # Overall adventure leaderboard (all levels combined)
     adventure_leaderboard = get_best_scores(adventure_data, 50)
+    
     test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
     endless_leaderboard = get_best_scores(endless_data, 50)
 
@@ -1829,6 +1846,7 @@ def leaderboard():
 
     return render_template("leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,
+                         adventure_levels=adventure_levels,
                          test_yourself_leaderboard=test_yourself_leaderboard,
                          endless_leaderboard=endless_leaderboard,
                          is_student=is_student)
@@ -1864,12 +1882,21 @@ def guest_leaderboard():
         sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
         return sorted_players[:limit]
     
+    # For adventure mode, create per-level leaderboards
+    adventure_levels = {}
+    for level_num in range(1, 11):  # Levels 1-10
+        level_data = [entry for entry in adventure_data if entry.get("level") == level_num]
+        adventure_levels[level_num] = get_best_scores(level_data, 10)  # Top 10 per level
+    
+    # Overall adventure leaderboard (all levels combined)
     adventure_leaderboard = get_best_scores(adventure_data, 50)
+    
     test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
     endless_leaderboard = get_best_scores(endless_data, 50)
 
     return render_template("guest_leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,
+                         adventure_levels=adventure_levels,
                          test_yourself_leaderboard=test_yourself_leaderboard,
                          endless_leaderboard=endless_leaderboard)
 

@@ -452,6 +452,33 @@
             // Enable submit button
             document.getElementById('tfSubmitButton').disabled = false;
         }
+        
+        // Add Enter key support for all question types
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                // Check if multiple choice question with selected answer
+                const submitButton = document.getElementById('submitButton');
+                if (submitButton && !submitButton.disabled) {
+                    submitButton.click();
+                    return;
+                }
+                
+                // Check if true/false question with selected answer
+                const tfSubmitButton = document.getElementById('tfSubmitButton');
+                if (tfSubmitButton && !tfSubmitButton.disabled) {
+                    tfSubmitButton.click();
+                    return;
+                }
+                
+                // For short answer, let the default form submission happen
+                const answerForm = document.getElementById('answerForm');
+                if (answerForm) {
+                    answerForm.submit();
+                }
+            }
+        });
 
         // Countdown logic to update the timer every second
         const countdown = setInterval(() => {

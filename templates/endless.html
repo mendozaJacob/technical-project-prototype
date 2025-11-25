@@ -174,6 +174,33 @@
         // Enable submit button
         document.getElementById('endlessTfSubmitButton').disabled = false;
     }
+    
+    // Add Enter key support for all question types
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            
+            // Check if multiple choice question with selected answer
+            const endlessSubmitButton = document.getElementById('endlessSubmitButton');
+            if (endlessSubmitButton && !endlessSubmitButton.disabled) {
+                endlessSubmitButton.click();
+                return;
+            }
+            
+            // Check if true/false question with selected answer
+            const endlessTfSubmitButton = document.getElementById('endlessTfSubmitButton');
+            if (endlessTfSubmitButton && !endlessTfSubmitButton.disabled) {
+                endlessTfSubmitButton.click();
+                return;
+            }
+            
+            // For short answer, submit the form
+            const form = document.querySelector('form');
+            if (form) {
+                form.submit();
+            }
+        }
+    });
 </script>
 </body>
 </html>

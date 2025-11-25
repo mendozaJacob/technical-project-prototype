@@ -2154,7 +2154,16 @@ def test_yourself():
     if q_index >= len(test_questions):
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
-    question = test_questions[q_index]
+    
+    # Safety check for question existence
+    try:
+        question = test_questions[q_index]
+        if not question or not question.get('q'):
+            raise IndexError("Invalid question")
+    except (IndexError, KeyError) as e:
+        print(f"[ERROR] Question access error: {e}")
+        session['test_q_index'] = 40
+        return redirect(url_for('test_yourself_result'))
 
     correct_count = session.get('test_correct', 0)
     if request.method == 'POST':
@@ -2455,7 +2464,26 @@ def endless_game():
         else:
             flash('No questions available. Please contact your teacher.', 'error')
             return redirect(url_for('index'))
-    question = session['endless_current_question']
+    
+    # Safety check for question
+    try:
+        question = session.get('endless_current_question')
+        if not question or not isinstance(question, dict) or not question.get('q'):
+            # Reset and get new question
+            endless_questions = get_questions_for_pool('endless_mode')
+            if not endless_questions:
+                endless_questions = questions
+            if endless_questions:
+                question = random.choice(endless_questions)
+                session['endless_current_question'] = question
+            else:
+                flash('No questions available. Game cannot continue.', 'error')
+                return redirect(url_for('endless_result'))
+    except Exception as e:
+        print(f"[ERROR] Endless question error: {e}")
+        flash('An error occurred. Ending game.', 'error')
+        session['endless_hp'] = 0
+        return redirect(url_for('endless_result'))
     
     # Get session variables
     streak = session.get('endless_streak', 0)

@@ -2187,6 +2187,10 @@ def test_yourself():
     try:
         id_to_question = {q['id']: q for q in questions}
         test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
+        
+        # Store only question count, not full IDs list to reduce session size
+        if 'test_total_questions' not in session:
+            session['test_total_questions'] = len(test_question_ids)
     except Exception as e:
         print(f"[ERROR] Failed to rebuild test_questions: {e}")
         session['test_q_index'] = 40
@@ -2271,15 +2275,15 @@ def test_yourself():
                 )
             
             session['test_user_answers'].append({
-                'question': question.get('q', '')[:200],  # Truncate long questions
-                'user_answer': user_answer[:200],  # Truncate long answers
-                'correct_answer': correct_answer[:200],
+                'question': question.get('q', '')[:150],  # Further truncate questions
+                'user_answer': user_answer[:100],  # Truncate user answers
+                'correct_answer': correct_answer[:100],  # Truncate correct answers
                 'correct': is_correct,
-                'feedback': question.get('feedback', 'No additional information available.')[:300],
-                'match_type': feedback_type[:100] if isinstance(feedback_type, str) else str(feedback_type)[:100],
-                'similarity': similarity_score
+                'feedback': question.get('feedback', '')[:150],  # Reduce feedback size
+                'match_type': feedback_type[:50] if isinstance(feedback_type, str) else str(feedback_type)[:50],
+                'similarity': round(similarity_score, 2) if similarity_score else 0
             })
-            # Limit to last 40 entries to prevent session overflow
+            # Keep only essential answers, limit to 40
             if len(session['test_user_answers']) > 40:
                 session['test_user_answers'] = session['test_user_answers'][-40:]
             if is_correct:
@@ -2320,8 +2324,8 @@ def test_yourself_result():
         flash('Test Yourself mode is currently disabled.', 'error')
         return redirect(url_for('index'))
     
-    # Use the question IDs to determine total
-    total = len(session.get('test_question_ids', []))
+    # Use stored total or question IDs length as fallback
+    total = session.get('test_total_questions', len(session.get('test_question_ids', [])))
     correct = session.get('test_correct', 0)
     percent = int((correct / total) * 100) if total else 0
     passed = percent >= 75

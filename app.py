@@ -2328,23 +2328,30 @@ def test_yourself_result():
     # Get user answers for review
     user_answers = session.get('test_user_answers', [])
     
-    # Save student progress and leaderboard if logged in
+    # Calculate time and score
+    test_start_time = session.get('test_start_time', time.time())
+    time_taken = time.time() - test_start_time
+    score = correct * 10  # Simple scoring system
+    
+    # Get player name (student name or guest name)
+    if session.get('is_student'):
+        player_name = session.get('student_name', 'Anonymous')
+    else:
+        player_name = session.get('player_name', 'Anonymous')
+    
+    # Save to leaderboard for ALL players (students and guests)
+    save_leaderboard(
+        player_name=player_name,
+        score=score,
+        total_time=time_taken,
+        correct_answers=correct,
+        wrong_answers=total - correct,
+        game_mode="test_yourself"
+    )
+    
+    # Save student progress if logged in as student
     if session.get('is_student') and session.get('student_id'):
         student_id = session.get('student_id')
-        test_start_time = session.get('test_start_time', time.time())
-        time_taken = time.time() - test_start_time
-        score = correct * 10  # Simple scoring system
-        
-        # Save to leaderboard
-        save_leaderboard(
-            player_name=session.get("player_name", "Anonymous"),
-            score=score,
-            total_time=time_taken,
-            correct_answers=correct,
-            wrong_answers=total - correct,
-            game_mode="test_yourself"
-        )
-        
         update_student_progress(
             student_id=student_id,
             game_type='test_yourself',
@@ -2833,13 +2840,21 @@ def endless_result():
     correct = session.get('endless_correct', 0)
     wrong = session.get('endless_wrong', 0)
     total_time = time.time() - session.get('endless_start_time', time.time())
-    player_name = session.get('player_name', None)
     feedback_list = session.get('endless_feedback_list', [])
     
+    # Get player name (student name or guest name)
+    if session.get('is_student'):
+        player_name = session.get('student_name', 'Anonymous')
+    else:
+        player_name = session.get('player_name', None)
+    
     if request.method == 'POST':
+        # If guest player submitting name for first time
         if not player_name:
             player_name = request.form.get('player_name', 'Anonymous')
             session['player_name'] = player_name
+        
+        # Save to leaderboard for all players
         save_leaderboard(player_name, score, total_time, correct, wrong, "endless")
         
         # Save student progress if logged in

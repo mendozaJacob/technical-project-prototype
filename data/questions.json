@@ -799,7 +799,7 @@
     "q": "Who wrote 'The Lord of the Rings'?",
     "answer": "J.R.R. Tolkien",
     "keywords": [
-      "J.R.R. Tolkien"
+      "J.R.R. Tolkien", "Tolkien"
     ],
     "feedback": "J.R.R. Tolkien wrote 'The Lord of the Rings' trilogy, a fantasy epic."
   },

@@ -2175,8 +2175,9 @@ def test_yourself():
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
     
-    # Check if we've reached the end or time is up
-    if not test_questions or q_index >= len(test_questions) or q_index >= 40 or total_seconds_left <= 0:
+    # Check if we've reached the end or time is up (40 questions = indices 0-39)
+    # Using > 39 instead of >= 40 to ensure question 40 (index 39) is displayed
+    if not test_questions or q_index > 39 or total_seconds_left <= 0:
         print(f"[DEBUG] REDIRECT TO RESULT: test_q_index={q_index}, test_questions={len(test_questions)}, total_seconds_left={total_seconds_left}, test_user_answers={len(session.get('test_user_answers', []))}")
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
@@ -2192,7 +2193,8 @@ def test_yourself():
             q_index += 1
             session['test_q_index'] = q_index
     
-    if q_index >= len(test_questions) or q_index >= 40:
+    # Final check after skipping invalid questions
+    if q_index > 39:
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
     

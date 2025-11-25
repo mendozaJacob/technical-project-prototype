@@ -153,36 +153,93 @@
         <!-- Adventure Mode Leaderboard -->
         <div id="adventure-leaderboard" class="leaderboard-section active">
             <h2 class="section-title">⚔️ Adventure Mode Top Players</h2>
-            {% if adventure_leaderboard %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Score</th>
-                            <th>Time (s)</th>
-                            <th>Correct</th>
-                            <th>Wrong</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for record in adventure_leaderboard %}
-                        <tr>
-                            <td class="rank rank-{{ loop.index if loop.index <= 3 else '' }}">{{ loop.index }}</td>
-                            <td>{{ record.player }}</td>
-                            <td><strong>{{ record.score }}</strong></td>
-                            <td>{{ record.time }}</td>
-                            <td>{{ record.correct_answers }}</td>
-                            <td>{{ record.wrong_answers }}</td>
-                            <td>{{ record.date[:10] if record.date else 'N/A' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="no-data">No guest adventure scores yet. Play as a guest to appear on this leaderboard!</div>
-            {% endif %}
+            
+            <!-- Level-specific leaderboards -->
+            <div style="margin-bottom: 40px;">
+                <h3 style="text-align: center; color: #4b2e05; margin-bottom: 20px;">📊 Per-Level Leaderboards</h3>
+                <div class="leaderboard-tabs" style="margin-bottom: 20px;">
+                    {% for level in range(1, 11) %}
+                    <button class="tab-button {% if level == 1 %}active{% endif %}" 
+                            onclick="showLevelLeaderboard({{ level }})">
+                        Level {{ level }}
+                    </button>
+                    {% endfor %}
+                    <button class="tab-button" onclick="showLevelLeaderboard('overall')">
+                        Overall
+                    </button>
+                </div>
+                
+                {% for level in range(1, 11) %}
+                <div id="level-{{ level }}-leaderboard" class="level-leaderboard" style="{% if level != 1 %}display: none;{% endif %}">
+                    <h4 style="text-align: center; color: #6d4106; margin-bottom: 15px;">Level {{ level }} Top Players</h4>
+                    {% if adventure_levels[level] %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Score</th>
+                                    <th>Time (s)</th>
+                                    <th>Correct</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in adventure_levels[level] %}
+                                <tr>
+                                    <td class="rank rank-{{ loop.index if loop.index <= 3 else '' }}">{{ loop.index }}</td>
+                                    <td>{{ record.player }}</td>
+                                    <td><strong>{{ record.score }}</strong></td>
+                                    <td>{{ record.time }}</td>
+                                    <td>{{ record.correct_answers }}</td>
+                                    <td>{{ record.date[:10] if record.date else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="no-data">No scores for this level yet. Be the first!</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <!-- Overall Leaderboard -->
+                <div id="level-overall-leaderboard" class="level-leaderboard" style="display: none;">
+                    <h4 style="text-align: center; color: #6d4106; margin-bottom: 15px;">Overall Best Scores (All Levels)</h4>
+                    {% if adventure_leaderboard %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Score</th>
+                                    <th>Time (s)</th>
+                                    <th>Correct</th>
+                                    <th>Wrong</th>
+                                    <th>Level</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in adventure_leaderboard %}
+                                <tr>
+                                    <td class="rank rank-{{ loop.index if loop.index <= 3 else '' }}">{{ loop.index }}</td>
+                                    <td>{{ record.player }}</td>
+                                    <td><strong>{{ record.score }}</strong></td>
+                                    <td>{{ record.time }}</td>
+                                    <td>{{ record.correct_answers }}</td>
+                                    <td>{{ record.wrong_answers }}</td>
+                                    <td>{{ record.level if record.level else 'N/A' }}</td>
+                                    <td>{{ record.date[:10] if record.date else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="no-data">No guest adventure scores yet. Play as a guest to appear on this leaderboard!</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         
         <!-- Test Yourself Leaderboard -->
@@ -275,6 +332,23 @@
             
             // Show selected leaderboard section
             document.getElementById(mode + '-leaderboard').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+        
+        function showLevelLeaderboard(level) {
+            // Hide all level leaderboards
+            const levelSections = document.querySelectorAll('.level-leaderboard');
+            levelSections.forEach(section => section.style.display = 'none');
+            
+            // Remove active class from level tab buttons (only within adventure section)
+            const adventureSection = document.getElementById('adventure-leaderboard');
+            const levelButtons = adventureSection.querySelectorAll('.tab-button');
+            levelButtons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected level leaderboard
+            document.getElementById('level-' + level + '-leaderboard').style.display = 'block';
             
             // Add active class to clicked button
             event.target.classList.add('active');

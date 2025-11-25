@@ -694,7 +694,7 @@ def normalize_true_false_answer(answer):
     return answer_lower
 
 # Helper function to save leaderboard data
-def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure"):
+def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure", level=None):
     # Save to student leaderboard if it's a logged-in student
     if session.get('is_student') and session.get('student_id'):
         # Get actual student name from students.json instead of relying on player_name
@@ -708,7 +708,7 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
         elif session.get('student_name'):
             player_name = session.get('student_name')
         
-        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}")
+        print(f"Saving student leaderboard data: {player_name}, mode: {game_mode}, level: {level}")
         
         record = {
             "player": player_name,
@@ -720,6 +720,10 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
             "game_mode": game_mode,
             "date": time.strftime("%Y-%m-%d %H:%M:%S")
         }
+        
+        # Add level for adventure mode
+        if game_mode == "adventure" and level is not None:
+            record["level"] = level
         
         try:
             with open(LEADERBOARD_FILE, "r", encoding="utf-8") as f:
@@ -734,7 +738,7 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
     
     # Save to guest leaderboard if it's a guest player (not a student)
     else:
-        print(f"Saving guest leaderboard data: {player_name}, mode: {game_mode}")
+        print(f"Saving guest leaderboard data: {player_name}, mode: {game_mode}, level: {level}")
         
         record = {
             "player": player_name,
@@ -745,6 +749,10 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
             "game_mode": game_mode,
             "date": time.strftime("%Y-%m-%d %H:%M:%S")
         }
+        
+        # Add level for adventure mode
+        if game_mode == "adventure" and level is not None:
+            record["level"] = level
         
         try:
             with open(GUEST_LEADERBOARD_FILE, "r", encoding="utf-8") as f:
@@ -1623,7 +1631,8 @@ def result():
         total_time=total_time,
         correct_answers=session.get('correct_answers', 0),
         wrong_answers=session.get('wrong_answers', 0),
-        game_mode="adventure"
+        game_mode="adventure",
+        level=session.get('selected_level', 1)
     )
     
     # Save student progress if logged in
@@ -1820,7 +1829,15 @@ def leaderboard():
         sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
         return sorted_players[:limit]
     
+    # For adventure mode, create per-level leaderboards
+    adventure_levels = {}
+    for level_num in range(1, 11):  # Levels 1-10
+        level_data = [entry for entry in adventure_data if entry.get("level") == level_num]
+        adventure_levels[level_num] = get_best_scores(level_data, 10)  # Top 10 per level
+    
+    # Overall adventure leaderboard (all levels combined)
     adventure_leaderboard = get_best_scores(adventure_data, 50)
+    
     test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
     endless_leaderboard = get_best_scores(endless_data, 50)
 
@@ -1829,6 +1846,7 @@ def leaderboard():
 
     return render_template("leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,
+                         adventure_levels=adventure_levels,
                          test_yourself_leaderboard=test_yourself_leaderboard,
                          endless_leaderboard=endless_leaderboard,
                          is_student=is_student)
@@ -1864,12 +1882,21 @@ def guest_leaderboard():
         sorted_players = sorted(player_best.values(), key=lambda x: (-x["score"], x["time"]))
         return sorted_players[:limit]
     
+    # For adventure mode, create per-level leaderboards
+    adventure_levels = {}
+    for level_num in range(1, 11):  # Levels 1-10
+        level_data = [entry for entry in adventure_data if entry.get("level") == level_num]
+        adventure_levels[level_num] = get_best_scores(level_data, 10)  # Top 10 per level
+    
+    # Overall adventure leaderboard (all levels combined)
     adventure_leaderboard = get_best_scores(adventure_data, 50)
+    
     test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
     endless_leaderboard = get_best_scores(endless_data, 50)
 
     return render_template("guest_leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,
+                         adventure_levels=adventure_levels,
                          test_yourself_leaderboard=test_yourself_leaderboard,
                          endless_leaderboard=endless_leaderboard)
 
@@ -2431,14 +2458,19 @@ def endless_start():
     session['endless_wrong'] = 0
     session['endless_start_time'] = time.time()
     session['endless_question_start'] = time.time()
+    session['endless_recent_questions'] = []  # Track recent questions to avoid repetition
     
     # Use questions from endless mode pool
     endless_questions = get_questions_for_pool('endless_mode')
     if endless_questions:
-        session['endless_current_question'] = random.choice(endless_questions)
+        selected_question = random.choice(endless_questions)
+        session['endless_current_question'] = selected_question
+        session['endless_recent_questions'] = [selected_question.get('id')]
     elif questions:
         # Fallback to all questions if pool is empty
-        session['endless_current_question'] = random.choice(questions)
+        selected_question = random.choice(questions)
+        session['endless_current_question'] = selected_question
+        session['endless_recent_questions'] = [selected_question.get('id')]
     else:
         flash('No questions available. Please contact your teacher to add questions.', 'error')
         return redirect(url_for('index'))
@@ -2518,8 +2550,7 @@ def endless_game():
             return redirect(url_for('endless_result'))
         
         session['endless_question_start'] = time.time()
-        # Select a different question (not the same one)
-        current_q_id = question.get('id')
+        # Select a different question avoiding recent ones
         endless_questions = get_questions_for_pool('endless_mode')
         if not endless_questions:
             endless_questions = questions
@@ -2528,13 +2559,29 @@ def endless_game():
             flash('No questions available. Game cannot continue.', 'error')
             return redirect(url_for('endless_result'))
         
-        # Filter out the current question to ensure a new one
-        available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+        # Get recent questions to avoid (last 20)
+        recent_q_ids = session.get('endless_recent_questions', [])
+        
+        # Filter out recently asked questions
+        available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+        
+        # If we've exhausted all questions, reset the recent list but keep the last 5
+        if not available_questions:
+            session['endless_recent_questions'] = recent_q_ids[-5:] if len(recent_q_ids) > 5 else []
+            available_questions = [q for q in endless_questions if q.get('id') not in session['endless_recent_questions']]
+        
+        # Select new question
         if available_questions:
-            session['endless_current_question'] = random.choice(available_questions)
+            new_question = random.choice(available_questions)
         else:
-            # Fallback if only one question exists
-            session['endless_current_question'] = random.choice(endless_questions)
+            new_question = random.choice(endless_questions)
+        
+        session['endless_current_question'] = new_question
+        
+        # Add to recent questions list (keep last 20)
+        recent_q_ids.append(new_question.get('id'))
+        session['endless_recent_questions'] = recent_q_ids[-20:]
+        
         return redirect(url_for('endless_game'))
     
     # Handle answer submission
@@ -2615,18 +2662,34 @@ def endless_game():
                 session['endless_streak'] = 0
                 session['endless_wrong'] = session.get('endless_wrong', 0) + 1
             session['endless_question_start'] = time.time()
-            # Select a different question (not the same one)
-            current_q_id = question.get('id')
+            # Select a different question avoiding recent ones
             endless_questions = get_questions_for_pool('endless_mode')
             if not endless_questions:
                 endless_questions = questions
-            # Filter out the current question to ensure a new one
-            available_questions = [q for q in endless_questions if q.get('id') != current_q_id]
+            
+            # Get recent questions to avoid (last 20)
+            recent_q_ids = session.get('endless_recent_questions', [])
+            
+            # Filter out recently asked questions
+            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+            
+            # If we've exhausted all questions, reset the recent list but keep the last 5
+            if not available_questions:
+                session['endless_recent_questions'] = recent_q_ids[-5:] if len(recent_q_ids) > 5 else []
+                available_questions = [q for q in endless_questions if q.get('id') not in session['endless_recent_questions']]
+            
+            # Select new question
             if available_questions:
-                session['endless_current_question'] = random.choice(available_questions)
+                new_question = random.choice(available_questions)
             else:
-                # Fallback if only one question exists
-                session['endless_current_question'] = random.choice(endless_questions)
+                new_question = random.choice(endless_questions)
+            
+            session['endless_current_question'] = new_question
+            
+            # Add to recent questions list (keep last 20)
+            recent_q_ids.append(new_question.get('id'))
+            session['endless_recent_questions'] = recent_q_ids[-20:]
+            
             return redirect(url_for('endless_game'))
         except Exception as e:
             print(f"[ERROR] Endless mode POST error: {str(e)}")

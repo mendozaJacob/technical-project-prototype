@@ -14,6 +14,8 @@
         <p>Player HP: {{ player_hp }}</p>
         <p>Enemy HP: {{ enemy_hp }}</p>
         <p>Level Reached: {{ level }}</p>
+        <p>Correct Answers: {{ session.get('correct_answers', 0) }} / {{ session.get('correct_answers', 0) + session.get('wrong_answers', 0) }}</p>
+        <p>Accuracy: {{ '%.1f' | format(session.get('correct_answers', 0) / (session.get('correct_answers', 0) + session.get('wrong_answers', 0)) * 100 if (session.get('correct_answers', 0) + session.get('wrong_answers', 0)) > 0 else 0) }}%</p>
         <p>Enemy Faced: {{ enemy['name'] }} {{ enemy['avatar'] }}</p>
         {% if session.get('is_student') %}
             <a href="{{ url_for('student_dashboard') }}" class="btn">Back to Student Portal</a>
@@ -24,11 +26,18 @@
         {% if can_advance %}
             <form method="post" action="{{ url_for('select_level') }}">
                 <input type="hidden" name="level" value="{{ next_level }}">
-                <button type="submit" class="btn">Advance to Level {{ next_level }}</button>
+                <button type="submit" class="btn" style="background: #28a745;">✅ Advance to Level {{ next_level }}</button>
             </form>
+        {% elif session.get('level_completed', False) %}
+            <p style="color: #ff9800; font-weight: bold; background: #fff3e0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                ⚠️ Level completed, but you need at least 70% accuracy to advance!<br>
+                Current Accuracy: {{ '%.1f' | format(session.get('correct_answers', 0) / (session.get('correct_answers', 0) + session.get('wrong_answers', 0)) * 100 if (session.get('correct_answers', 0) + session.get('wrong_answers', 0)) > 0 else 0) }}%<br>
+                Required: 70%
+            </p>
+            <a href="{{ url_for('select_level') }}" class="btn" style="background: #ff9800;">🔄 Replay Level to Improve</a>
         {% else %}
             <p style="color: red; font-weight: bold;">
-                You need at least 7 correct answers to advance! Try again.
+                Level not completed. Try again!
             </p>
             <a href="{{ url_for('select_level') }}" class="btn">Replay Level</a>
         {% endif %}

@@ -417,7 +417,8 @@
     "q": "Which vitamin is also known as ascorbic acid?",
     "answer": "Vitamin C",
     "keywords": [
-      "Vitamin C"
+      "Vitamin C", 
+      "C", "c" 
     ],
     "feedback": "Vitamin C, or ascorbic acid, is essential for immune function and collagen production."
   },
@@ -635,7 +636,7 @@
     "q": "Which vitamin helps with blood clotting?",
     "answer": "Vitamin K",
     "keywords": [
-      "Vitamin K"
+      "Vitamin K" , "K" , "k"
     ],
     "feedback": "Vitamin K is essential for blood clotting and bone health."
   },
@@ -798,7 +799,7 @@
     "q": "Who wrote 'The Lord of the Rings'?",
     "answer": "J.R.R. Tolkien",
     "keywords": [
-      "J.R.R. Tolkien"
+      "J.R.R. Tolkien", "Tolkien"
     ],
     "feedback": "J.R.R. Tolkien wrote 'The Lord of the Rings' trilogy, a fantasy epic."
   },
@@ -816,7 +817,7 @@
     "q": "Which vitamin is found in citrus fruits?",
     "answer": "Vitamin C",
     "keywords": [
-      "Vitamin C"
+      "Vitamin C", "c", "C"
     ],
     "feedback": "Vitamin C is abundant in citrus fruits and helps boost the immune system."
   },

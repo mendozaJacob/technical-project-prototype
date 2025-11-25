@@ -1686,11 +1686,17 @@ def result():
         and next_level <= max_level
     )
 
-    # Unlock the next level if completed
+    # Unlock the next level if completed AND meets accuracy requirement
     if session.get('level_completed', False):
         prev_highest = session.get('highest_unlocked', 1)
-        if next_level > prev_highest:
+        
+        # Only unlock next level if accuracy requirement is met
+        if current_accuracy >= required_accuracy and next_level > prev_highest:
             session['highest_unlocked'] = next_level
+        elif current_accuracy < required_accuracy:
+            # Player completed level but didn't meet accuracy requirement
+            # They can replay the same level but can't advance
+            pass
 
         # Auto-save progress after level completion
         auto_save_progress()

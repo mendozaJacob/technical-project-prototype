@@ -2748,68 +2748,86 @@ def endless_game():
             if not endless_questions:
                 endless_questions = questions
             
-            # Get recent questions to avoid - make a copy to avoid reference issues
-            recent_q_ids = list(session.get('endless_recent_questions', []))
+            # Get recent questions using SET for guaranteed uniqueness
+            recent_q_ids_list = session.get('endless_recent_questions', [])
+            recent_q_ids_set = set(recent_q_ids_list)  # Convert to set to remove any duplicates
             
-            # Add current question to history before selecting new one
+            # Get current question ID - CRITICAL: must exclude this from next selection
             current_q_id = question.get('id')
-            if current_q_id and current_q_id not in recent_q_ids:
-                recent_q_ids.append(current_q_id)
-                # Keep only last 30 questions in history immediately
-                if len(recent_q_ids) > 30:
-                    recent_q_ids = recent_q_ids[-30:]
             
-            print(f"[DEBUG ENDLESS] Total questions: {len(endless_questions)}, Recent history: {len(recent_q_ids)}, Current Q ID: {current_q_id}")
+            # Add current question to the exclusion set
+            if current_q_id:
+                recent_q_ids_set.add(current_q_id)
             
-            # Check for duplicate IDs in history
-            unique_history = set(recent_q_ids)
-            if len(recent_q_ids) != len(unique_history):
-                print(f"[WARNING ENDLESS] History contains duplicates! Cleaning up...")
-                recent_q_ids = list(unique_history)
+            print(f"[DEBUG ENDLESS] Total questions: {len(endless_questions)}, History size: {len(recent_q_ids_set)}, Current Q ID: {current_q_id}")
             
-            # Filter out recently asked questions
-            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+            # Filter out ALL recently asked questions (using set for O(1) lookup)
+            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids_set]
             
             print(f"[DEBUG ENDLESS] Available questions after filtering: {len(available_questions)}")
             
-            # If we've exhausted all questions, clear oldest questions from history
-            if not available_questions:
-                print(f"[DEBUG ENDLESS] Pool exhausted! Keeping only last 10 in history")
-                recent_q_ids = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
-                available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
-                print(f"[DEBUG ENDLESS] After reset - History: {len(recent_q_ids)}, Available: {len(available_questions)}")
+            # If we've used up too many questions, reset to smaller history
+            if len(available_questions) < 10:  # Keep at least 10 options available
+                print(f"[DEBUG ENDLESS] Low availability! Resetting to last 5 questions in history")
+                # Keep only the most recent 5 questions (including current)
+                recent_list = list(recent_q_ids_set)
+                recent_q_ids_set = set(recent_list[-5:]) if len(recent_list) > 5 else recent_q_ids_set
+                # Always keep current question in exclusion
+                if current_q_id:
+                    recent_q_ids_set.add(current_q_id)
+                available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids_set]
+                print(f"[DEBUG ENDLESS] After reset - History: {len(recent_q_ids_set)}, Available: {len(available_questions)}")
             
-            # Select new question using random.choice from available pool
-            if available_questions:
-                new_question = random.choice(available_questions)
-            else:
-                # Last resort - pick any question (shouldn't happen with 100 questions)
-                print(f"[WARNING ENDLESS] Last resort: picking from all questions")
-                new_question = random.choice(endless_questions)
+            # CRITICAL: Filter out current question explicitly (double-check)
+            if current_q_id:
+                available_questions = [q for q in available_questions if q.get('id') != current_q_id]
             
-            print(f"[DEBUG ENDLESS] Selected new question ID: {new_question.get('id')}")
+            # Select new question with multiple attempts to avoid duplicates
+            new_question = None
+            max_attempts = 5
+            for attempt in range(max_attempts):
+                if available_questions:
+                    candidate = random.choice(available_questions)
+                    # Verify it's NOT the current question
+                    if candidate.get('id') != current_q_id:
+                        new_question = candidate
+                        break
+                    else:
+                        print(f"[WARNING ENDLESS] Attempt {attempt+1}: Got same question, retrying...")
+                        # Remove this from available and try again
+                        available_questions = [q for q in available_questions if q.get('id') != current_q_id]
+                else:
+                    break
             
-            # Verify no immediate duplicate
-            if new_question.get('id') == current_q_id:
-                print(f"[ERROR ENDLESS] DUPLICATE DETECTED! Same as current question. Selecting different one...")
-                # Force selection of a different question
-                different_questions = [q for q in available_questions if q.get('id') != current_q_id]
-                if different_questions:
-                    new_question = random.choice(different_questions)
-                    print(f"[DEBUG ENDLESS] Corrected to question ID: {new_question.get('id')}")
+            # Final fallback if all else fails
+            if not new_question:
+                print(f"[ERROR ENDLESS] Could not find different question! Picking from full pool...")
+                all_different = [q for q in endless_questions if q.get('id') != current_q_id]
+                if all_different:
+                    new_question = random.choice(all_different)
+                else:
+                    # This should never happen with 100 questions
+                    new_question = random.choice(endless_questions)
+            
+            new_q_id = new_question.get('id')
+            print(f"[DEBUG ENDLESS] Selected new question ID: {new_q_id} (Current was: {current_q_id})")
+            
+            # FINAL SAFETY CHECK
+            if new_q_id == current_q_id:
+                print(f"[CRITICAL ERROR] Failed to prevent duplicate! This should never happen!")
             
             session['endless_current_question'] = new_question
             
-            # Add newly selected question to history to prevent immediate repetition
-            new_q_id = new_question.get('id')
-            if new_q_id and new_q_id not in recent_q_ids:
-                recent_q_ids.append(new_q_id)
-                # Keep only last 30
-                if len(recent_q_ids) > 30:
-                    recent_q_ids = recent_q_ids[-30:]
+            # Update history: convert set back to list, add new question, keep last 30
+            updated_history = list(recent_q_ids_set)
+            if new_q_id and new_q_id not in updated_history:
+                updated_history.append(new_q_id)
             
-            # Update session with updated history
-            session['endless_recent_questions'] = recent_q_ids
+            # Keep only last 30 questions in history
+            if len(updated_history) > 30:
+                updated_history = updated_history[-30:]
+            
+            session['endless_recent_questions'] = updated_history
             
             print(f"[DEBUG] Updated history length: {len(recent_q_ids)}")
             

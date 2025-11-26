@@ -89,6 +89,52 @@
             color: #e6c15b;
             font-size: 1.1em;
         }
+        .chapter-section {
+            margin-bottom: 35px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 2px solid #4b2e05;
+        }
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4b2e05;
+        }
+        .chapter-title {
+            font-size: 1.4em;
+            color: #2e3d1f;
+            font-weight: bold;
+        }
+        .chapter-lock {
+            font-size: 1.5em;
+        }
+        .chapter-description {
+            color: #4b2e05;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        .locked-chapter {
+            opacity: 0.6;
+            position: relative;
+        }
+        .locked-chapter::after {
+            content: '🔒 Locked by Teacher';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -110,23 +156,59 @@
         </div>
         <div class="level-title">🛡️ Select Your Dungeon 🐉</div>
         <form method="post">
-            <div class="level-grid">
-                {% for level in levels %}
-                    {% if level.level <= highest_unlocked %}
-                        <button class="level-btn unlocked" name="level" value="{{ level.level }}">
-                            <span class="icon">⚔️</span>
-                            <span class="number">{{ level.level }}</span>
-                        </button>
-                    {% else %}
-                        <button class="level-btn locked" disabled>
-                            <span class="icon">🔒</span>
-                            <span class="number">{{ level.level }}</span>
-                        </button>
+            {% if chapters %}
+                {% for chapter in chapters %}
+                <div class="chapter-section {% if chapter.locked_level_mode %}locked-chapter{% endif %}">
+                    <div class="chapter-header">
+                        <div class="chapter-title">{{ chapter.name }}</div>
+                        <div class="chapter-lock">
+                            {% if chapter.locked_level_mode %}🔒{% else %}📖{% endif %}
+                        </div>
+                    </div>
+                    {% if chapter.description %}
+                    <div class="chapter-description">{{ chapter.description }}</div>
                     {% endif %}
+                    
+                    {% if not chapter.locked_level_mode %}
+                    <div class="level-grid">
+                        {% for level in levels %}
+                            {% if level.level in chapter.level_range %}
+                                {% if level.level <= highest_unlocked %}
+                                    <button class="level-btn unlocked" name="level" value="{{ level.level }}">
+                                        <span class="icon">⚔️</span>
+                                        <span class="number">{{ level.level }}</span>
+                                    </button>
+                                {% else %}
+                                    <button class="level-btn locked" disabled>
+                                        <span class="icon">🔒</span>
+                                        <span class="number">{{ level.level }}</span>
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
                 {% endfor %}
-            </div>
+            {% else %}
+                <!-- Fallback: Show all levels without chapters -->
+                <div class="level-grid">
+                    {% for level in levels %}
+                        {% if level.level <= highest_unlocked %}
+                            <button class="level-btn unlocked" name="level" value="{{ level.level }}">
+                                <span class="icon">⚔️</span>
+                                <span class="number">{{ level.level }}</span>
+                            </button>
+                        {% else %}
+                            <button class="level-btn locked" disabled>
+                                <span class="icon">🔒</span>
+                                <span class="number">{{ level.level }}</span>
+                            </button>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
         </form>
     </div>
 </body>
 </html>
-

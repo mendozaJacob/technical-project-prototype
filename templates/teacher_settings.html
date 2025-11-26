@@ -377,19 +377,6 @@
 
                     <div class="setting-item">
                         <div class="setting-info">
-                            <div class="setting-label">Speed Bonus</div>
-                            <div class="setting-description">Enable bonus points for quick answers</div>
-                        </div>
-                        <div class="setting-control">
-                            <label class="toggle-switch">
-                                <input type="checkbox" name="speed_bonus" {{ 'checked' if settings.speed_bonus else '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
                             <div class="setting-label">Level Completion Bonus</div>
                             <div class="setting-description">Bonus points for completing a level</div>
                         </div>
@@ -417,17 +404,6 @@
                                 <input type="checkbox" name="adaptive_difficulty" {{ 'checked' if settings.adaptive_difficulty else '' }}>
                                 <span class="slider"></span>
                             </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-label">Required Accuracy for Progression</div>
-                            <div class="setting-description">Minimum accuracy needed to unlock next level</div>
-                        </div>
-                        <div class="setting-control">
-                            <input type="range" name="min_accuracy" value="{{ settings.min_accuracy or 70 }}" min="50" max="95" step="5" oninput="updateRangeValue(this, 'accuracyValue')">
-                            <span class="current-value" id="accuracyValue">{{ settings.min_accuracy or 70 }}%</span>
                         </div>
                     </div>
                 </div>
@@ -548,45 +524,6 @@
                         <div class="setting-control">
                             <input type="number" name="session_timeout" value="{{ settings.session_timeout or 30 }}" min="5" max="120" step="5">
                             <span class="current-value">minutes</span>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-label">Timeout Behavior</div>
-                            <div class="setting-description">What happens when question timer expires</div>
-                        </div>
-                        <div class="setting-control">
-                            <select name="timeout_behavior">
-                                <option value="penalty" {{ 'selected' if settings.timeout_behavior == 'penalty' else '' }}>Apply Penalty & Continue</option>
-                                <option value="fail" {{ 'selected' if settings.timeout_behavior == 'fail' else '' }}>Immediate Failure</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-label">Test Yourself Mode</div>
-                            <div class="setting-description">Enable/disable the Test Yourself game mode</div>
-                        </div>
-                        <div class="setting-control">
-                            <label class="checkbox-container">
-                                <input type="checkbox" name="test_yourself_enabled" {{ 'checked' if settings.test_yourself_enabled else '' }}>
-                                <span class="checkmark"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <div class="setting-label">Endless Mode</div>
-                            <div class="setting-description">Enable/disable the Endless Mode game option</div>
-                        </div>
-                        <div class="setting-control">
-                            <label class="checkbox-container">
-                                <input type="checkbox" name="endless_mode_enabled" {{ 'checked' if settings.endless_mode_enabled else '' }}>
-                                <span class="checkmark"></span>
-                            </label>
                         </div>
                     </div>
                 </div>
@@ -715,9 +652,7 @@
                     'analytics_enabled': 'Analytics Tracking',
                     'auto_save': 'Auto-Save Progress',
                     'session_timeout': 'Session Timeout',
-                    'timeout_behavior': 'Timeout Behavior',
-                    'test_yourself_enabled': 'Test Yourself Mode',
-                    'endless_mode_enabled': 'Endless Mode'
+                    'timeout_behavior': 'Timeout Behavior'
                 };
                 
                 const changedList = changedSettings.map(setting => 

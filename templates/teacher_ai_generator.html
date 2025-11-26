@@ -285,6 +285,28 @@
                     <textarea id="context" name="context" placeholder="Any specific requirements or focus areas..."></textarea>
                 </div>
                 
+                <div class="form-group">
+                    <label for="target_chapter">Assign to Chapter (Optional):</label>
+                    <select id="target_chapter" name="target_chapter">
+                        <option value="">-- Don't assign to chapter --</option>
+                        {% for chapter in chapters %}
+                        <option value="{{ chapter.id }}">{{ chapter.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small style="color: #666; display: block; margin-top: 5px;">Select a chapter to automatically add generated questions to it</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="target_level">Assign to Level (Optional):</label>
+                    <select id="target_level" name="target_level">
+                        <option value="">-- Don't assign to level --</option>
+                        {% for level in range(1, 11) %}
+                        <option value="{{ level }}">Level {{ level }}</option>
+                        {% endfor %}
+                    </select>
+                    <small style="color: #666; display: block; margin-top: 5px;">Select a level to automatically add generated questions to it</small>
+                </div>
+                
                 <div style="text-align: center;">
                     <button type="submit" id="generate-btn" class="btn btn-success">🎯 Generate Questions with AI</button>
                 </div>
@@ -304,6 +326,8 @@
             <form method="POST" action="{{ url_for('teacher_save_questions') }}">
                 <!-- Store all questions as one JSON array in a textarea -->
                 <textarea name="all_questions" style="display: none;">{{ generated_questions|tojson }}</textarea>
+                <input type="hidden" name="target_chapter" value="{{ target_chapter }}">
+                <input type="hidden" name="target_level" value="{{ target_level }}">
                 {% for question in generated_questions %}
                 <div class="question-item">
                     <h4>Q{{ loop.index }}: {{ question.q }}</h4>

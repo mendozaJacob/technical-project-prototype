@@ -2121,207 +2121,104 @@ import random
 
 @app.route('/test_yourself', methods=['GET', 'POST'])
 def test_yourself():
-    # Check if Test Yourself mode is enabled
     settings = get_current_game_settings()
     if not settings.get('test_yourself_enabled', True):
         flash('Test Yourself mode is currently disabled.', 'error')
         return redirect(url_for('index'))
-    
-    # Reset test state for a true new start (GET with ?new=1) or if no session data exists
+
+    # Reset test state if new start or no session data
     if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
-        # Completely reset session to ensure clean start
         reset_test_yourself_session()
         session['test_user_answers'] = []
-        print(f"[DEBUG] questions list length at test start: {len(questions)}")
         
-        # Use questions from test_yourself pool
-        test_pool_questions = get_questions_for_pool('test_yourself')
-        if not test_pool_questions:
-            test_pool_questions = questions  # Fallback to all questions
-        
+        test_pool_questions = get_questions_for_pool('test_yourself') or questions
         valid_questions = [q for q in test_pool_questions if q.get('q') and str(q.get('q')).strip()]
-        if not valid_questions:
-            session['test_question_ids'] = []
-        elif len(valid_questions) >= 40:
-            # Use random.sample to guarantee no duplicates (returns unique selection)
+        
+        if len(valid_questions) >= 40:
             selected = random.sample(valid_questions, 40)
-            # Extract IDs and convert to set for guaranteed uniqueness
-            question_ids_set = set(q['id'] for q in selected)
-            # Convert back to list and shuffle
-            question_ids_list = list(question_ids_set)
-            random.shuffle(question_ids_list)
-            session['test_question_ids'] = question_ids_list
         else:
-            # If fewer than 40 questions, use all available without repeats
-            # Use set to ensure absolute uniqueness even with small pools
-            unique_questions = list({q['id']: q for q in valid_questions}.values())
-            random.shuffle(unique_questions)
-            session['test_question_ids'] = [q['id'] for q in unique_questions]
-        
-        # Debug: Verify uniqueness using set comparison
-        question_ids = session['test_question_ids']
-        unique_ids = set(question_ids)
-        print(f"[DEBUG TEST INIT] Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs (set-verified)")
-        if len(question_ids) != len(unique_ids):
-            duplicate_ids = [id for id in unique_ids if question_ids.count(id) > 1]
-            print(f"[CRITICAL TEST INIT] Duplicate question IDs found despite set conversion: {duplicate_ids}")
-            # Force fix by using only unique IDs
-            session['test_question_ids'] = list(unique_ids)
-            random.shuffle(session['test_question_ids'])
-        
+            selected = valid_questions
+
+        # Store only question IDs in session to reduce session size
+        session['test_question_ids'] = list({q['id']: q for q in selected}.keys())
+        random.shuffle(session['test_question_ids'])
+
         session['test_q_index'] = 0
         session['test_correct'] = 0
         session['test_start_time'] = time.time()
-        session['test_time_limit'] = 60 * 60  # 1 hour in seconds
+        session['test_time_limit'] = 60 * 60  # 1 hour
 
-    # Calculate timer
     total_seconds_left = max(0, int(session.get('test_time_limit', 3600) - (time.time() - session.get('test_start_time', time.time()))))
     time_left_min = total_seconds_left // 60
     time_left_sec = total_seconds_left % 60
     q_index = session.get('test_q_index', 0)
     test_question_ids = session.get('test_question_ids', [])
-    
-    # Debug: Print current state
-    print(f"[DEBUG TEST] GET request - q_index={q_index}, total_test_questions={len(test_question_ids)}")
-    if q_index < len(test_question_ids):
-        print(f"[DEBUG TEST] Current question ID: {test_question_ids[q_index]}")
-    
-    # Rebuild the test_questions list from global questions using IDs
+
     if not questions:
         flash('No questions available. Please contact your teacher.', 'error')
         return redirect(url_for('index'))
-    
-    try:
-        id_to_question = {q['id']: q for q in questions}
-        test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
-        
-        # Store only question count, not full IDs list to reduce session size
-        if 'test_total_questions' not in session:
-            session['test_total_questions'] = len(test_question_ids)
-    except Exception as e:
-        print(f"[ERROR] Failed to rebuild test_questions: {e}")
-        session['test_q_index'] = 40
-        return redirect(url_for('test_yourself_result'))
-    
-    # Check if we've reached the end or time is up (40 questions = indices 0-39)
-    # Using > 39 instead of >= 40 to ensure question 40 (index 39) is displayed
+
+    # Build test_questions from IDs
+    id_to_question = {q['id']: q for q in questions}
+    test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
+
     if not test_questions or q_index > 39 or total_seconds_left <= 0:
-        print(f"[DEBUG] REDIRECT TO RESULT: test_q_index={q_index}, test_questions={len(test_questions)}, total_seconds_left={total_seconds_left}, test_user_answers={len(session.get('test_user_answers', []))}")
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
 
     # Skip invalid questions
     while q_index < len(test_questions) and q_index < 40:
-        try:
-            if test_questions[q_index].get('q') and str(test_questions[q_index].get('q')).strip():
-                break
-            q_index += 1
-            session['test_q_index'] = q_index
-        except (IndexError, KeyError):
-            q_index += 1
-            session['test_q_index'] = q_index
-    
-    # Final check after skipping invalid questions
+        if test_questions[q_index].get('q') and str(test_questions[q_index].get('q')).strip():
+            break
+        q_index += 1
+    session['test_q_index'] = q_index
+
     if q_index > 39:
         session['test_q_index'] = 40
         return redirect(url_for('test_yourself_result'))
-    
-    # Safety check for question existence
-    try:
-        question = test_questions[q_index]
-        if not question or not question.get('q') or not str(question.get('q')).strip():
-            raise IndexError("Invalid question")
-    except (IndexError, KeyError) as e:
-        print(f"[ERROR] Question access error at index {q_index}: {e}")
-        session['test_q_index'] = 40
-        return redirect(url_for('test_yourself_result'))
+
+    question = test_questions[q_index]
 
     correct_count = session.get('test_correct', 0)
     if request.method == 'POST':
         try:
             user_answer = request.form.get('answer', '').strip().lower()
             correct_answer = question.get('answer', '').strip().lower()
-            # Normalize keywords
-            raw_keywords = question.get('keywords', [])
-            if isinstance(raw_keywords, str):
-                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-            else:
-                keywords = [str(k).strip().lower() for k in raw_keywords]
-            # Use fuzzy matching for test mode
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-            
-            # If student and AI grading is enabled, use AI as fallback for uncertain answers
-            if session.get('is_student') and session.get('ai_grading_enabled', False):
-                # Use AI grading for short answers with low confidence (< 0.9)
-                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
-                    try:
-                        ai_result = grade_answer_with_ai(
-                            question=question.get('q', ''),
-                            correct_answer=correct_answer,
-                            student_answer=user_answer,
-                            confidence_threshold=75
-                        )
-                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
-                            is_correct = True
-                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
-                            similarity_score = ai_result.get('confidence', 0) / 100.0
-                    except Exception as e:
-                        print(f"AI grading error: {e}")
-            
-            # Log student answer in real-time
-            if 'student_id' in session:
-                log_student_answer(
-                    student_id=session['student_id'],
-                    student_name=session.get('student_name', 'Unknown'),
-                    question_id=question.get('id', 'unknown'),
-                    question_text=question.get('q', ''),
-                    student_answer=user_answer,
-                    correct_answer=correct_answer,
-                    is_correct=is_correct,
-                    game_mode='test_yourself'
-                )
-            
+
+            # Update test_user_answers but truncate strings to avoid big headers
             session['test_user_answers'].append({
-                'question': question.get('q', '')[:150],  # Further truncate questions
-                'user_answer': user_answer[:100],  # Truncate user answers
-                'correct_answer': correct_answer[:100],  # Truncate correct answers
+                'question': question.get('q', '')[:100],
+                'user_answer': user_answer[:50],
+                'correct_answer': correct_answer[:50],
                 'correct': is_correct,
-                'feedback': question.get('feedback', '')[:150],  # Reduce feedback size
-                'match_type': feedback_type[:50] if isinstance(feedback_type, str) else str(feedback_type)[:50],
+                'feedback': question.get('feedback', '')[:100],
+                'match_type': str(feedback_type)[:50],
                 'similarity': round(similarity_score, 2) if similarity_score else 0
             })
-            # Keep only essential answers, limit to 40
-            if len(session['test_user_answers']) > 40:
-                session['test_user_answers'] = session['test_user_answers'][-40:]
+            # Keep only last 40 answers to limit session size
+            session['test_user_answers'] = session['test_user_answers'][-40:]
+
             if is_correct:
                 session['test_correct'] = correct_count + 1
-            
-            # Increment question index
-            new_q_index = q_index + 1
-            session['test_q_index'] = new_q_index
-            
-            # Debug logging
-            print(f"[DEBUG TEST POST] Answered Q{q_index + 1} (ID={question.get('id')}), correct={is_correct}")
-            print(f"[DEBUG TEST POST] Moving to next: new_q_index={new_q_index}, total_questions={len(test_question_ids)}")
-            if new_q_index < len(test_question_ids):
-                print(f"[DEBUG TEST POST] Next question ID will be: {test_question_ids[new_q_index]}")
-            
+            session['test_q_index'] = q_index + 1
+
             return redirect(url_for('test_yourself'))
         except Exception as e:
-            print(f"[ERROR] Test yourself mode POST error: {str(e)}")
-            # Force game over on error to prevent crash
+            print(f"[ERROR] Test yourself POST error: {e}")
             session['test_q_index'] = 40
             return redirect(url_for('test_yourself_result'))
 
     return render_template('test_yourself.html',
-                          question=question,
-                          q_number=q_index + 1,
-                          q_index=q_index,
-                          test_questions=test_questions,
-                          correct_count=correct_count,
-                          time_left_min=time_left_min,
-                          time_left_sec=time_left_sec,
-                          total_seconds_left=total_seconds_left)
+                           question=question,
+                           q_number=q_index + 1,
+                           q_index=q_index,
+                           test_questions=test_questions,
+                           correct_count=correct_count,
+                           time_left_min=time_left_min,
+                           time_left_sec=time_left_sec,
+                           total_seconds_left=total_seconds_left)
+
 
 @app.route('/test_yourself_result')
 def test_yourself_result():

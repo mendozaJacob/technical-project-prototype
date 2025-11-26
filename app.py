@@ -2143,24 +2143,31 @@ def test_yourself():
         if not valid_questions:
             session['test_question_ids'] = []
         elif len(valid_questions) >= 40:
-            # Use random.sample to guarantee no duplicates
+            # Use random.sample to guarantee no duplicates (returns unique selection)
             selected = random.sample(valid_questions, 40)
-            session['test_question_ids'] = [q['id'] for q in selected]
+            # Extract IDs and convert to set for guaranteed uniqueness
+            question_ids_set = set(q['id'] for q in selected)
+            # Convert back to list and shuffle
+            question_ids_list = list(question_ids_set)
+            random.shuffle(question_ids_list)
+            session['test_question_ids'] = question_ids_list
         else:
-            # If fewer than 40 questions, select all unique questions first
-            # Then repeat the shuffled list cyclically to reach 40 total
-            shuffled = random.sample(valid_questions, len(valid_questions))
-            session['test_question_ids'] = []
-            for i in range(40):
-                session['test_question_ids'].append(shuffled[i % len(shuffled)]['id'])
+            # If fewer than 40 questions, use all available without repeats
+            # Use set to ensure absolute uniqueness even with small pools
+            unique_questions = list({q['id']: q for q in valid_questions}.values())
+            random.shuffle(unique_questions)
+            session['test_question_ids'] = [q['id'] for q in unique_questions]
         
-        # Debug: Check for duplicates in the selected question IDs
+        # Debug: Verify uniqueness using set comparison
         question_ids = session['test_question_ids']
         unique_ids = set(question_ids)
-        print(f"[DEBUG TEST INIT] Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs")
+        print(f"[DEBUG TEST INIT] Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs (set-verified)")
         if len(question_ids) != len(unique_ids):
             duplicate_ids = [id for id in unique_ids if question_ids.count(id) > 1]
-            print(f"[WARNING TEST INIT] Duplicate question IDs found: {duplicate_ids}")
+            print(f"[CRITICAL TEST INIT] Duplicate question IDs found despite set conversion: {duplicate_ids}")
+            # Force fix by using only unique IDs
+            session['test_question_ids'] = list(unique_ids)
+            random.shuffle(session['test_question_ids'])
         
         session['test_q_index'] = 0
         session['test_correct'] = 0

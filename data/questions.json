@@ -1229,5 +1229,292 @@
     "feedback": "The root directory in Linux is indeed represented by a single forward slash (/), which is the top-most directory in the filesystem hierarchy.",
     "difficulty": "easy",
     "ai_generated": false
+  },
+  {
+    "id": 116,
+    "q": "What is `pip` primarily used for in the context of Python, especially when dealing with tools that might be used in cybersecurity?",
+    "answer": "`pip` is the standard package installer for Python, used to install and manage software packages and libraries, which are often required for cybersecurity scripts and tools.",
+    "keywords": [
+      "package installer",
+      "Python",
+      "libraries",
+      "modules",
+      "install software"
+    ],
+    "feedback": "`pip` allows users to easily add external libraries like PyPDF2 to their Python environment, a common task when setting up development environments for cybersecurity tools.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 117,
+    "q": "True or False: Installing specific Python libraries, such as PyPDF2, is only relevant for non-cybersecurity related tasks.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Many cybersecurity tools and scripts are developed in Python and often require various libraries to perform functions like data analysis, file manipulation, or network communication. PyPDF2, for example, could be used to analyze PDF documents for potential threats or extract information during forensic analysis.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 118,
+    "q": "Which command is typically used to install Python packages or libraries, such as those that might be needed for cybersecurity scripts?",
+    "answer": "pip install",
+    "keywords": [],
+    "feedback": "`pip install` is the correct command for installing Python packages. Understanding how to install necessary components is a fundamental skill for anyone working with Python in cybersecurity.",
+    "type": "multiple_choice",
+    "options": [
+      "npm install",
+      "apt-get install",
+      "pip install",
+      "yum install"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 119,
+    "q": "Why might a cybersecurity professional need a library that supports PDF files, like PyPDF2?",
+    "answer": "A cybersecurity professional might need to analyze PDF documents for malware, extract sensitive information, perform forensic analysis, or process security reports, all of which could require a library for PDF manipulation.",
+    "keywords": [
+      "analyze PDFs",
+      "extract data",
+      "malware analysis",
+      "forensic analysis",
+      "security reports"
+    ],
+    "feedback": "PDF files are a common medium for information exchange and can also be vectors for attacks. Libraries like PyPDF2 enable security professionals to programmatically interact with and inspect these files.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 120,
+    "q": "Why is understanding how software handles different file formats, such as PDF, important in cybersecurity?",
+    "answer": "Understanding file format handling is crucial in cybersecurity because malformed or specially crafted files (like PDFs) can be exploited to deliver malware, trigger vulnerabilities, or compromise systems.",
+    "keywords": [
+      "malware delivery",
+      "exploits",
+      "vulnerabilities",
+      "file format attacks",
+      "compromise systems"
+    ],
+    "feedback": "Attackers often leverage vulnerabilities in how software processes file formats. By understanding these mechanisms, cybersecurity professionals can better identify and mitigate such threats.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 121,
+    "q": "True or False: PyPDF2 is a programming language commonly used for developing cybersecurity tools.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "PyPDF2 is a *library* for the Python programming language, not a language itself. Python, however, is indeed a programming language widely used in cybersecurity.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 122,
+    "q": "When developing a cybersecurity script in Python, what does the command `pip install [library_name]` generally accomplish?",
+    "answer": "The command `pip install [library_name]` installs an external Python library or module that the cybersecurity script depends on to perform specific tasks, such as network scanning, data encryption, or file parsing.",
+    "keywords": [
+      "install library",
+      "add module",
+      "Python dependency",
+      "extend functionality"
+    ],
+    "feedback": "Cybersecurity scripts often rely on a variety of pre-built libraries to avoid reinventing the wheel and to leverage specialized functions, making `pip install` an essential command.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 123,
+    "q": "In the realm of cybersecurity, why is it important to know how to manage software dependencies (like libraries and packages)?",
+    "answer": "Managing software dependencies ensures that cybersecurity tools and scripts have all necessary components to function correctly, prevents conflicts between versions, and helps in patching vulnerabilities found in outdated libraries.",
+    "keywords": [
+      "dependency management",
+      "vulnerability patching",
+      "tool functionality",
+      "version control"
+    ],
+    "feedback": "Proper dependency management is vital for maintaining the security and stability of cybersecurity tools, ensuring they are always up-to-date and free from known vulnerabilities.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 124,
+    "q": "Which of the following best describes PyPDF2?",
+    "answer": "A Python library for working with PDF files",
+    "keywords": [],
+    "feedback": "PyPDF2 is a specific library designed to add capabilities for reading, writing, and manipulating PDF documents within Python applications.",
+    "type": "multiple_choice",
+    "options": [
+      "A type of malware",
+      "A cybersecurity operating system",
+      "A Python library for working with PDF files",
+      "A network protocol"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 125,
+    "q": "True or False: All software used in cybersecurity, including custom scripts and open-source tools, comes fully equipped and never requires additional libraries or dependencies to be installed.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Many cybersecurity tools and custom scripts, especially those developed in Python, often require users to install additional libraries and dependencies using commands like `pip install` to gain full functionality.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 126,
+    "q": "True or False: PyPDF2 is a library specifically needed for PDF support.",
+    "answer": "true",
+    "keywords": [],
+    "feedback": "The content explicitly states, 'PDF support requires PyPDF2,' indicating its purpose.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 127,
+    "q": "What command is used to install the PyPDF2 library?",
+    "answer": "pip install PyPDF2",
+    "keywords": [
+      "pip install PyPDF2",
+      "pip install pypdf2"
+    ],
+    "feedback": "The content provides the exact command: 'pip install PyPDF2'.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 128,
+    "q": "Which tool is used to install the PyPDF2 package, according to the content?",
+    "answer": "pip",
+    "keywords": [],
+    "feedback": "The command 'pip install PyPDF2' indicates that 'pip' is the tool used for installation.",
+    "type": "multiple_choice",
+    "options": [
+      "npm",
+      "apt-get",
+      "pip",
+      "brew"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 129,
+    "q": "What kind of files does the PyPDF2 library help a program work with?",
+    "answer": "PDF files",
+    "keywords": [
+      "PDF",
+      "PDF files",
+      "Portable Document Format"
+    ],
+    "feedback": "The content states 'PDF support requires PyPDF2,' meaning it enables working with Portable Document Format files.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 130,
+    "q": "True or False: You can install PyPDF2 by simply typing 'install PyPDF2' in the command line.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "The correct command requires 'pip' before 'install PyPDF2', so it should be 'pip install PyPDF2'.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 131,
+    "q": "What does 'PDF support' imply in the context of a software library like PyPDF2?",
+    "answer": "The ability to create, read, or modify PDF documents programmatically.",
+    "keywords": [],
+    "feedback": "'PDF support' means the software can interact with PDF files, allowing operations like reading content, generating new PDFs, or altering existing ones.",
+    "type": "multiple_choice",
+    "options": [
+      "Sending PDF files via email",
+      "Viewing PDF files in a web browser",
+      "Printing PDF files only",
+      "The ability to create, read, or modify PDF documents programmatically."
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 132,
+    "q": "If a program requires functionality to handle PDF documents, which specific Python library is mentioned as a prerequisite?",
+    "answer": "PyPDF2",
+    "keywords": [
+      "PyPDF2",
+      "pypdf2"
+    ],
+    "feedback": "The content explicitly states, 'PDF support requires PyPDF2,' making it the necessary library.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 133,
+    "q": "True or False: Installing PyPDF2 typically involves using a graphical user interface (GUI).",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "The installation method 'pip install PyPDF2' is a command-line operation, not a graphical user interface process.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 134,
+    "q": "What is the primary function of 'pip' in the context of Python development?",
+    "answer": "To install and manage Python packages.",
+    "keywords": [],
+    "feedback": "The command 'pip install PyPDF2' demonstrates that 'pip' is used for installing Python packages and their dependencies.",
+    "type": "multiple_choice",
+    "options": [
+      "To run Python scripts",
+      "To debug Python code",
+      "To install and manage Python packages.",
+      "To write Python programs"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 135,
+    "q": "Why would a developer need to install the PyPDF2 library?",
+    "answer": "To enable PDF support in their Python application.",
+    "keywords": [
+      "To add PDF functionality",
+      "To work with PDF files",
+      "To provide PDF support"
+    ],
+    "feedback": "The content clearly states that 'PDF support requires PyPDF2,' indicating its role in enabling PDF-related features.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
   }
 ]

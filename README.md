@@ -53,13 +53,22 @@ Quiz Battle: Dungeons of Knowledge is a comprehensive educational platform that 
 - **Mobile Responsive**: Play on any device
 
 ### 👨‍🏫 For Teachers
+- **📚 Chapter Management System**: Organize questions into chapters with independent mode locks
+  - Lock/unlock chapters per game mode (Test Yourself, Level Mode, Endless Mode)
+  - Automatic question pool synchronization
+  - Visual chapter cards with progress tracking
 - **📡 Real-Time Student Monitoring**: Watch student answers live as they play with WebSocket technology
 - **Complete Student Management**: Add, edit, and monitor students with individual/batch reset capabilities
 - **Multi-Type Question Creation**: Create Short Answer, Multiple Choice, and True/False questions
 - **AI-Powered Question Generation**: Upload curriculum and generate mixed question types automatically
+  - Comprehensive API key validation with helpful error messages
+  - Support for Gemini and OpenAI APIs
+  - Automatic detection of missing or invalid API keys
 - **Enhanced Answer Evaluation**: Advanced fuzzy matching with multiple validation methods
-- **Advanced Settings Control**: Configure 22+ game parameters
+- **Advanced Settings Control**: Configure game parameters (redundant settings removed)
 - **Live Performance Analytics**: Track student progress and performance in real-time
+  - Click student names to view individual progress details
+  - Modal popups with detailed statistics and recent activity
 - **Intelligent Grading**: AI-powered answer evaluation with semantic understanding
 - **Advanced Filtering**: Filter live answers by student, game mode, and correctness
 - **Content Management**: Manage questions, levels, and enemies with type-based filtering
@@ -154,17 +163,25 @@ The advanced answer evaluation system includes:
 - **Goal**: Complete all levels to become a master
 - **Features**: Character selection, HP management, enemy battles
 
+### 📚 Chapter System Integration
+All game modes now integrate with the chapter management system:
+- **Teacher Control**: Lock/unlock chapters independently for each mode
+- **Auto-Sync**: Question pools automatically update based on chapter locks
+- **Flexible Learning**: Teachers can control which content is available per mode
+
 ### ♾️ Endless Mode
 - **Structure**: Continuous questions until HP reaches 0
-- **Mechanics**: Random questions from all difficulty levels
+- **Mechanics**: Random questions from unlocked chapters
 - **Goal**: Achieve the highest score possible
 - **Features**: Progressive difficulty, extended gameplay
+- **Chapter Lock**: Teachers can lock specific chapters to control question availability
 
 ### 📝 Test Yourself Mode
-- **Structure**: 40-question comprehensive exam
-- **Mechanics**: Timed assessment with 75% pass requirement
-- **Goal**: Demonstrate mastery of all concepts
+- **Structure**: Comprehensive exam from unlocked chapters
+- **Mechanics**: Timed assessment with performance tracking
+- **Goal**: Demonstrate mastery of concepts
 - **Features**: Detailed results, performance analysis
+- **Chapter Lock**: Teachers can lock chapters to customize test content
 
 ## 👨‍🏫 Teacher Portal
 
@@ -180,6 +197,10 @@ The advanced answer evaluation system includes:
 - **Login Analytics**: Track student engagement and activity
 
 ### 🤖 AI Question Generator
+- **API Key Validation**: Comprehensive checks with helpful error messages
+  - Detects missing or invalid API keys before processing
+  - User-friendly instructions for obtaining API keys
+  - Support for both Gemini and OpenAI APIs
 - **File Upload**: Support for PDF, DOCX, TXT, and MD files
 - **Question Type Selection**: Choose Short Answer, Multiple Choice, True/False, or mixed
 - **Content Analysis**: AI extracts key concepts from curriculum
@@ -187,16 +208,32 @@ The advanced answer evaluation system includes:
 - **Quality Control**: Review and approve generated questions with type-specific validation
 - **Bulk Creation**: Generate multiple question types in a single operation
 
+### 📚 Chapter Management
+- **Organize Content**: Group questions into logical chapters
+- **Assign Questions**: Select which questions belong to each chapter
+- **Define Level Ranges**: Set which game levels use which chapter
+- **Per-Mode Locks**: Independent lock control for each game mode:
+  - 🔒 Test Yourself Mode
+  - 🔒 Level Mode  
+  - 🔒 Endless Mode
+- **Auto-Sync**: Question pools automatically update based on locks
+- **Visual Management**: Chapter cards with lock status and question counts
+
 ### ⚙️ Advanced Settings
-**22 Configurable Parameters**:
+**Streamlined Configuration**:
 - Game mechanics (HP, damage, timing)
 - Scoring systems (points, bonuses, penalties)
-- Difficulty progression and adaptive features
-- Interface customization (sounds, animations, themes)
+- Adaptive difficulty progression
+- Interface customization (sounds, animations, timers, progress bars)
 - System settings (debug mode, analytics, session management)
+- Removed redundant settings for better clarity
 
 ### 📊 Analytics & Reporting
 - **Student Performance**: Individual and class-wide statistics
+- **Click-Through Details**: Click student names to view detailed progress
+  - Individual statistics modal popup
+  - Recent game history
+  - Performance trends
 - **Question Analysis**: Identify difficult or problematic questions
 - **Engagement Metrics**: Track time spent and completion rates
 - **AI Grading Accuracy**: Monitor automated grading performance
@@ -212,6 +249,8 @@ The advanced answer evaluation system includes:
 │   ├── 📄 questions.json     # Question database
 │   ├── 📄 levels.json        # Level configurations
 │   ├── 📄 enemies.json       # Enemy definitions
+│   ├── 📄 chapters.json      # Chapter organization (NEW)
+│   ├── 📄 question_pools.json # Question pool management (NEW)
 │   ├── 📄 students.json      # Student accounts
 │   ├── 📄 student_progress.json # Individual progress
 │   ├── 📄 game_settings.json # Global game settings

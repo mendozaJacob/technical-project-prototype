@@ -611,5 +611,172 @@
       "questions_answered": 3,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764292223.8868055,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764292232.3193266,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764292236.2348175,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764292246.174505,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764292690.0650663,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764292725.0694938,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 126,
+      "user_answer": "true",
+      "correct_answer": "true",
+      "is_correct": true,
+      "time_taken": 27.27712345123291,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292732.0049217,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 127,
+      "user_answer": "ls",
+      "correct_answer": "pip install pypdf2",
+      "is_correct": false,
+      "time_taken": 5.36592435836792,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292777.1844118,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 5,
+      "questions_answered": 2,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764292779.687214,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764292807.3404698,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 126,
+      "user_answer": "true",
+      "correct_answer": "true",
+      "is_correct": true,
+      "time_taken": 25.734949827194214,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292810.8696313,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 127,
+      "user_answer": "ls",
+      "correct_answer": "pip install pypdf2",
+      "is_correct": false,
+      "time_taken": 2.343233585357666,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292818.3177278,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 128,
+      "user_answer": "npm",
+      "correct_answer": "pip",
+      "is_correct": false,
+      "time_taken": 4.946521282196045,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292825.1913753,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 3,
+      "reason": "player_quit"
+    }
   }
 ]

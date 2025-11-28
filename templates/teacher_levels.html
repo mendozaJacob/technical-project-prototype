@@ -310,14 +310,41 @@
             </div>
         </div>
 
+        <!-- Chapter Filter -->
+        <div style="margin: 30px 0; padding: 20px; background: #fffbe6; border: 2px solid #4b2e05; border-radius: 12px;">
+            <label for="chapterFilter" style="font-weight: bold; margin-right: 15px; font-size: 1.1em;">📚 Filter by Chapter:</label>
+            <select id="chapterFilter" onchange="filterLevelsByChapter()" style="padding: 10px; border-radius: 8px; border: 2px solid #4b2e05; font-family: 'Times New Roman', Times, serif; font-size: 1em;">
+                <option value="">All Chapters (All Levels)</option>
+                {% for chapter in chapters %}
+                <option value="{{ chapter.id }}">{{ chapter.name }} (Levels {{ chapter.level_range|min }}-{{ chapter.level_range|max }})</option>
+                {% endfor %}
+                <option value="unassigned">Unassigned Levels</option>
+            </select>
+        </div>
+
         <!-- Levels Grid -->
         <div class="levels-grid">
             {% for level in levels %}
-            <div class="level-card">
+            <div class="level-card" data-chapter-id="{% if level.level in level_to_chapter %}{{ level_to_chapter[level.level].id }}{% else %}unassigned{% endif %}">
                 <div class="level-header">
                     <h3 class="level-title">Level {{ level.level }}</h3>
                     <div class="level-number">{{ level.level }}</div>
                 </div>
+
+                <!-- Chapter Badge -->
+                {% if level.level in level_to_chapter %}
+                <div style="margin-bottom: 15px;">
+                    <span style="background: #4a7c59; color: white; padding: 5px 12px; border-radius: 6px; font-size: 0.9em; display: inline-block;">
+                        📚 {{ level_to_chapter[level.level].name }}
+                    </span>
+                </div>
+                {% else %}
+                <div style="margin-bottom: 15px;">
+                    <span style="background: #999; color: white; padding: 5px 12px; border-radius: 6px; font-size: 0.9em; display: inline-block;">
+                        ⚠️ Not assigned to chapter
+                    </span>
+                </div>
+                {% endif %}
 
                 <!-- Enemy Information -->
                 {% set enemy = enemies|selectattr("level", "equalto", level.level)|first %}
@@ -575,6 +602,29 @@
                     alert('Error deleting level');
                 });
             }
+        }
+
+        function filterLevelsByChapter() {
+            const selectedChapterId = document.getElementById('chapterFilter').value;
+            const levelCards = document.querySelectorAll('.level-card');
+            
+            levelCards.forEach(card => {
+                const cardChapterId = card.getAttribute('data-chapter-id');
+                
+                if (selectedChapterId === '') {
+                    // Show all levels
+                    card.style.display = '';
+                } else if (selectedChapterId === 'unassigned' && cardChapterId === 'unassigned') {
+                    // Show unassigned levels
+                    card.style.display = '';
+                } else if (cardChapterId === selectedChapterId) {
+                    // Show levels matching selected chapter
+                    card.style.display = '';
+                } else {
+                    // Hide levels not matching filter
+                    card.style.display = 'none';
+                }
+            });
         }
 
         // Close modal when clicking outside

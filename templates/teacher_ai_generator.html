@@ -330,7 +330,28 @@
                 <input type="hidden" name="target_level" value="{{ target_level }}">
                 {% for question in generated_questions %}
                 <div class="question-item">
-                    <h4>Q{{ loop.index }}: {{ question.q }}</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0;">Q{{ loop.index }}: {{ question.q }}</h4>
+                        <span style="background: #4a7c59; color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.85em;">
+                            {% if question.type == 'short_answer' %}📝 Short Answer
+                            {% elif question.type == 'multiple_choice' %}🔢 Multiple Choice
+                            {% elif question.type == 'true_false' %}✔️ True/False
+                            {% else %}❓ {{ question.type }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if question.type == 'multiple_choice' and question.options %}
+                    <div style="margin: 15px 0; padding: 10px; background: #f0f0f0; border-radius: 6px;">
+                        <strong>Options:</strong>
+                        <ol style="margin: 10px 0 0 20px;">
+                            {% for option in question.options %}
+                            <li style="margin: 5px 0;">{{ option }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    {% endif %}
+                    
                     <div class="answer"><strong>Answer:</strong> {{ question.answer }}</div>
                     {% if question.keywords %}
                     <div><strong>Keywords:</strong> {{ question.keywords|join(', ') }}</div>

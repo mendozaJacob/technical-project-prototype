@@ -108,8 +108,8 @@
         100
       ],
       "locked_test_yourself": true,
-      "locked_level_mode": false,
-      "locked_endless_mode": false,
+      "locked_level_mode": true,
+      "locked_endless_mode": true,
       "level_range": [
         1,
         2,
@@ -123,12 +123,57 @@
         10
       ],
       "created_at": "2025-11-26T00:00:00",
-      "updated_at": "2025-11-26T01:04:18.120375"
+      "updated_at": "2025-11-27T20:10:09.444606"
+    },
+    {
+      "id": 2,
+      "name": "Chapter 2",
+      "description": "",
+      "order": 2,
+      "question_ids": [
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135
+      ],
+      "locked_test_yourself": true,
+      "locked_level_mode": false,
+      "locked_endless_mode": true,
+      "level_range": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "created_at": "2025-11-27T19:33:12.239566",
+      "updated_at": "2025-11-27T20:10:10.895458"
     }
   ],
   "metadata": {
-    "last_updated": "2025-11-26T01:04:18.120380",
+    "last_updated": "2025-11-27T20:10:10.895463",
     "version": "1.0.0",
-    "total_chapters": 1
+    "total_chapters": 2
   }
 }

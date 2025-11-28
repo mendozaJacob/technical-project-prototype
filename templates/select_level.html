@@ -156,6 +156,7 @@
         </div>
         <div class="level-title">🛡️ Select Your Dungeon 🐉</div>
         <form method="post">
+            <input type="hidden" id="chapter_id" name="chapter_id" value="">
             {% if chapters %}
                 {% for chapter in chapters %}
                 <div class="chapter-section {% if chapter.locked_level_mode %}locked-chapter{% endif %}">
@@ -174,7 +175,7 @@
                         {% for level in levels %}
                             {% if level.level in chapter.level_range %}
                                 {% if level.level <= highest_unlocked %}
-                                    <button class="level-btn unlocked" name="level" value="{{ level.level }}">
+                                    <button class="level-btn unlocked" name="level" value="{{ level.level }}" onclick="document.getElementById('chapter_id').value='{{ chapter.id }}'">
                                         <span class="icon">⚔️</span>
                                         <span class="number">{{ level.level }}</span>
                                     </button>

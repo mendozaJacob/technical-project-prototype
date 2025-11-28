@@ -1,914 +1,1520 @@
 [
   {
     "id": 1,
-    "q": "What is the capital city of France?",
-    "answer": "Paris",
+    "q": "Configure your Host Name to server1.example.com",
+    "answer": "hostnamectl set-hostname server1.example.com",
     "keywords": [
-      "Paris"
+      "hostname",
+      "hostnamectl"
     ],
-    "feedback": "Paris is the capital and most populous city of France, known for its art, fashion, and landmarks like the Eiffel Tower."
+    "feedback": "hostnamectl is the systemd command for managing the system hostname, ensuring the change is persistent across reboots on modern Linux distributions like RHEL."
   },
   {
     "id": 2,
-    "q": "Which planet is known as the Red Planet?",
-    "answer": "Mars",
+    "q": "Which command lists the files in your current directory?",
+    "answer": "ls",
     "keywords": [
-      "Mars"
+      "ls",
+      "list files"
     ],
-    "feedback": "Mars is called the Red Planet due to its reddish appearance caused by iron oxide on its surface."
+    "feedback": "ls is the standard command to list directory contents, providing a quick overview of files and subdirectories in the current working directory."
   },
   {
     "id": 3,
-    "q": "What is the largest ocean on Earth?",
-    "answer": "Pacific Ocean",
+    "q": "Create a user named student with password student",
+    "answer": "useradd student; echo 'student' | passwd --stdin student",
     "keywords": [
-      "Pacific"
+      "useradd",
+      "create user",
+      "passwd"
     ],
-    "feedback": "The Pacific Ocean covers more than one-third of the Earth's surface and is the largest by area."
+    "feedback": "useradd creates the user account with default settings, and passwd sets the password using stdin redirection for non-interactive scripting."
   },
   {
     "id": 4,
-    "q": "Who painted the Mona Lisa?",
-    "answer": "Leonardo da Vinci",
+    "q": "How do you create a new directory named /home/student/docs?",
+    "answer": "mkdir -p /home/student/docs",
     "keywords": [
-      "Leonardo da Vinci"
+      "mkdir",
+      "create directory"
     ],
-    "feedback": "Leonardo da Vinci, an Italian Renaissance artist, created the Mona Lisa around 1503, and it is housed in the Louvre Museum."
+    "feedback": "mkdir -p creates the directory and any necessary parent directories, preventing errors if intermediate paths do not exist."
   },
   {
     "id": 5,
-    "q": "What is the chemical symbol for gold?",
-    "answer": "Au",
+    "q": "Mount the /dev/sdb1 filesystem to /mnt/data",
+    "answer": "mount /dev/sdb1 /mnt/data",
     "keywords": [
-      "Au"
+      "mount",
+      "filesystem"
     ],
-    "feedback": "Au comes from the Latin word 'aurum,' meaning gold, and it is element number 79 on the periodic table."
+    "feedback": "mount attaches the filesystem on the specified device to the mount point, making the storage accessible at that location in the directory tree."
   },
   {
     "id": 6,
-    "q": "In which year did the Titanic sink?",
-    "answer": "1912",
+    "q": "Configure the system to boot into graphical mode",
+    "answer": "systemctl set-default graphical.target",
     "keywords": [
-      "1912"
+      "systemctl",
+      "graphical target"
     ],
-    "feedback": "The RMS Titanic sank on April 15, 1912, after hitting an iceberg during its maiden voyage from Southampton to New York City."
+    "feedback": "systemctl set-default changes the default systemd target to graphical.target, enabling the GUI environment on boot."
   },
   {
     "id": 7,
-    "q": "What is the square root of 144?",
-    "answer": "12",
+    "q": "Install the httpd package",
+    "answer": "dnf install httpd -y",
     "keywords": [
-      "12"
+      "dnf",
+      "install package",
+      "httpd"
     ],
-    "feedback": "The square root of 144 is 12, since 12 multiplied by itself equals 144."
+    "feedback": "dnf is the package manager for RHEL-based systems, and -y assumes yes to prompts for automated installation of the Apache HTTP server package."
   },
   {
     "id": 8,
-    "q": "Which animal is known as the 'King of the Jungle'?",
-    "answer": "Lion",
+    "q": "Create a cron job to run /usr/bin/backup.sh daily at 2 AM",
+    "answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
     "keywords": [
-      "Lion"
+      "crontab",
+      "cron job",
+      "schedule"
     ],
-    "feedback": "Lions are often called the King of the Jungle due to their strength and role as apex predators in African savannas."
+    "feedback": "crontab -e edits the user's cron table, and the cron syntax '0 2 * * *' schedules the script to run at 2 AM every day."
   },
   {
     "id": 9,
-    "q": "What is the longest river in the world?",
-    "answer": "Nile River",
+    "q": "Find all files owned by user student",
+    "answer": "find / -user student 2>/dev/null",
     "keywords": [
-      "Nile",
-      "The Nile River"
+      "find",
+      "user files"
     ],
-    "feedback": "The Nile River, flowing through northeastern Africa, is traditionally considered the longest river at about 4,135 miles."
+    "feedback": "find searches the filesystem starting from root, filtering by user ownership, with stderr redirected to suppress permission errors."
   },
   {
     "id": 10,
-    "q": "Who wrote 'To Kill a Mockingbird'?",
-    "answer": "Harper Lee",
+    "q": "Configure firewall to allow SSH",
+    "answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
     "keywords": [
-      "Harper Lee"
+      "firewall-cmd",
+      "SSH",
+      "firewall"
     ],
-    "feedback": "Harper Lee wrote 'To Kill a Mockingbird' in 1960, a novel addressing racial injustice in the American South."
+    "feedback": "firewall-cmd manages firewalld, adding the SSH service permanently and reloading to apply changes without restarting the service."
   },
   {
     "id": 11,
-    "q": "What is the capital of Japan?",
-    "answer": "Tokyo",
+    "q": "Create a logical volume named lv_data of size 100M in volume group vg_system",
+    "answer": "lvcreate -L 100M -n lv_data vg_system",
     "keywords": [
-      "Tokyo"
+      "lvcreate",
+      "LVM",
+      "logical volume"
     ],
-    "feedback": "Tokyo is the capital and largest city of Japan, serving as its political, economic, and cultural center."
+    "feedback": "lvcreate is the LVM command to create logical volumes, -L specifies the size, -n names the volume, and vg_system is the target volume group for flexible storage management."
   },
   {
     "id": 12,
-    "q": "Which element has the atomic number 1?",
-    "answer": "Hydrogen",
+    "q": "Format /dev/sdc1 with ext4 filesystem",
+    "answer": "mkfs.ext4 /dev/sdc1",
     "keywords": [
-      "Hydrogen"
+      "mkfs",
+      "ext4",
+      "format"
     ],
-    "feedback": "Hydrogen is the lightest and most abundant element in the universe, with atomic number 1."
+    "feedback": "mkfs.ext4 formats the partition with the ext4 filesystem, which is the default journaling filesystem for RHEL, providing reliability and performance."
   },
   {
     "id": 13,
-    "q": "What is the largest planet in our solar system?",
-    "answer": "Jupiter",
+    "q": "Add the user student to the wheel group",
+    "answer": "usermod -aG wheel student",
     "keywords": [
-      "Jupiter"
+      "usermod",
+      "group",
+      "wheel"
     ],
-    "feedback": "Jupiter is the largest planet, known for its Great Red Spot and numerous moons."
+    "feedback": "usermod modifies user accounts, -aG appends the user to additional groups without removing existing ones, and wheel is the standard sudo group in RHEL."
   },
   {
     "id": 14,
-    "q": "Who was the first president of the United States?",
-    "answer": "George Washington",
+    "q": "Start and enable the httpd service",
+    "answer": "systemctl start httpd; systemctl enable httpd",
     "keywords": [
-      "George Washington"
+      "systemctl",
+      "httpd",
+      "service"
     ],
-    "feedback": "George Washington served as the first President of the United States from 1789 to 1797."
+    "feedback": "systemctl manages systemd services, 'start' runs the service immediately, and 'enable' configures it to start automatically on boot."
   },
   {
     "id": 15,
-    "q": "What is the currency of the United Kingdom?",
-    "answer": "Pound Sterling",
+    "q": "Configure SELinux to enforcing mode",
+    "answer": "setenforce 1; sed -i 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config",
     "keywords": [
-      "British Pound",
-      "GBP", 
-      "Pound",
-      "Sterling"
+      "SELinux",
+      "setenforce",
+      "enforcing"
     ],
-    "feedback": "The Pound Sterling, often called the British Pound, is the official currency of the UK."
+    "feedback": "setenforce changes the runtime SELinux mode, and sed edits the config file for persistence, enforcing security policies on the system."
   },
   {
     "id": 16,
-    "q": "Which gas do plants absorb from the atmosphere?",
-    "answer": "Carbon Dioxide",
+    "q": "Create a swap file of 512M and activate it",
+    "answer": "dd if=/dev/zero of=/swapfile bs=1M count=512; chmod 600 /swapfile; mkswap /swapfile; swapon /swapfile",
     "keywords": [
-      "CO2",
-      "Carbon Dioxide"
+      "swap",
+      "mkswap",
+      "swapon"
     ],
-    "feedback": "Plants use photosynthesis to absorb carbon dioxide and convert it into oxygen and glucose."
+    "feedback": "dd creates a file filled with zeros, chmod sets secure permissions, mkswap formats it as swap space, and swapon activates it for memory paging."
   },
   {
     "id": 17,
-    "q": "What is the smallest country in the world?",
-    "answer": "Vatican City",
+    "q": "Archive and compress the /home directory to /tmp/home_backup.tar.gz",
+    "answer": "tar -czf /tmp/home_backup.tar.gz /home",
     "keywords": [
-      "Vatican City"
+      "tar",
+      "compress",
+      "archive"
     ],
-    "feedback": "Vatican City is the smallest independent state in the world, located within Rome, Italy."
+    "feedback": "tar creates archives, -c creates, -z compresses with gzip, -f specifies the output file, for efficient backup and storage."
   },
   {
     "id": 18,
-    "q": "Who discovered penicillin?",
-    "answer": "Alexander Fleming",
+    "q": "Configure the system time zone to America/New_York",
+    "answer": "timedatectl set-timezone America/New_York",
     "keywords": [
-      "Alexander Fleming"
+      "timedatectl",
+      "timezone"
     ],
-    "feedback": "Alexander Fleming discovered penicillin in 1928, revolutionizing medicine as the first antibiotic."
+    "feedback": "timedatectl is the systemd command for time management, setting the timezone persistently across reboots."
   },
   {
     "id": 19,
-    "q": "What is the hardest natural substance on Earth?",
-    "answer": "Diamond",
+    "q": "Set the password for user student to never expire",
+    "answer": "chage -M -1 student",
     "keywords": [
-      "Diamond"
+      "chage",
+      "password expire"
     ],
-    "feedback": "Diamond is the hardest known natural material, formed from carbon under high pressure and temperature."
+    "feedback": "chage manages password aging policies, -M -1 sets the maximum age to unlimited, disabling password expiration for the user."
   },
   {
     "id": 20,
-    "q": "Which continent is known as the 'Dark Continent'?",
-    "answer": "Africa",
+    "q": "List all active network interfaces",
+    "answer": "nmcli device status",
     "keywords": [
-      "Africa"
+      "nmcli",
+      "network interfaces"
     ],
-    "feedback": "Africa is sometimes called the 'Dark Continent' due to its historical mystery to Europeans before extensive exploration."
+    "feedback": "nmcli is the NetworkManager command-line tool, 'device status' lists all network devices and their connection states."
   },
   {
     "id": 21,
-    "q": "What is the speed of light in a vacuum in meters per second?",
-    "answer": "299,792,458 meters per second",
+    "q": "Configure a static IP address 192.168.1.100/24 for interface enp0s3",
+    "answer": "nmcli con mod enp0s3 ipv4.addresses 192.168.1.100/24 ipv4.method manual; nmcli con up enp0s3",
     "keywords": [
-      "3 x 10^8 m/s",
-      "186,282 miles per second",
-      "299,792,458"
+      "nmcli",
+      "static IP",
+      "network"
     ],
-    "feedback": "The speed of light in a vacuum is approximately 299,792,458 meters per second, a fundamental constant in physics."
+    "feedback": "nmcli modifies NetworkManager connections, setting the IP address and method to manual for static configuration, then brings the connection up."
   },
   {
     "id": 22,
-    "q": "Who wrote '1984'?",
-    "answer": "George Orwell",
+    "q": "Create a new partition on /dev/sdb using fdisk",
+    "answer": "fdisk /dev/sdb; n; p; 1; <default>; <default>; w",
     "keywords": [
-      "George Orwell"
+      "fdisk",
+      "partition",
+      "disk"
     ],
-    "feedback": "George Orwell wrote '1984' in 1949, a dystopian novel about totalitarianism and surveillance."
+    "feedback": "fdisk is an interactive partition editor, n creates a new partition, p specifies primary, and w writes changes to disk."
   },
   {
     "id": 23,
-    "q": "What is the largest desert in the world?",
-    "answer": "Sahara Desert",
+    "q": "Extend the filesystem on /dev/vg_system/lv_data to use all free space",
+    "answer": "lvextend -l +100%FREE /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data",
     "keywords": [
-      "Sahara"
+      "lvextend",
+      "resize2fs",
+      "extend filesystem"
     ],
-    "feedback": "The Sahara Desert in Africa is the largest hot desert, covering over 9 million square kilometers."
+    "feedback": "lvextend expands the logical volume to use all free space in the volume group, then resize2fs adjusts the filesystem size accordingly."
   },
   {
     "id": 24,
-    "q": "Which vitamin is produced when skin is exposed to sunlight?",
-    "answer": "Vitamin D",
+    "q": "Install and enable the vsftpd service",
+    "answer": "dnf install vsftpd -y; systemctl enable vsftpd; systemctl start vsftpd",
     "keywords": [
-      "Vitamin D", "D"
+      "vsftpd",
+      "FTP",
+      "service"
     ],
-    "feedback": "Vitamin D is synthesized in the skin through exposure to UVB rays from sunlight."
+    "feedback": "dnf installs the FTP server package, systemctl enables and starts the service for file transfer capabilities."
   },
   {
     "id": 25,
-    "q": "What is the capital of Australia?",
-    "answer": "Canberra",
+    "q": "Change the ownership of /home/student/docs to user admin",
+    "answer": "chown -R admin:admin /home/student/docs",
     "keywords": [
-      "Canberra"
+      "chown",
+      "ownership"
     ],
-    "feedback": "Canberra is the capital of Australia, chosen as a compromise between Sydney and Melbourne."
+    "feedback": "chown recursively changes ownership to the specified user and group, ensuring proper access control."
   },
   {
     "id": 26,
-    "q": "Who painted 'The Starry Night'?",
-    "answer": "Vincent van Gogh",
+    "q": "Set permissions on /etc/shadow to 000",
+    "answer": "chmod 000 /etc/shadow",
     "keywords": [
-      "Vincent van Gogh", "van Gogh"
+      "chmod",
+      "permissions",
+      "shadow"
     ],
-    "feedback": "Vincent van Gogh created 'The Starry Night' in 1889 while in an asylum in Saint-Rémy-de-Provence."
+    "feedback": "chmod sets the file to no permissions, restricting access to the shadow password file for security."
   },
   {
     "id": 27,
-    "q": "What is the most spoken language in the world by number of native speakers?",
-    "answer": "Mandarin Chinese",
+    "q": "Create a simple shell script /usr/local/bin/hello.sh that prints 'Hello World' and make it executable",
+    "answer": "echo '#!/bin/bash\necho \"Hello World\"' > /usr/local/bin/hello.sh; chmod +x /usr/local/bin/hello.sh",
     "keywords": [
-      "Chinese",
-      "Mandarin"
+      "shell script",
+      "bash",
+      "executable"
     ],
-    "feedback": "Mandarin Chinese is the most spoken language by native speakers, with over 900 million people."
+    "feedback": "echo creates the script with shebang and content, chmod +x makes it executable for running as a command."
   },
   {
     "id": 28,
-    "q": "Which planet is closest to the Sun?",
-    "answer": "Mercury",
+    "q": "List all processes using more than 10% CPU",
+    "answer": "top -p $(pgrep -f .) | awk '$9 > 10'",
     "keywords": [
-      "Mercury"
+      "top",
+      "processes",
+      "CPU"
     ],
-    "feedback": "Mercury is the closest planet to the Sun, with an average distance of about 58 million kilometers."
+    "feedback": "top displays processes, pgrep gets all PIDs, awk filters those exceeding 10% CPU usage."
   },
   {
     "id": 29,
-    "q": "What is the chemical formula for water?",
-    "answer": "H2O",
+    "q": "Configure the system to use NTP for time synchronization",
+    "answer": "dnf install chrony -y; systemctl enable chronyd; systemctl start chronyd",
     "keywords": [
-      "H2O"
+      "chrony",
+      "NTP",
+      "time sync"
     ],
-    "feedback": "Water's chemical formula is H2O, consisting of two hydrogen atoms and one oxygen atom."
+    "feedback": "chrony is the NTP client for RHEL, installed and enabled to synchronize system time with NTP servers."
   },
   {
     "id": 30,
-    "q": "Who was the first man to walk on the Moon?",
-    "answer": "Neil Armstrong",
+    "q": "Create a new file system mount point /var/www and mount /dev/sdd1 there with defaults",
+    "answer": "mkdir /var/www; mount /dev/sdd1 /var/www; echo '/dev/sdd1 /var/www ext4 defaults 0 0' >> /etc/fstab",
     "keywords": [
-      "Neil Armstrong"
+      "mount point",
+      "fstab"
     ],
-    "feedback": "Neil Armstrong was the first person to walk on the Moon during the Apollo 11 mission in 1969."
+    "feedback": "mkdir creates the mount point, mount attaches the device, and fstab entry ensures persistence across reboots."
   },
   {
     "id": 31,
-    "q": "What is the capital of Brazil?",
-    "answer": "Brasília",
+    "q": "Disable the firewall for HTTP service",
+    "answer": "firewall-cmd --permanent --remove-service=http; firewall-cmd --reload",
     "keywords": [
-      "Brasília"
+      "firewall-cmd",
+      "disable service"
     ],
-    "feedback": "Brasília is the capital of Brazil, designed and built in the 1950s as a planned city."
+    "feedback": "firewall-cmd removes the HTTP service from the permanent configuration and reloads to apply changes, disabling web traffic."
   },
   {
     "id": 32,
-    "q": "Which organ pumps blood in the human body?",
-    "answer": "Heart",
+    "q": "Find and kill a process with PID 1234",
+    "answer": "kill 1234",
     "keywords": [
-      "Heart"
+      "kill",
+      "process"
     ],
-    "feedback": "The heart is a muscular organ that pumps blood throughout the body via the circulatory system."
+    "feedback": "kill sends a SIGTERM signal to terminate the process with the specified PID gracefully."
   },
   {
     "id": 33,
-    "q": "What is the largest mammal in the world?",
-    "answer": "Blue Whale",
+    "q": "Configure sudo for user student without password",
+    "answer": "echo 'student ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers",
     "keywords": [
-      "Blue Whale"
+      "sudoers",
+      "sudo"
     ],
-    "feedback": "The blue whale is the largest animal ever known to have lived, reaching lengths of up to 30 meters."
+    "feedback": "echo appends a sudoers entry allowing the user to run all commands without password authentication."
   },
   {
     "id": 34,
-    "q": "Who invented the telephone?",
-    "answer": "Alexander Graham Bell",
+    "q": "Backup the /etc directory using rsync to /backup/etc",
+    "answer": "rsync -av /etc/ /backup/etc/",
     "keywords": [
-      "Alexander Graham Bell"
+      "rsync",
+      "backup"
     ],
-    "feedback": "Alexander Graham Bell patented the telephone in 1876, enabling voice communication over distances."
+    "feedback": "rsync synchronizes files with archive mode (-a) and verbose output (-v), preserving permissions and timestamps."
   },
   {
     "id": 35,
-    "q": "What is the capital of Canada?",
-    "answer": "Ottawa",
+    "q": "Set the SELinux context for /var/www to httpd_sys_content_t",
+    "answer": "semanage fcontext -a -t httpd_sys_content_t '/var/www(/.*)?'; restorecon -Rv /var/www",
     "keywords": [
-      "Ottawa"
+      "semanage",
+      "SELinux context"
     ],
-    "feedback": "Ottawa is the capital of Canada, located on the Ottawa River in Ontario."
+    "feedback": "semanage adds a file context rule, and restorecon applies it recursively to set proper SELinux labels for web content."
   },
   {
     "id": 36,
-    "q": "Which gas makes up about 78% of Earth's atmosphere?",
-    "answer": "Nitrogen",
+    "q": "List all mounted file systems",
+    "answer": "df -hT",
     "keywords": [
-      "Nitrogen"
+      "df",
+      "mounted filesystems"
     ],
-    "feedback": "Nitrogen comprises approximately 78% of the Earth's atmosphere, essential for life."
+    "feedback": "df displays disk space usage with human-readable (-h) and filesystem type (-T) information."
   },
   {
     "id": 37,
-    "q": "What is the longest bone in the human body?",
-    "answer": "Femur",
+    "q": "Create a group named developers and add user student to it",
+    "answer": "groupadd developers; usermod -aG developers student",
     "keywords": [
-      "Femur"
+      "groupadd",
+      "group"
     ],
-    "feedback": "The femur, or thigh bone, is the longest and strongest bone in the human body."
+    "feedback": "groupadd creates the group, and usermod appends the user to the group without removing existing memberships."
   },
   {
     "id": 38,
-    "q": "Who wrote 'Pride and Prejudice'?",
-    "answer": "Jane Austen",
+    "q": "Reboot the system immediately",
+    "answer": "reboot",
     "keywords": [
-      "Jane Austen"
+      "reboot",
+      "shutdown"
     ],
-    "feedback": "Jane Austen wrote 'Pride and Prejudice' in 1813, a classic novel of manners and romance."
+    "feedback": "reboot initiates an immediate system restart using systemd."
   },
   {
     "id": 39,
-    "q": "What is the capital of India?",
-    "answer": "New Delhi",
+    "q": "Check the status of the sshd service",
+    "answer": "systemctl status sshd",
     "keywords": [
-      "New Delhi"
+      "systemctl",
+      "service status"
     ],
-    "feedback": "New Delhi is the capital of India, serving as the seat of the Indian government."
+    "feedback": "systemctl status shows the current state, uptime, and recent logs for the SSH daemon service."
   },
   {
     "id": 40,
-    "q": "Which element is represented by the symbol 'O'?",
-    "answer": "Oxygen",
+    "q": "Update all packages on the system",
+    "answer": "dnf update -y",
     "keywords": [
-      "Oxygen"
+      "dnf",
+      "update packages"
     ],
-    "feedback": "Oxygen is a chemical element with symbol O, essential for respiration and combustion."
+    "feedback": "dnf update downloads and installs available updates for all packages, with -y assuming yes to prompts."
   },
   {
     "id": 41,
-    "q": "What is the capital of Germany?",
-    "answer": "Berlin",
+    "q": "Create a volume group named vg_data using /dev/sdb",
+    "answer": "vgcreate vg_data /dev/sdb",
     "keywords": [
-      "Berlin"
+      "vgcreate",
+      "volume group",
+      "LVM"
     ],
-    "feedback": "Berlin is the capital and largest city of Germany, its political and cultural center."
+    "feedback": "vgcreate creates a volume group from the specified physical volume, enabling logical volume management for flexible storage."
   },
   {
     "id": 42,
-    "q": "Which planet has the most moons?",
-    "answer": "Saturn",
+    "q": "Reduce the size of logical volume lv_data by 50M",
+    "answer": "umount /dev/vg_system/lv_data; e2fsck -f /dev/vg_system/lv_data; resize2fs /dev/vg_system/lv_data 150M; lvreduce -L 200M /dev/vg_system/lv_data",
     "keywords": [
-      "Saturn"
+      "lvreduce",
+      "resize2fs",
+      "reduce LV"
     ],
-    "feedback": "Saturn has over 80 known moons, more than any other planet in our solar system."
+    "feedback": "umount detaches the filesystem, e2fsck checks for errors, resize2fs shrinks the filesystem, and lvreduce reduces the logical volume size."
   },
   {
     "id": 43,
-    "q": "What is the chemical symbol for sodium?",
-    "answer": "Na",
+    "q": "Configure NFS export for /exports/share to 192.168.1.0/24 with read-write access",
+    "answer": "echo '/exports/share 192.168.1.0/24(rw,sync)' >> /etc/exports; exportfs -ra",
     "keywords": [
-      "Na"
+      "NFS",
+      "exports",
+      "share"
     ],
-    "feedback": "Na is the symbol for sodium, a highly reactive alkali metal."
+    "feedback": "echo adds an NFS export entry to /etc/exports, and exportfs reloads the NFS configuration to share the directory with read-write access."
   },
   {
     "id": 44,
-    "q": "Who was the first female Prime Minister of the United Kingdom?",
-    "answer": "Margaret Thatcher",
+    "q": "Install and configure Samba for anonymous access to /samba/share",
+    "answer": "dnf install samba -y; mkdir /samba/share; chmod 777 /samba/share; echo '[share]\\npath = /samba/share\\nbrowseable = yes\\nguest ok = yes\\nread only = no' > /etc/samba/smb.conf; systemctl enable smb; systemctl start smb",
     "keywords": [
-      "Margaret Thatcher"
+      "Samba",
+      "SMB",
+      "share"
     ],
-    "feedback": "Margaret Thatcher served as Prime Minister of the UK from 1979 to 1990, known as the 'Iron Lady'."
+    "feedback": "dnf installs Samba, mkdir creates the share directory, chmod sets permissions, echo configures smb.conf, and systemctl enables and starts the SMB service."
   },
   {
     "id": 45,
-    "q": "What is the capital of Russia?",
-    "answer": "Moscow",
+    "q": "Set up auditing for file access on /var/log/audit.log",
+    "answer": "auditctl -w /var/log/audit.log -p wa -k log-watch",
     "keywords": [
-      "Moscow"
+      "auditctl",
+      "auditing"
     ],
-    "feedback": "Moscow is the capital of Russia, its largest city and economic hub."
+    "feedback": "auditctl sets up auditing rules to watch file access (write and attribute changes) on the specified log file with a custom key."
   },
   {
     "id": 46,
-    "q": "Which vitamin is also known as ascorbic acid?",
-    "answer": "Vitamin C",
+    "q": "Configure the system to ignore IPv6",
+    "answer": "echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf; sysctl -p",
     "keywords": [
-      "Vitamin C", 
-      "C", "c" 
+      "IPv6",
+      "sysctl"
     ],
-    "feedback": "Vitamin C, or ascorbic acid, is essential for immune function and collagen production."
+    "feedback": "echo adds a sysctl parameter to disable IPv6 on all interfaces, and sysctl -p applies the changes persistently."
   },
   {
     "id": 47,
-    "q": "What is the largest island in the world?",
-    "answer": "Greenland",
+    "q": "Create a symbolic link from /tmp/link to /etc/passwd",
+    "answer": "ln -s /etc/passwd /tmp/link",
     "keywords": [
-      "Greenland"
+      "ln",
+      "symbolic link"
     ],
-    "feedback": "Greenland is the world's largest island, located between the Arctic and Atlantic Oceans."
+    "feedback": "ln -s creates a symbolic link pointing to the target file, allowing access via the link path."
   },
   {
     "id": 48,
-    "q": "Who directed the movie 'Jurassic Park'?",
-    "answer": "Steven Spielberg",
+    "q": "List all users in the system",
+    "answer": "getent passwd",
     "keywords": [
-      "Steven Spielberg"
+      "getent",
+      "users"
     ],
-    "feedback": "Steven Spielberg directed 'Jurassic Park' in 1993, a blockbuster about dinosaurs brought back to life."
+    "feedback": "getent passwd retrieves all user entries from the passwd database, including local and remote users."
   },
   {
     "id": 49,
-    "q": "What is the capital of China?",
-    "answer": "Beijing",
+    "q": "Configure the firewall to allow port 8080/tcp",
+    "answer": "firewall-cmd --permanent --add-port=8080/tcp; firewall-cmd --reload",
     "keywords": [
-      "Beijing"
+      "firewall-cmd",
+      "port"
     ],
-    "feedback": "Beijing is the capital of China, home to historical sites like the Forbidden City."
+    "feedback": "firewall-cmd adds a permanent rule to allow TCP traffic on port 8080 and reloads the firewall configuration."
   },
   {
     "id": 50,
-    "q": "Which metal is liquid at room temperature?",
-    "answer": "Mercury",
+    "q": "Delete the user student and its home directory",
+    "answer": "userdel -r student",
     "keywords": [
-      "Mercury"
+      "userdel",
+      "delete user"
     ],
-    "feedback": "Mercury is the only metal that is liquid at standard room temperature."
+    "feedback": "userdel -r removes the user account and recursively deletes their home directory and mail spool."
   },
   {
     "id": 51,
-    "q": "What is the capital of Italy?",
-    "answer": "Rome",
+    "q": "Create a hard link named backup in /tmp to /etc/hosts",
+    "answer": "ln /etc/hosts /tmp/backup",
     "keywords": [
-      "Rome"
+      "ln",
+      "hard link"
     ],
-    "feedback": "Rome is the capital of Italy, known for its ancient history and landmarks like the Colosseum."
+    "feedback": "ln creates a hard link to the target file, sharing the same inode and data blocks for efficient space usage."
   },
   {
     "id": 52,
-    "q": "Which scientist developed the theory of relativity?",
-    "answer": "Albert Einstein",
+    "q": "Check disk usage for the root filesystem",
+    "answer": "df -h /",
     "keywords": [
-      "Albert Einstein"
+      "df",
+      "disk usage"
     ],
-    "feedback": "Albert Einstein formulated the theory of relativity, revolutionizing physics in the early 20th century."
+    "feedback": "df displays disk space usage with human-readable format (-h) for the specified filesystem."
   },
   {
     "id": 53,
-    "q": "What is the capital of Mexico?",
-    "answer": "Mexico City",
+    "q": "Install the vim-enhanced package",
+    "answer": "dnf install vim-enhanced -y",
     "keywords": [
-      "Mexico City"
+      "dnf",
+      "vim"
     ],
-    "feedback": "Mexico City is the capital of Mexico, one of the largest cities in the world."
+    "feedback": "dnf installs the enhanced Vim package, which includes additional features and syntax highlighting."
   },
   {
     "id": 54,
-    "q": "Which gas is known as laughing gas?",
-    "answer": "Nitrous Oxide",
+    "q": "Configure the system to boot into single-user mode by default",
+    "answer": "systemctl set-default rescue.target",
     "keywords": [
-      "N2O",
-      "Nitrous Oxide"
+      "systemctl",
+      "rescue target"
     ],
-    "feedback": "Nitrous oxide, or N2O, is called laughing gas for its euphoric effects when inhaled."
+    "feedback": "systemctl set-default changes the default systemd target to rescue.target, enabling single-user mode on boot."
   },
   {
     "id": 55,
-    "q": "What is the capital of South Korea?",
-    "answer": "Seoul",
+    "q": "Find all empty directories in /home",
+    "answer": "find /home -type d -empty",
     "keywords": [
-      "Seoul"
+      "find",
+      "empty directories"
     ],
-    "feedback": "Seoul is the capital of South Korea, a major economic and cultural hub in East Asia."
+    "feedback": "find searches for directories (-type d) that are empty (-empty) within the /home directory."
   },
   {
     "id": 56,
-    "q": "Who wrote 'The Great Gatsby'?",
-    "answer": "F. Scott Fitzgerald",
+    "q": "Set the umask for the root user to 027",
+    "answer": "echo 'umask 027' >> /root/.bashrc",
     "keywords": [
-      "F. Scott Fitzgerald"
+      "umask",
+      "permissions"
     ],
-    "feedback": "F. Scott Fitzgerald wrote 'The Great Gatsby' in 1925, a critique of the American Dream."
+    "feedback": "echo appends the umask setting to the root user's bashrc file, setting default permissions for new files."
   },
   {
     "id": 57,
-    "q": "What is the capital of Argentina?",
-    "answer": "Buenos Aires",
+    "q": "Configure the hostname resolution for server2.example.com in /etc/hosts",
+    "answer": "echo '192.168.1.101 server2.example.com' >> /etc/hosts",
     "keywords": [
-      "Buenos Aires"
+      "/etc/hosts",
+      "hostname resolution"
     ],
-    "feedback": "Buenos Aires is the capital of Argentina, known for its European-style architecture."
+    "feedback": "echo adds a static hostname entry to /etc/hosts for local name resolution."
   },
   {
     "id": 58,
-    "q": "Which element has the symbol 'Fe'?",
-    "answer": "Iron",
+    "q": "List all services that are enabled",
+    "answer": "systemctl list-unit-files --type=service | grep enabled",
     "keywords": [
-      "Iron"
+      "systemctl",
+      "enabled services"
     ],
-    "feedback": "Iron, with symbol Fe, is a common metal used in construction and manufacturing."
+    "feedback": "systemctl lists all service unit files, and grep filters for those that are enabled."
   },
   {
     "id": 59,
-    "q": "What is the capital of Egypt?",
-    "answer": "Cairo",
+    "q": "Create a new LVM physical volume on /dev/sde",
+    "answer": "pvcreate /dev/sde",
     "keywords": [
-      "Cairo"
+      "pvcreate",
+      "physical volume"
     ],
-    "feedback": "Cairo is the capital of Egypt, located along the Nile River and known for its pyramids."
+    "feedback": "pvcreate initializes the specified device as a physical volume for LVM."
   },
   {
     "id": 60,
-    "q": "Who was the first woman to win a Nobel Prize?",
-    "answer": "Marie Curie",
+    "q": "Mount an ISO file /tmp/rhel.iso to /mnt/iso",
+    "answer": "mkdir /mnt/iso; mount -o loop /tmp/rhel.iso /mnt/iso",
     "keywords": [
-      "Marie Curie"
+      "mount",
+      "ISO",
+      "loop"
     ],
-    "feedback": "Marie Curie won the Nobel Prize in Physics in 1903 and Chemistry in 1911 for her work on radioactivity."
+    "feedback": "mkdir creates the mount point, and mount with loop option attaches the ISO file as a filesystem."
   },
   {
     "id": 61,
-    "q": "What is the capital of Spain?",
-    "answer": "Madrid",
+    "q": "Configure the firewall to allow DNS service",
+    "answer": "firewall-cmd --permanent --add-service=dns; firewall-cmd --reload",
     "keywords": [
-      "Madrid"
+      "firewall-cmd",
+      "DNS"
     ],
-    "feedback": "Madrid is the capital of Spain, its largest city and a major European cultural center."
+    "feedback": "firewall-cmd adds the DNS service to the permanent firewall configuration and reloads the rules."
   },
   {
     "id": 62,
-    "q": "Which planet is known for its rings?",
-    "answer": "Saturn",
+    "q": "Change the group ownership of /var/log to adm",
+    "answer": "chgrp -R adm /var/log",
     "keywords": [
-      "Saturn"
+      "chgrp",
+      "group ownership"
     ],
-    "feedback": "Saturn is famous for its prominent ring system, made mostly of ice and rock particles."
+    "feedback": "chgrp recursively changes the group ownership of /var/log to adm."
   },
   {
     "id": 63,
-    "q": "What is the chemical symbol for potassium?",
-    "answer": "K",
+    "q": "Create a cron job to clean /tmp every Sunday at 3 AM",
+    "answer": "crontab -e; 0 3 * * 0 rm -rf /tmp/*",
     "keywords": [
-      "K"
+      "crontab",
+      "weekly cron"
     ],
-    "feedback": "K is the symbol for potassium, an alkali metal essential for human health."
+    "feedback": "crontab -e edits the user's cron table, scheduling the command to run weekly on Sunday at 3 AM."
   },
   {
     "id": 64,
-    "q": "Who wrote 'The Catcher in the Rye'?",
-    "answer": "J.D. Salinger",
+    "q": "Verify the integrity of the package database",
+    "answer": "dnf verify",
     "keywords": [
-      "J.D. Salinger"
+      "dnf",
+      "verify packages"
     ],
-    "feedback": "J.D. Salinger wrote 'The Catcher in the Rye' in 1951, a coming-of-age novel."
+    "feedback": "dnf verify checks the integrity of installed packages against the package database."
   },
   {
     "id": 65,
-    "q": "What is the capital of Turkey?",
-    "answer": "Ankara",
+    "q": "Set SELinux to permissive mode temporarily",
+    "answer": "setenforce 0",
     "keywords": [
-      "Ankara"
+      "SELinux",
+      "permissive"
     ],
-    "feedback": "Ankara is the capital of Turkey, serving as its political center."
+    "feedback": "setenforce changes SELinux to permissive mode, allowing violations to be logged but not enforced."
   },
   {
     "id": 66,
-    "q": "Which gas is produced during photosynthesis?",
-    "answer": "Oxygen",
+    "q": "List all kernel modules currently loaded",
+    "answer": "lsmod",
     "keywords": [
-      "Oxygen"
+      "lsmod",
+      "kernel modules"
     ],
-    "feedback": "Plants produce oxygen as a byproduct of photosynthesis, using sunlight, water, and carbon dioxide."
+    "feedback": "lsmod lists all currently loaded kernel modules."
   },
   {
     "id": 67,
-    "q": "What is the capital of Thailand?",
-    "answer": "Bangkok",
+    "q": "Configure a DHCP client for interface enp0s3",
+    "answer": "nmcli con mod enp0s3 ipv4.method auto; nmcli con up enp0s3",
     "keywords": [
-      "Bangkok"
+      "nmcli",
+      "DHCP"
     ],
-    "feedback": "Bangkok is the capital of Thailand, a bustling city known for its temples and markets."
+    "feedback": "nmcli sets the interface to use automatic IP configuration (DHCP) and brings the connection up."
   },
   {
     "id": 68,
-    "q": "Who discovered America in 1492?",
-    "answer": "Christopher Columbus",
+    "q": "Create a file /etc/motd with content 'Welcome to RHCSA Lab'",
+    "answer": "echo 'Welcome to RHCSA Lab' > /etc/motd",
     "keywords": [
-      "Christopher Columbus"
+      "motd",
+      "message of the day"
     ],
-    "feedback": "Christopher Columbus reached the Americas in 1492, sponsored by Spain."
+    "feedback": "echo creates or overwrites the message of the day file with the specified content."
   },
   {
     "id": 69,
-    "q": "What is the capital of South Africa?",
-    "answer": "Cape Town",
+    "q": "Install the mariadb-server package and start it",
+    "answer": "dnf install mariadb-server -y; systemctl enable mariadb; systemctl start mariadb",
     "keywords": [
-      "Pretoria",
-      "Bloemfontein"
+      "mariadb",
+      "database",
+      "service"
     ],
-    "feedback": "South Africa has three capital cities: Cape Town (legislative), Pretoria (executive), and Bloemfontein (judicial)."
+    "feedback": "dnf installs MariaDB server, systemctl enables and starts the service."
   },
   {
     "id": 70,
-    "q": "Which vitamin helps with blood clotting?",
-    "answer": "Vitamin K",
+    "q": "Find all files modified in the last 7 days",
+    "answer": "find / -mtime -7 2>/dev/null",
     "keywords": [
-      "Vitamin K" , "K" , "k"
+      "find",
+      "modified files"
     ],
-    "feedback": "Vitamin K is essential for blood clotting and bone health."
+    "feedback": "find searches for files modified within the last 7 days, redirecting errors to suppress permission issues."
   },
   {
     "id": 71,
-    "q": "What is the capital of Greece?",
-    "answer": "Athens",
+    "q": "Configure the system to use a proxy server at 192.168.1.1:8080",
+    "answer": "echo 'http_proxy=http://192.168.1.1:8080' >> /etc/environment; source /etc/environment",
     "keywords": [
-      "Athens"
+      "proxy",
+      "environment"
     ],
-    "feedback": "Athens is the capital of Greece, birthplace of democracy and home to the Acropolis."
+    "feedback": "echo adds proxy settings to /etc/environment, and source applies them to the current session."
   },
   {
     "id": 72,
-    "q": "Who painted 'Guernica'?",
-    "answer": "Pablo Picasso",
+    "q": "Create a new partition table on /dev/sdf using parted",
+    "answer": "parted /dev/sdf mklabel gpt",
     "keywords": [
-      "Pablo Picasso"
+      "parted",
+      "partition table"
     ],
-    "feedback": "Pablo Picasso painted 'Guernica' in 1937, depicting the horrors of the Spanish Civil War."
+    "feedback": "parted creates a new GPT partition table on the specified device."
   },
   {
     "id": 73,
-    "q": "What is the capital of Portugal?",
-    "answer": "Lisbon",
+    "q": "Enable the firewalld service and set it to start on boot",
+    "answer": "systemctl enable firewalld; systemctl start firewalld",
     "keywords": [
-      "Lisbon"
+      "firewalld",
+      "enable service"
     ],
-    "feedback": "Lisbon is the capital of Portugal, known for its historic trams and Atlantic coastline."
+    "feedback": "systemctl enables and starts the firewalld service for automatic startup and immediate activation."
   },
   {
     "id": 74,
-    "q": "Which element is used in batteries?",
-    "answer": "Lithium",
+    "q": "List all logical volumes in the system",
+    "answer": "lvdisplay",
     "keywords": [
-      "Lithium"
+      "lvdisplay",
+      "logical volumes"
     ],
-    "feedback": "Lithium is commonly used in rechargeable batteries due to its light weight and high energy density."
+    "feedback": "lvdisplay shows detailed information about all logical volumes in the system."
   },
   {
     "id": 75,
-    "q": "What is the capital of Sweden?",
-    "answer": "Stockholm",
+    "q": "Set the password aging for user student to 30 days maximum",
+    "answer": "chage -M 30 student",
     "keywords": [
-      "Stockholm"
+      "chage",
+      "password aging"
     ],
-    "feedback": "Stockholm is the capital of Sweden, built on 14 islands in the Baltic Sea."
+    "feedback": "chage sets the maximum password age to 30 days for the user."
   },
   {
     "id": 76,
-    "q": "Who wrote 'Harry Potter and the Philosopher's Stone'?",
-    "answer": "J.K. Rowling",
+    "q": "Configure the NFS client to mount /exports/share from server.example.com to /mnt/nfs",
+    "answer": "mkdir /mnt/nfs; mount -t nfs server.example.com:/exports/share /mnt/nfs; echo 'server.example.com:/exports/share /mnt/nfs nfs defaults 0 0' >> /etc/fstab",
     "keywords": [
-      "J.K. Rowling"
+      "NFS",
+      "mount client"
     ],
-    "feedback": "J.K. Rowling wrote the first Harry Potter book in 1997, starting a global phenomenon."
+    "feedback": "mkdir creates mount point, mount attaches NFS share, and fstab entry ensures persistence."
   },
   {
     "id": 77,
-    "q": "What is the capital of Norway?",
-    "answer": "Oslo",
+    "q": "Check the current SELinux policy version",
+    "answer": "sestatus",
     "keywords": [
-      "Oslo"
+      "sestatus",
+      "SELinux policy"
     ],
-    "feedback": "Oslo is the capital of Norway, located at the end of the Oslofjord."
+    "feedback": "sestatus displays the current SELinux status, including policy version and mode."
   },
   {
     "id": 78,
-    "q": "Which planet is known as the 'Morning Star' or 'Evening Star'?",
-    "answer": "Venus",
+    "q": "Create a bootable USB from an ISO file using dd",
+    "answer": "dd if=/path/to/rhel.iso of=/dev/sdg bs=4M status=progress",
     "keywords": [
-      "Venus"
+      "dd",
+      "bootable USB"
     ],
-    "feedback": "Venus is visible as the brightest planet and is called the Morning or Evening Star due to its brightness."
+    "feedback": "dd copies the ISO to the USB device with progress reporting for creating bootable media."
   },
   {
     "id": 79,
-    "q": "What is the capital of Denmark?",
-    "answer": "Copenhagen",
+    "q": "List all available repositories",
+    "answer": "dnf repolist",
     "keywords": [
-      "Copenhagen"
+      "dnf",
+      "repositories"
     ],
-    "feedback": "Copenhagen is the capital of Denmark, known for its canals and modern architecture."
+    "feedback": "dnf repolist lists all enabled repositories and their details."
   },
   {
     "id": 80,
-    "q": "Who invented the light bulb?",
-    "answer": "Thomas Edison",
+    "q": "Troubleshoot and restart the network service if connectivity is lost",
+    "answer": "systemctl restart NetworkManager; nmcli device connect enp0s3",
     "keywords": [
-      "Thomas Edison"
+      "NetworkManager",
+      "troubleshoot network"
     ],
-    "feedback": "Thomas Edison patented the practical incandescent light bulb in 1879."
+    "feedback": "systemctl restarts NetworkManager, and nmcli reconnects the specified device."
   },
   {
     "id": 81,
-    "q": "What is the capital of the Netherlands?",
-    "answer": "Amsterdam",
+    "q": "Tune the kernel parameter vm.swappiness to 10 for better memory management",
+    "answer": "echo 'vm.swappiness = 10' >> /etc/sysctl.conf; sysctl -p",
     "keywords": [
-      "Amsterdam"
+      "sysctl vm.swappiness=10 (temporary)",
+      "Edit /etc/sysctl.d/99-custom.conf for overrides"
     ],
-    "feedback": "Amsterdam is the capital of the Netherlands, famous for its canals and museums."
+    "feedback": "echo adds the swappiness setting to sysctl.conf, and sysctl -p applies the kernel parameter."
   },
   {
     "id": 82,
-    "q": "Which gas is responsible for the greenhouse effect?",
-    "answer": "Carbon Dioxide",
+    "q": "Create a BTRFS subvolume named data in /mnt/btrfs and set it as default",
+    "answer": "mkfs.btrfs /dev/sdb1; mount /dev/sdb1 /mnt/btrfs; btrfs subvolume create /mnt/btrfs/data; umount /mnt/btrfs; echo '/dev/sdb1 /mnt/btrfs btrfs defaults,subvol=/data 0 0' >> /etc/fstab",
     "keywords": [
-      "CO2",
-      "Carbon Dioxide"
+      "btrfs subvolume snapshot /mnt/btrfs/data (for backups)",
+      "Use mkfs.btrfs -f for force format"
     ],
-    "feedback": "Carbon dioxide traps heat in the atmosphere, contributing to global warming."
+    "feedback": "mkfs.btrfs formats the device, btrfs creates subvolume, and fstab sets it as default mount."
   },
   {
     "id": 83,
-    "q": "What is the capital of Switzerland?",
-    "answer": "Bern",
+    "q": "Install Podman and run a simple nginx container on port 8080",
+    "answer": "dnf install podman -y; podman run -d -p 8080:80 --name web nginx",
     "keywords": [
-      "Bern"
+      "podman run -it for interactive mode",
+      "Use docker.io if Podman compatibility needed"
     ],
-    "feedback": "Bern is the capital of Switzerland, known for its medieval old town."
+    "feedback": "dnf installs Podman, podman runs nginx container in detached mode mapped to port 8080."
   },
   {
     "id": 84,
-    "q": "Who directed 'The Godfather'?",
-    "answer": "Francis Ford Coppola",
+    "q": "Find and delete all files larger than 100M in /var/log older than 30 days",
+    "answer": "find /var/log -type f -size +100M -mtime +30 -delete",
     "keywords": [
-      "Francis Ford Coppola"
+      "find /var/log -type f -size +100M -mtime +30 -exec rm {} \\; (explicit delete)",
+      "Use -print first to list before deleting"
     ],
-    "feedback": "Francis Ford Coppola directed 'The Godfather' in 1972, a classic crime drama."
+    "feedback": "find locates and deletes large old files in /var/log to free space."
   },
   {
     "id": 85,
-    "q": "What is the capital of Austria?",
-    "answer": "Vienna",
+    "q": "Configure disk quotas for user student on /home with 500M soft limit and 1G hard limit",
+    "answer": "dnf install quota -y; sed -i 's/0 1/1 1/' /etc/fstab; mount -o remount /home; quotacheck -cug /home; quotaon -vug /home; edquota -u student (set limits: blocks soft 500000, hard 1000000)",
     "keywords": [
-      "Vienna"
+      "repquota -u student (to check after)",
+      "Use quota tools for group quotas with -g"
     ],
-    "feedback": "Vienna is the capital of Austria, renowned for its music and imperial palaces."
+    "feedback": "dnf installs quota tools, enables quotas on /home, and sets limits for the user."
   },
   {
     "id": 86,
-    "q": "Which element has the atomic number 6?",
-    "answer": "Carbon",
+    "q": "Create a custom firewall zone named internal and assign interface enp0s8 to it",
+    "answer": "firewall-cmd --permanent --new-zone=internal; firewall-cmd --permanent --zone=internal --add-interface=enp0s8; firewall-cmd --reload",
     "keywords": [
-      "Carbon"
+      "firewall-cmd --zone=internal --add-source=192.168.2.0/24 (for IP-based)",
+      "Use --change-interface to reassign"
     ],
-    "feedback": "Carbon, atomic number 6, is the basis of all known life forms."
+    "feedback": "firewall-cmd creates a new zone and assigns the interface to it permanently."
   },
   {
     "id": 87,
-    "q": "What is the capital of Poland?",
-    "answer": "Warsaw",
+    "q": "List and set the SELinux boolean httpd_can_network_connect to on",
+    "answer": "getsebool -a | grep httpd; setsebool -P httpd_can_network_connect on",
     "keywords": [
-      "Warsaw"
+      "semanage boolean -m --on httpd_can_network_connect (permanent)",
+      "Use getsebool httpd_* for filtered list"
     ],
-    "feedback": "Warsaw is the capital of Poland, rebuilt after World War II destruction."
+    "feedback": "getsebool lists booleans, setsebool enables the boolean permanently."
   },
   {
     "id": 88,
-    "q": "Who wrote 'The Lord of the Rings'?",
-    "answer": "J.R.R. Tolkien",
+    "q": "Boot the system into rescue mode from GRUB and fix a broken /etc/fstab",
+    "answer": "At GRUB menu, press e; append 'rd.break' to linux line; Ctrl+X; mount -o remount,rw /sysroot; chroot /sysroot; vi /etc/fstab (fix); touch /.autorelabel; exit; reboot",
     "keywords": [
-      "J.R.R. Tolkien", "Tolkien"
+      "Use systemd unit for emergency.target",
+      "dracut -f for initramfs rebuild if needed"
     ],
-    "feedback": "J.R.R. Tolkien wrote 'The Lord of the Rings' trilogy, a fantasy epic."
+    "feedback": "GRUB edit appends rd.break for rescue mode, chroot allows fixing fstab, autorelabel for SELinux."
   },
   {
     "id": 89,
-    "q": "What is the capital of Hungary?",
-    "answer": "Budapest",
+    "q": "Install the 'Development Tools' package group",
+    "answer": "dnf groupinstall 'Development Tools' -y",
     "keywords": [
-      "Budapest"
+      "dnf group list (to see available groups)",
+      "yum groupinstall on older systems"
     ],
-    "feedback": "Budapest is the capital of Hungary, formed by the merger of Buda and Pest."
+    "feedback": "dnf groupinstall installs the Development Tools group, including compilers and build tools."
   },
   {
     "id": 90,
-    "q": "Which vitamin is found in citrus fruits?",
-    "answer": "Vitamin C",
+    "q": "Configure network bonding for interfaces enp0s3 and enp0s8 in active-backup mode",
+    "answer": "nmcli con add type bond ifname bond0 mode active-backup; nmcli con add type ethernet ifname enp0s3 master bond0; nmcli con add type ethernet ifname enp0s8 master bond0; nmcli con up bond0",
     "keywords": [
-      "Vitamin C", "c", "C"
+      "mode balance-rr for round-robin",
+      "Edit /etc/sysconfig/network-scripts/ifcfg-bond0 manually"
     ],
-    "feedback": "Vitamin C is abundant in citrus fruits and helps boost the immune system."
+    "feedback": "nmcli creates a bond interface in active-backup mode and adds slave interfaces."
   },
   {
     "id": 91,
-    "q": "What is the capital of Finland?",
-    "answer": "Helsinki",
+    "q": "Configure iSCSI initiator to discover and login to target iqn.2016-06.example.com:storage",
+    "answer": "dnf install iscsi-initiator-utils -y; echo 'iqn.2016-06.example.com:storage' > /etc/iscsi/initiatorname.iscsi; iscsiadm -m discovery -t sendtargets -p 192.168.1.200; iscsiadm -m node -T iqn.2016-06.example.com:storage -p 192.168.1.200 -l",
     "keywords": [
-      "Helsinki"
+      "iscsiadm --mode node --logout (to disconnect)",
+      "Use open-iscsi service: systemctl enable iscsid"
     ],
-    "feedback": "Helsinki is the capital of Finland, known for its design and architecture."
+    "feedback": "dnf installs iSCSI tools, configures initiator, discovers and logs in to target."
   },
   {
     "id": 92,
-    "q": "Who was the first man in space?",
-    "answer": "Yuri Gagarin",
+    "q": "Create a basic Kickstart file /tmp/ks.cfg for automated installation with minimal packages",
+    "answer": "vi /tmp/ks.cfg with content: url --url=http://mirror.example.com; lang en_US; keyboard us; rootpw --plaintext rootpass; clearpart --all; part / --fstype=ext4 --size=10240; %packages @core; %end",
     "keywords": [
-      "Yuri Gagarin"
+      "ksvalidator /tmp/ks.cfg (to validate)",
+      "Use %pre for pre-install scripts"
     ],
-    "feedback": "Yuri Gagarin became the first human in space in 1961 aboard Vostok 1."
+    "feedback": "vi creates a Kickstart file with basic installation directives for automated setup."
   },
   {
     "id": 93,
-    "q": "What is the capital of Ireland?",
-    "answer": "Dublin",
+    "q": "Write a bash script /usr/local/bin/check_disk.sh that alerts if / is over 80% full",
+    "answer": "echo '#!/bin/bash\\ndf -h / | awk \"NR==2 {if (\\$5+0 > 80) print \\\\\\\"Disk usage critical: \\\\\\\" \\$5 \\\\\\\" on /\\\\\\\"}\"' > /usr/local/bin/check_disk.sh; chmod +x /usr/local/bin/check_disk.sh",
     "keywords": [
-      "Dublin"
+      "Use threshold 90 for stricter check",
+      "Integrate with cron: 0 * * * * /usr/local/bin/check_disk.sh"
     ],
-    "feedback": "Dublin is the capital of Ireland, home to Trinity College and the Guinness Storehouse."
+    "feedback": "echo creates a script that checks disk usage and alerts if over 80%, makes it executable."
   },
   {
     "id": 94,
-    "q": "Which element is used in jewelry and has symbol 'Ag'?",
-    "answer": "Silver",
+    "q": "Configure logrotate for /var/log/messages to rotate weekly and keep 4 weeks",
+    "answer": "echo '/var/log/messages {\nweekly\nrotate 4\ncompress\nmissingok\n}' > /etc/logrotate.d/messages",
     "keywords": [
-      "Silver"
+      "daily instead of weekly",
+      "postrotate /bin/kill -HUP `cat /var/run/syslogd.pid` (for signal)"
     ],
-    "feedback": "Silver, symbol Ag, is valued for its luster and used in coins and jewelry."
+    "feedback": "echo creates a logrotate config to rotate messages weekly, keeping 4 copies compressed."
   },
   {
     "id": 95,
-    "q": "What is the capital of New Zealand?",
-    "answer": "Wellington",
+    "q": "Use rsync to mirror /data to remote server user@backup.example.com:/backup with compression",
+    "answer": "rsync -avz --delete /data/ user@backup.example.com:/backup/",
     "keywords": [
-      "Wellington"
+      "--exclude='*.tmp' to skip files",
+      "rsync -avz /data/ /local/backup/ (local mirror)"
     ],
-    "feedback": "Wellington is the capital of New Zealand, located at the southern tip of the North Island."
+    "feedback": "rsync mirrors the directory to remote server with archive, compression, and deletion of extra files."
   },
   {
     "id": 96,
-    "q": "Who painted 'The Persistence of Memory'?",
-    "answer": "Salvador Dalí",
+    "q": "Troubleshoot and relabel SELinux contexts after a filesystem move",
+    "answer": "restorecon -Rv /new/location; semanage fcontext -a -t default_t '/new/location(/.*)?'",
     "keywords": [
-      "Salvador Dalí"
+      "restorecon",
+      "semanage",
+      "SELinux contexts"
     ],
-    "feedback": "Salvador Dalí created 'The Persistence of Memory' in 1931, featuring melting clocks."
+    "feedback": "restorecon relabels files recursively to match policy, semanage adds a file context rule for the new location."
   },
   {
     "id": 97,
-    "q": "What is the capital of Chile?",
-    "answer": "Santiago",
+    "q": "Monitor system performance with sar and generate a daily report",
+    "answer": "dnf install sysstat -y; systemctl enable sysstat; crontab -e; 0 0 * * * /usr/lib64/sa/sa1 1 1; echo 'sar -A -f /var/log/sa/saDD' > /tmp/report.sh",
     "keywords": [
-      "Santiago"
+      "sar -u 1 5 (CPU every 5s for 1 min)",
+      "mpstat for multi-processor stats"
     ],
-    "feedback": "Santiago is the capital of Chile, nestled in the Andes Mountains."
+    "feedback": "dnf installs sysstat for sar, systemctl enables service, crontab schedules data collection, script generates comprehensive report."
   },
   {
     "id": 98,
-    "q": "Which gas is used in balloons to make them float?",
-    "answer": "Helium",
+    "q": "Create an incremental backup of /etc using tar to /backup/etc-incremental.tar",
+    "answer": "tar --listed-incremental=/backup/etc-snapshot --create --gzip -f /backup/etc-incremental.tar /etc",
     "keywords": [
-      "Helium"
+      "--one-file-system to avoid crossing mounts",
+      "Use rsync --backup for incremental alternative"
     ],
-    "feedback": "Helium is lighter than air, making it ideal for filling balloons."
+    "feedback": "tar uses listed-incremental to create backups of only changed files since the last snapshot."
   },
   {
     "id": 99,
-    "q": "What is the capital of Peru?",
-    "answer": "Lima",
+    "q": "Mount /dev/sde1 with noatime and nodiratime options for performance",
+    "answer": "mount -o noatime,nodiratime /dev/sde1 /mnt/perf; echo '/dev/sde1 /mnt/perf ext4 defaults,noatime,nodiratime 0 0' >> /etc/fstab",
     "keywords": [
-      "Lima"
+      "-o remount,noatime (for existing mount)",
+      "Use relatime for balanced performance"
     ],
-    "feedback": "Lima is the capital of Peru, founded by Spanish conquistadors in 1535."
+    "feedback": "mount with noatime options disables access time updates to improve performance, fstab entry makes it persistent."
   },
   {
     "id": 100,
-    "q": "Who wrote 'One Hundred Years of Solitude'?",
-    "answer": "Gabriel García Márquez",
+    "q": "Troubleshoot a failed boot by accessing the rescue environment and repairing GRUB",
+    "answer": "Boot from install media > Troubleshooting > Rescue; chroot /mnt/sysimage; grub2-mkconfig -o /boot/grub2/grub.cfg; grub2-install /dev/sda; exit; reboot",
     "keywords": [
-      "Gabriel García Márquez"
+      "efibootmgr -v (for EFI systems)",
+      "dracut --force /boot/initramfs-$(uname -r).img if kernel issue"
     ],
-    "feedback": "Gabriel García Márquez wrote 'One Hundred Years of Solitude' in 1967, a magical realism masterpiece."
+    "feedback": "Boot into rescue mode from install media, chroot into the system, regenerate GRUB config and reinstall bootloader."
+  },
+  {
+    "id": 101,
+    "q": "What is the primary purpose of understanding the OSI and TCP/IP models in network communication?",
+    "answer": "These models help us understand how network devices communicate and how data flows across a network.",
+    "keywords": [
+      "network models",
+      "communication",
+      "data flow"
+    ],
+    "feedback": "The OSI and TCP/IP models provide a standardized framework for understanding the functions of a network and the protocols involved in data transmission.",
+    "ai_generated": true
+  },
+  {
+    "id": 102,
+    "q": "Name one essential concept mentioned for achieving robust cybersecurity.",
+    "answer": "One essential concept is encryption (or firewalls, or intrusion detection systems).",
+    "keywords": [
+      "encryption",
+      "firewalls",
+      "IDS",
+      "cybersecurity concepts"
+    ],
+    "feedback": "Encryption scrambles data to prevent unauthorized access, firewalls control network traffic, and intrusion detection systems monitor for malicious activity, all crucial for robust cybersecurity.",
+    "ai_generated": true
+  },
+  {
+    "id": 103,
+    "q": "What is a common type of network attack mentioned in the content?",
+    "answer": "A common type of network attack is a DoS (Denial of Service) attack (or spoofing, or MITM - Man-in-the-Middle).",
+    "keywords": [
+      "DoS",
+      "spoofing",
+      "MITM",
+      "network attacks"
+    ],
+    "feedback": "DoS attacks aim to make a service unavailable by overwhelming it, while spoofing involves disguising as another entity, and MITM intercepts communication between two parties.",
+    "ai_generated": true
+  },
+  {
+    "id": 104,
+    "q": "Which mechanism is mentioned for secure remote access and authentication?",
+    "answer": "VPNs (Virtual Private Networks) are mentioned for secure remote access and authentication (also RADIUS or TACACS+).",
+    "keywords": [
+      "VPN",
+      "remote access",
+      "authentication",
+      "RADIUS",
+      "TACACS+"
+    ],
+    "feedback": "VPNs create a secure, encrypted connection over a less secure network, allowing users to safely access organizational resources from external locations.",
+    "ai_generated": true
+  },
+  {
+    "id": 105,
+    "q": "Why is cryptography important in securing communication channels?",
+    "answer": "Cryptography is important because it protects the confidentiality, integrity, and authenticity of data transmitted over communication channels.",
+    "keywords": [
+      "cryptography",
+      "communication security",
+      "confidentiality",
+      "integrity",
+      "authenticity"
+    ],
+    "feedback": "Cryptography uses techniques like encryption and digital signatures to transform information, making it unreadable to unauthorized parties and verifying its origin and content.",
+    "ai_generated": true
+  },
+  {
+    "id": 106,
+    "q": "At which OSI model layers does Link Encryption primarily operate?",
+    "answer": "Link Encryption primarily operates at the Data Link and Physical layers of the OSI model.",
+    "keywords": [
+      "Link Encryption",
+      "OSI model",
+      "Data Link layer",
+      "Physical layer"
+    ],
+    "feedback": "Link Encryption encrypts all data on a communication link at these lower layers, protecting against eavesdropping as data travels between network devices.",
+    "ai_generated": true
+  },
+  {
+    "id": 107,
+    "q": "What part of communication does End-to-End Encryption typically leave unencrypted?",
+    "answer": "End-to-End Encryption typically leaves routing information, such as headers and addresses, unencrypted.",
+    "keywords": [
+      "End-to-End Encryption",
+      "unencrypted",
+      "routing information",
+      "headers",
+      "addresses"
+    ],
+    "feedback": "While End-to-End Encryption secures the payload (the actual message content), it deliberately leaves routing information visible so that network devices can properly direct the data.",
+    "ai_generated": true
+  },
+  {
+    "id": 108,
+    "q": "Why is email security considered critical for business communication?",
+    "answer": "Email security is critical for business communication because email natively lacks security without encryption, digital signatures, or keys, making it vulnerable.",
+    "keywords": [
+      "email security",
+      "business communication",
+      "vulnerability",
+      "encryption",
+      "digital signatures"
+    ],
+    "feedback": "Businesses rely heavily on email for sensitive exchanges, so implementing security measures is essential to protect against data breaches, phishing, and other cyber threats.",
+    "ai_generated": true
+  },
+  {
+    "id": 109,
+    "q": "Name one key feature provided by PGP (Pretty Good Privacy).",
+    "answer": "PGP provides confidentiality (or integrity, or authenticity).",
+    "keywords": [
+      "PGP",
+      "Pretty Good Privacy",
+      "confidentiality",
+      "integrity",
+      "authenticity"
+    ],
+    "feedback": "PGP is a comprehensive encryption program designed to ensure the privacy, integrity, and authenticity of data, particularly for email and file transfers, using various cryptographic methods.",
+    "ai_generated": true
+  },
+  {
+    "id": 110,
+    "q": "What is the main purpose of S/MIME (Secure MIME)?",
+    "answer": "The main purpose of S/MIME is to encrypt and digitally sign messages and attachments for email security.",
+    "keywords": [
+      "S/MIME",
+      "Secure MIME",
+      "email security",
+      "encrypt",
+      "digitally sign"
+    ],
+    "feedback": "S/MIME extends the MIME standard to add cryptographic security services, ensuring that email content is confidential, has integrity, and is authenticated through digital signatures and encryption.",
+    "ai_generated": true
+  },
+  {
+    "id": 111,
+    "q": "Which command is used to list directory contents in Linux?",
+    "answer": "ls",
+    "options": [
+      "ls",
+      "dir",
+      "list",
+      "show"
+    ],
+    "type": "multiple_choice",
+    "keywords": [
+      "ls"
+    ],
+    "feedback": "The 'ls' command is the standard Unix/Linux command for listing directory contents.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 112,
+    "q": "Linux is an open-source operating system.",
+    "answer": "true",
+    "type": "true_false",
+    "keywords": [],
+    "feedback": "Linux is indeed an open-source operating system, meaning its source code is freely available and can be modified.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 113,
+    "q": "What does the 'cd' command do in Linux?",
+    "answer": "change directory",
+    "type": "short_answer",
+    "keywords": [
+      "changes directory",
+      "navigate",
+      "move to directory"
+    ],
+    "feedback": "The 'cd' command stands for 'change directory' and is used to navigate between directories in the filesystem.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 114,
+    "q": "Which symbol is used to redirect output to a file in Linux?",
+    "answer": ">",
+    "options": [
+      ">",
+      "<",
+      "|",
+      "&"
+    ],
+    "type": "multiple_choice",
+    "keywords": [
+      ">"
+    ],
+    "feedback": "The '>' symbol is used to redirect output from a command to a file, overwriting the file if it exists.",
+    "difficulty": "medium",
+    "ai_generated": false
+  },
+  {
+    "id": 115,
+    "q": "The root directory in Linux is represented by a forward slash (/).",
+    "answer": "true",
+    "type": "true_false",
+    "keywords": [],
+    "feedback": "The root directory in Linux is indeed represented by a single forward slash (/), which is the top-most directory in the filesystem hierarchy.",
+    "difficulty": "easy",
+    "ai_generated": false
+  },
+  {
+    "id": 116,
+    "q": "What is `pip` primarily used for in the context of Python, especially when dealing with tools that might be used in cybersecurity?",
+    "answer": "`pip` is the standard package installer for Python, used to install and manage software packages and libraries, which are often required for cybersecurity scripts and tools.",
+    "keywords": [
+      "package installer",
+      "Python",
+      "libraries",
+      "modules",
+      "install software"
+    ],
+    "feedback": "`pip` allows users to easily add external libraries like PyPDF2 to their Python environment, a common task when setting up development environments for cybersecurity tools.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 117,
+    "q": "True or False: Installing specific Python libraries, such as PyPDF2, is only relevant for non-cybersecurity related tasks.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Many cybersecurity tools and scripts are developed in Python and often require various libraries to perform functions like data analysis, file manipulation, or network communication. PyPDF2, for example, could be used to analyze PDF documents for potential threats or extract information during forensic analysis.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 118,
+    "q": "Which command is typically used to install Python packages or libraries, such as those that might be needed for cybersecurity scripts?",
+    "answer": "pip install",
+    "keywords": [],
+    "feedback": "`pip install` is the correct command for installing Python packages. Understanding how to install necessary components is a fundamental skill for anyone working with Python in cybersecurity.",
+    "type": "multiple_choice",
+    "options": [
+      "npm install",
+      "apt-get install",
+      "pip install",
+      "yum install"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 119,
+    "q": "Why might a cybersecurity professional need a library that supports PDF files, like PyPDF2?",
+    "answer": "A cybersecurity professional might need to analyze PDF documents for malware, extract sensitive information, perform forensic analysis, or process security reports, all of which could require a library for PDF manipulation.",
+    "keywords": [
+      "analyze PDFs",
+      "extract data",
+      "malware analysis",
+      "forensic analysis",
+      "security reports"
+    ],
+    "feedback": "PDF files are a common medium for information exchange and can also be vectors for attacks. Libraries like PyPDF2 enable security professionals to programmatically interact with and inspect these files.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 120,
+    "q": "Why is understanding how software handles different file formats, such as PDF, important in cybersecurity?",
+    "answer": "Understanding file format handling is crucial in cybersecurity because malformed or specially crafted files (like PDFs) can be exploited to deliver malware, trigger vulnerabilities, or compromise systems.",
+    "keywords": [
+      "malware delivery",
+      "exploits",
+      "vulnerabilities",
+      "file format attacks",
+      "compromise systems"
+    ],
+    "feedback": "Attackers often leverage vulnerabilities in how software processes file formats. By understanding these mechanisms, cybersecurity professionals can better identify and mitigate such threats.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 121,
+    "q": "True or False: PyPDF2 is a programming language commonly used for developing cybersecurity tools.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "PyPDF2 is a *library* for the Python programming language, not a language itself. Python, however, is indeed a programming language widely used in cybersecurity.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 122,
+    "q": "When developing a cybersecurity script in Python, what does the command `pip install [library_name]` generally accomplish?",
+    "answer": "The command `pip install [library_name]` installs an external Python library or module that the cybersecurity script depends on to perform specific tasks, such as network scanning, data encryption, or file parsing.",
+    "keywords": [
+      "install library",
+      "add module",
+      "Python dependency",
+      "extend functionality"
+    ],
+    "feedback": "Cybersecurity scripts often rely on a variety of pre-built libraries to avoid reinventing the wheel and to leverage specialized functions, making `pip install` an essential command.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 123,
+    "q": "In the realm of cybersecurity, why is it important to know how to manage software dependencies (like libraries and packages)?",
+    "answer": "Managing software dependencies ensures that cybersecurity tools and scripts have all necessary components to function correctly, prevents conflicts between versions, and helps in patching vulnerabilities found in outdated libraries.",
+    "keywords": [
+      "dependency management",
+      "vulnerability patching",
+      "tool functionality",
+      "version control"
+    ],
+    "feedback": "Proper dependency management is vital for maintaining the security and stability of cybersecurity tools, ensuring they are always up-to-date and free from known vulnerabilities.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 124,
+    "q": "Which of the following best describes PyPDF2?",
+    "answer": "A Python library for working with PDF files",
+    "keywords": [],
+    "feedback": "PyPDF2 is a specific library designed to add capabilities for reading, writing, and manipulating PDF documents within Python applications.",
+    "type": "multiple_choice",
+    "options": [
+      "A type of malware",
+      "A cybersecurity operating system",
+      "A Python library for working with PDF files",
+      "A network protocol"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 125,
+    "q": "True or False: All software used in cybersecurity, including custom scripts and open-source tools, comes fully equipped and never requires additional libraries or dependencies to be installed.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Many cybersecurity tools and custom scripts, especially those developed in Python, often require users to install additional libraries and dependencies using commands like `pip install` to gain full functionality.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 126,
+    "q": "True or False: PyPDF2 is a library specifically needed for PDF support.",
+    "answer": "true",
+    "keywords": [],
+    "feedback": "The content explicitly states, 'PDF support requires PyPDF2,' indicating its purpose.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 127,
+    "q": "What command is used to install the PyPDF2 library?",
+    "answer": "pip install PyPDF2",
+    "keywords": [
+      "pip install PyPDF2",
+      "pip install pypdf2"
+    ],
+    "feedback": "The content provides the exact command: 'pip install PyPDF2'.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 128,
+    "q": "Which tool is used to install the PyPDF2 package, according to the content?",
+    "answer": "pip",
+    "keywords": [],
+    "feedback": "The command 'pip install PyPDF2' indicates that 'pip' is the tool used for installation.",
+    "type": "multiple_choice",
+    "options": [
+      "npm",
+      "apt-get",
+      "pip",
+      "brew"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 129,
+    "q": "What kind of files does the PyPDF2 library help a program work with?",
+    "answer": "PDF files",
+    "keywords": [
+      "PDF",
+      "PDF files",
+      "Portable Document Format"
+    ],
+    "feedback": "The content states 'PDF support requires PyPDF2,' meaning it enables working with Portable Document Format files.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 130,
+    "q": "True or False: You can install PyPDF2 by simply typing 'install PyPDF2' in the command line.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "The correct command requires 'pip' before 'install PyPDF2', so it should be 'pip install PyPDF2'.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 131,
+    "q": "What does 'PDF support' imply in the context of a software library like PyPDF2?",
+    "answer": "The ability to create, read, or modify PDF documents programmatically.",
+    "keywords": [],
+    "feedback": "'PDF support' means the software can interact with PDF files, allowing operations like reading content, generating new PDFs, or altering existing ones.",
+    "type": "multiple_choice",
+    "options": [
+      "Sending PDF files via email",
+      "Viewing PDF files in a web browser",
+      "Printing PDF files only",
+      "The ability to create, read, or modify PDF documents programmatically."
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 132,
+    "q": "If a program requires functionality to handle PDF documents, which specific Python library is mentioned as a prerequisite?",
+    "answer": "PyPDF2",
+    "keywords": [
+      "PyPDF2",
+      "pypdf2"
+    ],
+    "feedback": "The content explicitly states, 'PDF support requires PyPDF2,' making it the necessary library.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 133,
+    "q": "True or False: Installing PyPDF2 typically involves using a graphical user interface (GUI).",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "The installation method 'pip install PyPDF2' is a command-line operation, not a graphical user interface process.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 134,
+    "q": "What is the primary function of 'pip' in the context of Python development?",
+    "answer": "To install and manage Python packages.",
+    "keywords": [],
+    "feedback": "The command 'pip install PyPDF2' demonstrates that 'pip' is used for installing Python packages and their dependencies.",
+    "type": "multiple_choice",
+    "options": [
+      "To run Python scripts",
+      "To debug Python code",
+      "To install and manage Python packages.",
+      "To write Python programs"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 135,
+    "q": "Why would a developer need to install the PyPDF2 library?",
+    "answer": "To enable PDF support in their Python application.",
+    "keywords": [
+      "To add PDF functionality",
+      "To work with PDF files",
+      "To provide PDF support"
+    ],
+    "feedback": "The content clearly states that 'PDF support requires PyPDF2,' indicating its role in enabling PDF-related features.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
   }
 ]

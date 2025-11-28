@@ -387,6 +387,29 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('assignModal')">&times;</span>
             <h2 style="color: #4b2e05;">Assign Questions to Pool</h2>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-left: 4px solid #4a7c59; border-radius: 4px;">
+                <strong>📚 Chapter Distribution:</strong>
+                {% set chapter_counts = {} %}
+                {% for question in all_questions %}
+                    {% if question.id in question_to_chapter %}
+                        {% set chapter_name = question_to_chapter[question.id].name %}
+                        {% if chapter_counts.update({chapter_name: chapter_counts.get(chapter_name, 0) + 1}) %}{% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if chapter_counts %}
+                    <div style="margin-top: 10px;">
+                        {% for chapter, count in chapter_counts.items()|sort %}
+                        <span style="display: inline-block; margin: 5px 10px 5px 0;">
+                            <strong>{{ chapter }}:</strong> {{ count }} questions
+                        </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <em>No chapters assigned yet</em>
+                {% endif %}
+            </div>
+            
             <form id="assignQuestionsForm" method="POST" action="{{ url_for('teacher_assign_questions_to_pool') }}">
                 <input type="hidden" id="assignPoolName" name="pool_name">
                 
@@ -395,17 +418,55 @@
                     <button type="button" onclick="deselectAllQuestions()" class="btn">Deselect All</button>
                     <span style="margin-left: 20px;">Selected: <span id="selectedCount">0</span> questions</span>
                 </div>
+                
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f8f8; border-radius: 8px; display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <label for="chapterFilter" style="font-weight: bold; margin-right: 10px;">📚 Filter by Chapter:</label>
+                        <select id="chapterFilter" onchange="applyFilters()" style="padding: 8px; border-radius: 4px; border: 2px solid #4b2e05;">
+                            <option value="">All Chapters</option>
+                            {% for chapter in chapters|sort(attribute='order') %}
+                            <option value="{{ chapter.id }}">{{ chapter.name }}</option>
+                            {% endfor %}
+                            <option value="unassigned">Unassigned to Chapter</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="levelFilter" style="font-weight: bold; margin-right: 10px;">🎯 Filter by Level:</label>
+                        <select id="levelFilter" onchange="applyFilters()" style="padding: 8px; border-radius: 4px; border: 2px solid #4b2e05;">
+                            <option value="">All Levels</option>
+                            {% for level in levels|sort(attribute='level') %}
+                            <option value="{{ level.level }}">Level {{ level.level }} ({{ level.difficulty }})</option>
+                            {% endfor %}
+                            <option value="unassigned">Unassigned to Level</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div class="question-assignment">
                     {% for question in all_questions %}
-                    <div class="question-item">
+                    <div class="question-item" 
+                         data-chapter-id="{% if question.id in question_to_chapter %}{{ question_to_chapter[question.id].id }}{% else %}unassigned{% endif %}"
+                         data-level="{% if question.id in question_to_level %}{{ question_to_level[question.id].level }}{% else %}unassigned{% endif %}">
                         <input type="checkbox" 
                                class="question-checkbox" 
                                name="question_ids" 
                                value="{{ question.id }}"
                                onchange="updateSelectedCount()">
                         <div class="question-content">
-                            <div class="question-text">Q{{ question.id }}: {{ question.q[:100] }}{% if question.q|length > 100 %}...{% endif %}</div>
+                            <div class="question-text">
+                                Q{{ question.id }}: {{ question.q[:100] }}{% if question.q|length > 100 %}...{% endif %}
+                                {% if question.id in question_to_chapter %}
+                                <span style="background: #4a7c59; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; margin-left: 10px;">
+                                    📚 {{ question_to_chapter[question.id].name }}
+                                </span>
+                                {% endif %}
+                                {% if question.id in question_to_level %}
+                                <span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; margin-left: 5px;">
+                                    🎯 Level {{ question_to_level[question.id].level }}
+                                </span>
+                                {% endif %}
+                            </div>
                             <div class="question-answer">{{ question.answer }}</div>
                         </div>
                     </div>
@@ -488,6 +549,33 @@
         function updateSelectedCount() {
             const checked = document.querySelectorAll('input[name="question_ids"]:checked').length;
             document.getElementById('selectedCount').textContent = checked;
+        }
+        
+        function applyFilters() {
+            const selectedChapter = document.getElementById('chapterFilter').value;
+            const selectedLevel = document.getElementById('levelFilter').value;
+            const questionItems = document.querySelectorAll('.question-item');
+            
+            questionItems.forEach(item => {
+                const itemChapter = item.getAttribute('data-chapter-id');
+                const itemLevel = item.getAttribute('data-level');
+                
+                let showByChapter = selectedChapter === '' || itemChapter === selectedChapter;
+                let showByLevel = selectedLevel === '' || itemLevel === selectedLevel;
+                
+                if (showByChapter && showByLevel) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            updateSelectedCount();
+        }
+        
+        // Legacy function for backward compatibility
+        function filterByChapter() {
+            applyFilters();
         }
 
         // Close modals when clicking outside

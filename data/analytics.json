@@ -287,7 +287,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1763999668.648468,
+=======
+    "timestamp": 1763998625.9819283,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -298,7 +302,257 @@
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1763999679.5136933,
+=======
+    "timestamp": 1763998653.671675,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 1,
+      "user_answer": "paris",
+      "correct_answer": "paris",
+      "is_correct": true,
+      "time_taken": 27.67978286743164,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998664.6400678,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 2,
+      "user_answer": "mars",
+      "correct_answer": "mars",
+      "is_correct": true,
+      "time_taken": 10.964408159255981,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998673.5785978,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 3,
+      "user_answer": "pacific ocean",
+      "correct_answer": "pacific ocean",
+      "is_correct": true,
+      "time_taken": 8.934537887573242,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998691.048752,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 4,
+      "user_answer": "leonardo da vinci",
+      "correct_answer": "leonardo da vinci",
+      "is_correct": true,
+      "time_taken": 17.46675968170166,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998697.963577,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 5,
+      "user_answer": "au",
+      "correct_answer": "au",
+      "is_correct": true,
+      "time_taken": 6.909421920776367,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998705.9126146,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 6,
+      "user_answer": "1912",
+      "correct_answer": "1912",
+      "is_correct": true,
+      "time_taken": 7.945855140686035,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998710.3462808,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 7,
+      "user_answer": "12",
+      "correct_answer": "12",
+      "is_correct": true,
+      "time_taken": 4.428373098373413,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998715.801595,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 8,
+      "user_answer": "lion",
+      "correct_answer": "lion",
+      "is_correct": true,
+      "time_taken": 5.452000617980957,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998725.102878,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 9,
+      "user_answer": "nile river",
+      "correct_answer": "nile river",
+      "is_correct": true,
+      "time_taken": 9.297781229019165,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998732.350906,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 10,
+      "user_answer": "harper lee",
+      "correct_answer": "harper lee",
+      "is_correct": true,
+      "time_taken": 7.244406700134277,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1763998735.6531332,
+    "event_type": "level_completed",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "final_score": 255,
+      "player_hp": 100,
+      "enemy_hp": 0,
+      "total_time": 109.66019892692566,
+      "correct_answers": 10,
+      "wrong_answers": 0,
+      "level_completed": true
+    }
+  },
+  {
+    "timestamp": 1763998911.4179275,
+    "event_type": "test_yourself_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1763999002.2222784,
+    "event_type": "endless_mode_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "final_score": 0,
+      "max_streak": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1763999008.935196,
+    "event_type": "level_selected",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764000505.2743518,
+    "event_type": "level_selected",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764000829.3897312,
+    "event_type": "level_selected",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764000862.7686996,
+    "event_type": "game_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764004096.9523168,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764004146.4071732,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     "event_type": "game_quit",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -310,7 +564,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1764018035.9633949,
+=======
+    "timestamp": 1764004149.1334379,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     "event_type": "level_selected",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -321,6 +579,7 @@
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1764018042.1617966,
     "event_type": "answer_submitted",
     "player_name": "Anonymous",
@@ -337,6 +596,9 @@
   },
   {
     "timestamp": 1764018046.6149914,
+=======
+    "timestamp": 1764004495.6271734,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     "event_type": "answer_submitted",
     "player_name": "Anonymous",
     "session_id": "unknown",
@@ -345,27 +607,43 @@
       "user_answer": "mars",
       "correct_answer": "mars",
       "is_correct": true,
+<<<<<<< HEAD
       "time_taken": 4.453194856643677,
+=======
+      "time_taken": 8.097036361694336,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
       "similarity_score": 1.0,
       "level": 1
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1764018051.351427,
+=======
+    "timestamp": 1764004513.6734452,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     "event_type": "answer_submitted",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
       "question_id": 3,
+<<<<<<< HEAD
       "user_answer": "pacific",
       "correct_answer": "pacific ocean",
       "is_correct": true,
       "time_taken": 4.734121561050415,
+=======
+      "user_answer": "pacific ocean",
+      "correct_answer": "pacific ocean",
+      "is_correct": true,
+      "time_taken": 18.04346799850464,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
       "similarity_score": 1.0,
       "level": 1
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1764018063.8447025,
     "event_type": "answer_submitted",
     "player_name": "Anonymous",
@@ -1414,17 +1692,25 @@
   },
   {
     "timestamp": 1764020894.4699948,
+=======
+    "timestamp": 1764004523.5474846,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     "event_type": "game_quit",
     "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
       "level": 1,
+<<<<<<< HEAD
       "score": 40,
+=======
+      "score": 25,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
       "questions_answered": 3,
       "reason": "player_quit"
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1764021305.9316726,
     "event_type": "test_yourself_quit",
     "player_name": "Anonymous",
@@ -1433,13 +1719,10 @@
       "questions_answered": 38,
       "correct_answers": 22,
       "score": 220,
-      "reason": "player_quit"
-    }
-  },
-  {
-    "timestamp": 1764065920.0372667,
+=======
+    "timestamp": 1764292223.8868055,
     "event_type": "level_selected",
-    "player_name": "JF",
+    "player_name": "Anonymous",
     "session_id": "unknown",
     "data": {
       "level": 1,
@@ -1448,6 +1731,37 @@
     }
   },
   {
+    "timestamp": 1764292232.3193266,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
+      "reason": "player_quit"
+    }
+  },
+  {
+<<<<<<< HEAD
+    "timestamp": 1764065920.0372667,
+    "event_type": "level_selected",
+    "player_name": "JF",
+=======
+    "timestamp": 1764292236.2348175,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+<<<<<<< HEAD
     "timestamp": 1764065925.2453384,
     "event_type": "answer_submitted",
     "player_name": "JF",
@@ -3923,10 +4237,21 @@
       "questions_answered": 41,
       "final_score": 350,
       "max_streak": 18,
+=======
+    "timestamp": 1764292246.174505,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
       "reason": "player_quit"
     }
   },
   {
+<<<<<<< HEAD
     "timestamp": 1764098251.74468,
     "event_type": "test_yourself_quit",
     "player_name": ":)",
@@ -3935,6 +4260,125 @@
       "questions_answered": 38,
       "correct_answers": 33,
       "score": 330,
+=======
+    "timestamp": 1764292690.0650663,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764292725.0694938,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 126,
+      "user_answer": "true",
+      "correct_answer": "true",
+      "is_correct": true,
+      "time_taken": 27.27712345123291,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292732.0049217,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 127,
+      "user_answer": "ls",
+      "correct_answer": "pip install pypdf2",
+      "is_correct": false,
+      "time_taken": 5.36592435836792,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292777.1844118,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 5,
+      "questions_answered": 2,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764292779.687214,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764292807.3404698,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 126,
+      "user_answer": "true",
+      "correct_answer": "true",
+      "is_correct": true,
+      "time_taken": 25.734949827194214,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292810.8696313,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 127,
+      "user_answer": "ls",
+      "correct_answer": "pip install pypdf2",
+      "is_correct": false,
+      "time_taken": 2.343233585357666,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292818.3177278,
+    "event_type": "answer_submitted",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 128,
+      "user_answer": "npm",
+      "correct_answer": "pip",
+      "is_correct": false,
+      "time_taken": 4.946521282196045,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764292825.1913753,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 3,
+>>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
       "reason": "player_quit"
     }
   }

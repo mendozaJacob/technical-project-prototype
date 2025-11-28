@@ -1,267 +1,101 @@
 [
     {
         "player": "Anonymous",
-        "score": 215,
-        "time": 58.1,
-        "correct_answers": 8,
-        "wrong_answers": 2,
-        "game_mode": "adventure",
-        "date": "2025-11-24 16:01:34"
-    },
-    {
-        "player": "Anonymous",
-        "score": 265,
-        "time": 279.04,
-        "correct_answers": 9,
-        "wrong_answers": 1,
-        "game_mode": "adventure",
-        "date": "2025-11-24 16:06:20"
-    },
-    {
-        "player": "Anonymous",
-        "score": 125,
-        "time": 49.72,
-        "correct_answers": 6,
-        "wrong_answers": 4,
-        "game_mode": "adventure",
-        "date": "2025-11-24 16:07:21"
-    },
-    {
-        "player": "Anonymous",
-        "score": 105,
-        "time": 77.44,
-        "correct_answers": 6,
-        "wrong_answers": 4,
-        "game_mode": "adventure",
-        "date": "2025-11-24 16:08:46"
-    },
-    {
-        "player": "Anonymous",
-        "score": 80,
-        "time": 58.16,
-        "correct_answers": 5,
-        "wrong_answers": 5,
-        "game_mode": "adventure",
-        "date": "2025-11-24 16:14:26"
-    },
-    {
-        "player": "Anonymous",
-        "score": 95,
-        "time": 60.21,
-        "correct_answers": 5,
-        "wrong_answers": 5,
-        "game_mode": "adventure",
-        "date": "2025-11-24 16:17:00"
-    },
-    {
-        "player": "Anonymous",
-        "score": 220,
-        "time": 256.07,
-        "correct_answers": 22,
-        "wrong_answers": 16,
-        "game_mode": "test_yourself",
-        "date": "2025-11-24 16:55:05"
-    },
-    {
-        "player": "JF",
-        "score": 230,
-        "time": 53.38,
-        "correct_answers": 9,
-        "wrong_answers": 1,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:19:33"
-    },
-    {
-        "player": "JF",
-        "score": 170,
-        "time": 59.15,
-        "correct_answers": 8,
-        "wrong_answers": 2,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:20:52"
-    },
-    {
-        "player": "JF",
-        "score": 130,
-        "time": 76.76,
-        "correct_answers": 7,
-        "wrong_answers": 3,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:22:17"
-    },
-    {
-        "player": "JF",
-        "score": 125,
-        "time": 58.8,
-        "correct_answers": 7,
-        "wrong_answers": 3,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:23:23"
-    },
-    {
-        "player": "JF",
-        "score": 130,
-        "time": 65.62,
-        "correct_answers": 7,
-        "wrong_answers": 3,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:24:41"
-    },
-    {
-        "player": "JF",
-        "score": 175,
-        "time": 57.03,
-        "correct_answers": 7,
-        "wrong_answers": 3,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:25:42"
-    },
-    {
-        "player": "JF",
-        "score": 70,
-        "time": 67.33,
-        "correct_answers": 5,
-        "wrong_answers": 5,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:26:57"
-    },
-    {
-        "player": "JF",
-        "score": 200,
-        "time": 42.94,
-        "correct_answers": 8,
-        "wrong_answers": 2,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:27:57"
-    },
-    {
-        "player": "JF",
-        "score": 45,
-        "time": 62.55,
-        "correct_answers": 4,
-        "wrong_answers": 6,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:29:13"
-    },
-    {
-        "player": "JF",
-        "score": 245,
-        "time": 43.61,
-        "correct_answers": 10,
+        "score": 0,
+        "time": 2.43,
+        "correct_answers": 0,
         "wrong_answers": 0,
-        "game_mode": "adventure",
-<<<<<<< HEAD
-        "date": "2025-11-25 05:30:04"
-    },
-    {
-        "player": "JF",
-        "score": -25,
-        "time": 79.91,
-        "correct_answers": 1,
-        "wrong_answers": 9,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:31:26"
-    },
-    {
-        "player": "JF",
-        "score": 220,
-        "time": 49.89,
-        "correct_answers": 9,
-        "wrong_answers": 1,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:32:56"
-    },
-    {
-        "player": "JF",
-        "score": 40,
-        "time": 50.63,
-        "correct_answers": 4,
-        "wrong_answers": 6,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:33:48"
-    },
-    {
-        "player": "JF",
-        "score": 210,
-        "time": 40.69,
-        "correct_answers": 8,
-        "wrong_answers": 2,
-        "game_mode": "adventure",
-        "date": "2025-11-25 05:34:31"
-    },
-    {
-        "player": "JF",
-        "score": 500,
-        "time": 422.13,
-        "correct_answers": 50,
-        "wrong_answers": 16,
-        "game_mode": "endless",
-        "date": "2025-11-25 13:07:06"
-    },
-    {
-        "player": "JF",
-        "score": 350,
-        "time": 528.51,
-        "correct_answers": 35,
-        "wrong_answers": 12,
-        "game_mode": "endless",
-        "date": "2025-11-25 13:21:41"
-    },
-    {
-        "player": "JF",
-        "score": 310,
-        "time": 608.62,
-        "correct_answers": 31,
-        "wrong_answers": 13,
-        "game_mode": "endless",
-        "date": "2025-11-25 13:44:58"
-    },
-    {
-        "player": ":)",
-        "score": 350,
-        "time": 219.46,
-        "correct_answers": 35,
-        "wrong_answers": 6,
-        "game_mode": "endless",
-        "date": "2025-11-25 14:01:27"
-    },
-    {
-        "player": ":)",
-        "score": 330,
-        "time": 959.79,
-        "correct_answers": 33,
-        "wrong_answers": 5,
         "game_mode": "test_yourself",
-        "date": "2025-11-25 14:17:31"
-=======
-        "date": "2025-11-24 10:20:23"
-    },
-    {
-        "player": "Anonymous",
-        "score": 255,
-        "time": 109.66,
-        "correct_answers": 10,
-        "wrong_answers": 0,
-        "game_mode": "adventure",
-        "date": "2025-11-24 10:38:55"
+        "date": "2025-11-28 17:21:21"
     },
     {
         "player": "Anonymous",
         "score": 0,
-        "time": 115.53,
+        "time": 2.08,
         "correct_answers": 0,
         "wrong_answers": 0,
         "game_mode": "test_yourself",
-        "date": "2025-11-24 10:41:51"
+        "date": "2025-11-28 17:21:52"
     },
     {
-        "player": "Val",
+        "player": "Anonymous",
         "score": 0,
-        "time": 71.08,
+        "time": 2.3,
         "correct_answers": 0,
         "wrong_answers": 0,
-        "game_mode": "endless",
-        "date": "2025-11-24 10:43:22"
->>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:21:59"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 2.62,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:22:05"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 1.88,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:22:17"
+    },
+    {
+        "player": "jf",
+        "score": 0,
+        "time": 25.64,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:22:58"
+    },
+    {
+        "player": "jf",
+        "score": 0,
+        "time": 1.96,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:23:03"
+    },
+    {
+        "player": "jf",
+        "score": 0,
+        "time": 56.23,
+        "correct_answers": 0,
+        "wrong_answers": 29,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:24:00"
+    },
+    {
+        "player": "jf",
+        "score": 0,
+        "time": 2.13,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:24:12"
+    },
+    {
+        "player": "jf",
+        "score": 0,
+        "time": 2.15,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:26:11"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 51.63,
+        "correct_answers": 0,
+        "wrong_answers": 31,
+        "game_mode": "test_yourself",
+        "date": "2025-11-28 17:28:56"
     }
 ]

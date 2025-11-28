@@ -2218,86 +2218,24 @@ def test_yourself():
     if not settings.get('test_yourself_enabled', True):
         flash('Test Yourself mode is currently disabled.', 'error')
         return redirect(url_for('index'))
-<<<<<<< HEAD
 
     # Reset test state if new start or no session data
-=======
-    
-    # Get chapter_id from query params or session
-    chapter_id = request.args.get('chapter_id', type=int)
-    if chapter_id:
-        session['test_chapter_id'] = chapter_id
-    elif 'test_chapter_id' not in session:
-        # No chapter selected, redirect to chapter selection
-        return redirect(url_for('select_chapter_test'))
-    else:
-        chapter_id = session.get('test_chapter_id')
-    
-    # Verify chapter is unlocked
-    chapter = get_chapter_by_id(chapter_id)
-    if not chapter:
-        flash('Chapter not found. Please select a valid chapter.', 'error')
-        return redirect(url_for('select_chapter_test'))
-    
-    if chapter.get('locked_test_yourself', False):
-        flash('This chapter is currently locked. Please contact your teacher.', 'error')
-        return redirect(url_for('select_chapter_test'))
-    
-    # Reset test state for a true new start (GET with ?new=1) or if no session data exists
->>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
     if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
         reset_test_yourself_session()
         session['test_user_answers'] = []
-<<<<<<< HEAD
         
         test_pool_questions = get_questions_for_pool('test_yourself') or questions
         valid_questions = [q for q in test_pool_questions if q.get('q') and str(q.get('q')).strip()]
         
         if len(valid_questions) >= 40:
-=======
-        session['test_chapter_id'] = chapter_id
-        print(f"[DEBUG] Starting Test Yourself with chapter {chapter_id}: {chapter.get('name')}")
-        
-        # Get questions from the selected chapter
-        chapter_questions = get_questions_for_chapter(chapter_id)
-        if not chapter_questions:
-            flash(f'No questions available in {chapter.get("name")}. Please contact your teacher.', 'error')
-            return redirect(url_for('select_chapter_test'))
-        
-        valid_questions = [q for q in chapter_questions if q.get('q') and str(q.get('q')).strip()]
-        if not valid_questions:
-            session['test_question_ids'] = []
-        elif len(valid_questions) >= 40:
-            # Use random.sample to guarantee no duplicates (returns unique selection)
->>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
             selected = random.sample(valid_questions, 40)
         else:
-<<<<<<< HEAD
             selected = valid_questions
 
         # Store only question IDs in session to reduce session size
         session['test_question_ids'] = list({q['id']: q for q in selected}.keys())
         random.shuffle(session['test_question_ids'])
 
-=======
-            # If fewer than 40 questions, use all available without repeats
-            # Use set to ensure absolute uniqueness even with small pools
-            unique_questions = list({q['id']: q for q in valid_questions}.values())
-            random.shuffle(unique_questions)
-            session['test_question_ids'] = [q['id'] for q in unique_questions]
-        
-        # Debug: Verify uniqueness using set comparison
-        question_ids = session['test_question_ids']
-        unique_ids = set(question_ids)
-        print(f"[DEBUG TEST INIT] Chapter {chapter_id}: Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs (set-verified)")
-        if len(question_ids) != len(unique_ids):
-            duplicate_ids = [id for id in unique_ids if question_ids.count(id) > 1]
-            print(f"[CRITICAL TEST INIT] Duplicate question IDs found despite set conversion: {duplicate_ids}")
-            # Force fix by using only unique IDs
-            session['test_question_ids'] = list(unique_ids)
-            random.shuffle(session['test_question_ids'])
-        
->>>>>>> 8725ea00a55ac8b2b7a865a621327963d37d0062
         session['test_q_index'] = 0
         session['test_correct'] = 0
         session['test_start_time'] = time.time()

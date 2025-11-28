@@ -107,9 +107,9 @@
         99,
         100
       ],
-      "locked_test_yourself": true,
-      "locked_level_mode": true,
-      "locked_endless_mode": true,
+      "locked_test_yourself": false,
+      "locked_level_mode": false,
+      "locked_endless_mode": false,
       "level_range": [
         1,
         2,
@@ -123,7 +123,7 @@
         10
       ],
       "created_at": "2025-11-26T00:00:00",
-      "updated_at": "2025-11-27T20:10:09.444606"
+      "updated_at": "2025-11-28T17:21:44.222456"
     },
     {
       "id": 2,
@@ -153,7 +153,7 @@
         135
       ],
       "locked_test_yourself": true,
-      "locked_level_mode": false,
+      "locked_level_mode": true,
       "locked_endless_mode": true,
       "level_range": [
         1,
@@ -168,11 +168,11 @@
         10
       ],
       "created_at": "2025-11-27T19:33:12.239566",
-      "updated_at": "2025-11-27T20:10:10.895458"
+      "updated_at": "2025-11-28T17:21:44.951359"
     }
   ],
   "metadata": {
-    "last_updated": "2025-11-27T20:10:10.895463",
+    "last_updated": "2025-11-28T17:21:44.951359",
     "version": "1.0.0",
     "total_chapters": 2
   }

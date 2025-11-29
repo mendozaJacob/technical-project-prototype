@@ -232,5 +232,41 @@
         "wrong_answers": 5,
         "game_mode": "test_yourself",
         "date": "2025-11-25 14:17:31"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 218.64,
+        "correct_answers": 0,
+        "wrong_answers": 29,
+        "game_mode": "test_yourself",
+        "date": "2025-11-29 09:07:00"
+    },
+    {
+        "player": "Anonymous",
+        "score": 330,
+        "time": 470.76,
+        "correct_answers": 33,
+        "wrong_answers": 6,
+        "game_mode": "test_yourself",
+        "date": "2025-11-29 11:25:00"
+    },
+    {
+        "player": "Anonymous",
+        "score": 0,
+        "time": 2.11,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-11-29 11:25:07"
+    },
+    {
+        "player": "Anonymous",
+        "score": 170,
+        "time": 202.72,
+        "correct_answers": 17,
+        "wrong_answers": 23,
+        "game_mode": "test_yourself",
+        "date": "2025-11-29 11:32:26"
     }
 ]

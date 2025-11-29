@@ -3937,5 +3937,64 @@
       "score": 330,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764424600.1038976,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764424604.4099982,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764425220.9484549,
+    "event_type": "test_yourself_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 29,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764433500.537071,
+    "event_type": "test_yourself_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 39,
+      "correct_answers": 33,
+      "score": 330,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764433507.4744022,
+    "event_type": "test_yourself_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
   }
 ]

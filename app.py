@@ -23,6 +23,9 @@ import threading
 LEADERBOARD_FILE = "data/leaderboard.json"
 GUEST_LEADERBOARD_FILE = "data/guest_leaderboard.json"
 
+# Temporary storage for test answers (to avoid session cookie size limit)
+test_answers_cache = {}
+
 # Load game settings at startup
 def load_initial_settings():
     """Load initial game settings or use defaults"""
@@ -2052,6 +2055,12 @@ def quit_test_yourself():
         # Clear all test yourself session data completely
         reset_test_yourself_session()
         
+        # Clean up cache
+        test_id = session.get('test_id')
+        if test_id and test_id in test_answers_cache:
+            test_answers_cache.pop(test_id, None)
+        session.pop('test_id', None)
+        
         accuracy = (correct_answers / questions_answered * 100) if questions_answered > 0 else 0
         flash(f'Test Yourself completed (quit). Score: {score}, Accuracy: {accuracy:.1f}% - Saved to leaderboard!', 'success')
         
@@ -2129,7 +2138,11 @@ def test_yourself():
     # Reset test state if new start or no session data
     if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
         reset_test_yourself_session()
-        session['test_user_answers'] = []
+        
+        # Generate unique test ID for this session
+        test_id = hashlib.md5(f"{time.time()}_{session.get('player_name', 'anon')}".encode()).hexdigest()
+        session['test_id'] = test_id
+        test_answers_cache[test_id] = []  # Store answers in cache instead of session
         
         test_pool_questions = get_questions_for_pool('test_yourself') or questions
         valid_questions = [q for q in test_pool_questions if q.get('q') and str(q.get('q')).strip()]
@@ -2186,18 +2199,22 @@ def test_yourself():
             correct_answer = question.get('answer', '').strip().lower()
             is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
 
-            # Update test_user_answers but truncate strings to avoid big headers
-            session['test_user_answers'].append({
-                'question': question.get('q', '')[:100],
-                'user_answer': user_answer[:50],
-                'correct_answer': correct_answer[:50],
-                'correct': is_correct,
-                'feedback': question.get('feedback', '')[:100],
-                'match_type': str(feedback_type)[:50],
-                'similarity': round(similarity_score, 2) if similarity_score else 0
-            })
-            # Keep only last 40 answers to limit session size
-            session['test_user_answers'] = session['test_user_answers'][-40:]
+            # Store answers in cache instead of session to avoid cookie size limit
+            test_id = session.get('test_id')
+            if test_id:
+                if test_id not in test_answers_cache:
+                    test_answers_cache[test_id] = []
+                test_answers_cache[test_id].append({
+                    'question': question.get('q', '')[:100],
+                    'user_answer': user_answer[:50],
+                    'correct_answer': correct_answer[:50],
+                    'correct': is_correct,
+                    'feedback': question.get('feedback', '')[:100],
+                    'match_type': str(feedback_type)[:50],
+                    'similarity': round(similarity_score, 2) if similarity_score else 0
+                })
+                # Keep only last 40 answers
+                test_answers_cache[test_id] = test_answers_cache[test_id][-40:]
 
             if is_correct:
                 session['test_correct'] = correct_count + 1
@@ -2233,8 +2250,10 @@ def test_yourself_result():
     correct = session.get('test_correct', 0)
     percent = int((correct / total) * 100) if total else 0
     passed = percent >= 75
-    # Get user answers for review
-    user_answers = session.get('test_user_answers', [])
+    
+    # Get user answers from cache instead of session
+    test_id = session.get('test_id')
+    user_answers = test_answers_cache.get(test_id, []) if test_id else []
     
     # Calculate time and score
     test_start_time = session.get('test_start_time', time.time())
@@ -2277,6 +2296,12 @@ def test_yourself_result():
     session.pop('test_start_time', None)
     session.pop('test_time_limit', None)
     session.pop('test_user_answers', None)
+    
+    # Clean up cache after rendering results
+    if test_id and test_id in test_answers_cache:
+        # Keep cache for a bit in case user refreshes, but schedule cleanup
+        threading.Timer(300, lambda: test_answers_cache.pop(test_id, None)).start()
+    
     return render_template('test_yourself_result.html',
                           correct_count=correct,
                           percent=percent,
@@ -2297,15 +2322,15 @@ except json.JSONDecodeError as e:
 
 # Load questions from the JSON file
 try:
-    questions_file = os.path.join(os.path.dirname(__file__), 'data', 'questions.json')
+    questions_file = os.path.join(os.path.dirname(__file__), 'data', 'old_questions.json')
     with open(questions_file, encoding='utf-8') as f:
         questions = json.load(f)
     print(f"Questions loaded successfully! Loaded {len(questions)} questions.")
 except FileNotFoundError:
-    print("Error: questions.json file not found.")
+    print("Error: old_questions.json file not found.")
     questions = []
 except json.JSONDecodeError as e:
-    print(f"Error: Failed to decode questions.json - {e}")
+    print(f"Error: Failed to decode old_questions.json - {e}")
     questions = []
 
 # Add questions to the Whoosh index
@@ -3053,7 +3078,7 @@ def teacher_save_questions():
             print(f"DEBUG: Successfully parsed after HTML decode: {len(all_questions)} questions")
         
         # Load existing questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
             existing_questions = json.load(f)
         
         print(f"DEBUG: Loaded {len(existing_questions)} existing questions")
@@ -3095,7 +3120,7 @@ def teacher_save_questions():
                 continue
         
         # Save updated questions
-        with open('data/questions.json', 'w', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
             json.dump(existing_questions, f, indent=2, ensure_ascii=False)
         
         print(f"DEBUG: Saved {saved_count} questions to file")
@@ -3381,7 +3406,7 @@ def teacher_add_question():
         feedback = request.form.get('feedback', '')
         
         # Load existing questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
             existing_questions = json.load(f)
         
         # Find next ID
@@ -3413,7 +3438,7 @@ def teacher_add_question():
         existing_questions.append(new_question)
         
         # Save questions
-        with open('data/questions.json', 'w', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
             json.dump(existing_questions, f, indent=2, ensure_ascii=False)
         
         flash('Question added successfully!')
@@ -3436,11 +3461,11 @@ def teacher_get_question(question_id):
 def teacher_edit_question():
     try:
         question_id = int(request.form.get('question_id'))
-        
+
         # Load questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
             all_questions = json.load(f)
-        
+
         # Get question type and options for editing
         question_type = request.form.get('question_type', 'short_answer')
         options = []
@@ -3464,11 +3489,11 @@ def teacher_edit_question():
                     'options': options if question_type == 'multiple_choice' else []
                 })
                 break
-        
+
         # Save questions
-        with open('data/questions.json', 'w', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
             json.dump(all_questions, f, indent=2, ensure_ascii=False)
-        
+
         flash('Question updated successfully!')
         return redirect(url_for('teacher_questions'))
         
@@ -3481,14 +3506,14 @@ def teacher_edit_question():
 def teacher_delete_question(question_id):
     try:
         # Load questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
             all_questions = json.load(f)
-        
+
         # Remove question
         all_questions = [q for q in all_questions if q.get('id') != question_id]
-        
+
         # Save questions
-        with open('data/questions.json', 'w', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
             json.dump(all_questions, f, indent=2, ensure_ascii=False)
         
         return jsonify({'success': True})
@@ -4444,7 +4469,7 @@ def recreate_search_index():
         
         # Reload questions
         global questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
+        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
             questions = json.load(f)
         
         # Rebuild index

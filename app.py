@@ -698,6 +698,8 @@ def normalize_true_false_answer(answer):
 
 # Helper function to save leaderboard data
 def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure", level=None):
+    print(f"[DEBUG SAVE_LEADERBOARD] Called with: player={player_name}, score={score}, mode={game_mode}, is_student={session.get('is_student')}")
+    
     # Save to student leaderboard if it's a logged-in student
     if session.get('is_student') and session.get('student_id'):
         # Get actual student name from students.json instead of relying on player_name
@@ -738,6 +740,8 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
 
         with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
             json.dump(leaderboard, f, indent=4)
+        
+        print(f"[DEBUG SAVE_LEADERBOARD] Successfully saved to STUDENT leaderboard: {LEADERBOARD_FILE}")
     
     # Save to guest leaderboard if it's a guest player (not a student)
     else:
@@ -760,13 +764,18 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
         try:
             with open(GUEST_LEADERBOARD_FILE, "r", encoding="utf-8") as f:
                 guest_leaderboard = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+            print(f"[DEBUG SAVE_LEADERBOARD] Loaded {len(guest_leaderboard)} existing guest records")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"[DEBUG SAVE_LEADERBOARD] Creating new guest leaderboard file: {e}")
             guest_leaderboard = []
 
         guest_leaderboard.append(record)
+        print(f"[DEBUG SAVE_LEADERBOARD] Added record, now have {len(guest_leaderboard)} total records")
 
         with open(GUEST_LEADERBOARD_FILE, "w", encoding="utf-8") as f:
             json.dump(guest_leaderboard, f, indent=4)
+        
+        print(f"[DEBUG SAVE_LEADERBOARD] Successfully saved to GUEST leaderboard: {GUEST_LEADERBOARD_FILE}")
 
 def load_leaderboard():
     """Load leaderboard data from file"""
@@ -2758,14 +2767,16 @@ def endless_game():
             
             session['endless_recent_questions'] = updated_history
             
-            print(f"[DEBUG] Updated history length: {len(recent_q_ids)}")
+            print(f"[DEBUG] Updated history length: {len(updated_history)}")
             
             return redirect(url_for('endless_game'))
         except Exception as e:
             print(f"[ERROR] Endless mode POST error: {str(e)}")
-            # Force game over on error to prevent crash
-            session['endless_hp'] = 0
-            return redirect(url_for('endless_result'))
+            import traceback
+            traceback.print_exc()
+            # Don't end game on error - just try to continue
+            flash(f'Error processing answer. Continuing game...', 'warning')
+            return redirect(url_for('endless_game'))
     
     return render_template('endless.html',
                           question=question,
@@ -2799,11 +2810,17 @@ def endless_result():
     else:
         player_name = session.get('player_name', None)
     
+    print(f"[DEBUG ENDLESS_RESULT] Method: {request.method}, Player name: {player_name}")
+    
     if request.method == 'POST':
         # If guest player submitting name for first time
         if not player_name:
-            player_name = request.form.get('player_name', 'Anonymous')
+            player_name = request.form.get('player_name', 'Anonymous').strip()
+            if not player_name:
+                player_name = 'Anonymous'
             session['player_name'] = player_name
+        
+        print(f"[DEBUG ENDLESS_RESULT] Saving to leaderboard: {player_name}, score: {score}, correct: {correct}, wrong: {wrong}")
         
         # Save to leaderboard for all players
         save_leaderboard(player_name, score, total_time, correct, wrong, "endless")
@@ -2835,6 +2852,9 @@ def endless_result():
         session.pop('endless_current_question', None)
         session.pop('endless_feedback_list', None)
         session.pop('player_name', None)
+        
+        flash(f'Score saved to leaderboard! {player_name}: {score} points', 'success')
+        print(f"[DEBUG ENDLESS_RESULT] Redirecting to leaderboard after save")
         return redirect(url_for('leaderboard'))
     return render_template('endless_result.html',
                           score=score,

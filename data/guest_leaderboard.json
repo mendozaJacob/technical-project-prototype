@@ -268,5 +268,41 @@
         "wrong_answers": 23,
         "game_mode": "test_yourself",
         "date": "2025-11-29 11:32:26"
+    },
+    {
+        "player": "JF",
+        "score": 20,
+        "time": 106.74,
+        "correct_answers": 2,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 13:28:51"
+    },
+    {
+        "player": "JF",
+        "score": 80,
+        "time": 260.15,
+        "correct_answers": 8,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 13:33:24"
+    },
+    {
+        "player": "JF",
+        "score": 10,
+        "time": 33.32,
+        "correct_answers": 1,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 13:37:29"
+    },
+    {
+        "player": "JF",
+        "score": 60,
+        "time": 72.94,
+        "correct_answers": 6,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 13:41:39"
     }
 ]

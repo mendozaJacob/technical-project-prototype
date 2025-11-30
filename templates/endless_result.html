@@ -122,7 +122,7 @@
         </div>
         {% endif %}
         
-        <form method="POST" style="margin-top:18px;">
+        <form method="POST" action="{{ url_for('endless_result') }}" style="margin-top:18px;">
             <label for="player_name">Enter your name for the leaderboard:</label><br>
             <input type="text" id="player_name" name="player_name" placeholder="{{ player_name or 'Anonymous' }}" value="{{ player_name or '' }}" style="margin-top:8px; padding:8px 10px; font-size:1em; border-radius:6px; border:1px solid #4b2e05;">
             <div style="margin-top:12px;">

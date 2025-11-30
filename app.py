@@ -25,6 +25,7 @@ GUEST_LEADERBOARD_FILE = "data/guest_leaderboard.json"
 
 # Temporary storage for test answers (to avoid session cookie size limit)
 test_answers_cache = {}
+endless_feedback_cache = {}
 
 # Load game settings at startup
 def load_initial_settings():
@@ -1877,6 +1878,8 @@ def guest_leaderboard():
     test_yourself_data = [entry for entry in all_data if entry.get("game_mode") == "test_yourself"]
     endless_data = [entry for entry in all_data if entry.get("game_mode") == "endless"]
     
+    print(f"[DEBUG GUEST_LEADERBOARD] Total entries: {len(all_data)}, Adventure: {len(adventure_data)}, Test: {len(test_yourself_data)}, Endless: {len(endless_data)}")
+    
     # Get best score per player for each mode
     def get_best_scores(data, limit=50):
         player_best = {}
@@ -1905,6 +1908,10 @@ def guest_leaderboard():
     
     test_yourself_leaderboard = get_best_scores(test_yourself_data, 50)
     endless_leaderboard = get_best_scores(endless_data, 50)
+    
+    print(f"[DEBUG GUEST_LEADERBOARD] Endless leaderboard has {len(endless_leaderboard)} entries")
+    if endless_leaderboard:
+        print(f"[DEBUG GUEST_LEADERBOARD] First endless entry: {endless_leaderboard[0]}")
 
     return render_template("guest_leaderboard.html", 
                          adventure_leaderboard=adventure_leaderboard,
@@ -2077,7 +2084,11 @@ def quit_test_yourself():
         print(f"Error in quit_test_yourself route: {e}")
         flash('Test session ended.', 'info')
     
-    return redirect(url_for('leaderboard'))
+    # Redirect to appropriate leaderboard
+    if session.get('is_student'):
+        return redirect(url_for('leaderboard'))
+    else:
+        return redirect(url_for('guest_leaderboard'))
 
 @app.route('/quit_endless')
 def quit_endless():
@@ -2126,13 +2137,23 @@ def quit_endless():
         # Clear all endless mode session data completely
         reset_endless_mode_session()
         
+        # Clean up cache
+        endless_id = session.get('endless_id')
+        if endless_id and endless_id in endless_feedback_cache:
+            endless_feedback_cache.pop(endless_id, None)
+        session.pop('endless_id', None)
+        
         flash(f'Endless Mode completed (quit). Score: {final_score}, {total_answered} questions - Saved to leaderboard!', 'success')
         
     except Exception as e:
         print(f"Error in quit_endless route: {e}")
         flash('Endless session ended.', 'info')
     
-    return redirect(url_for('leaderboard'))
+    # Redirect to appropriate leaderboard
+    if session.get('is_student'):
+        return redirect(url_for('leaderboard'))
+    else:
+        return redirect(url_for('guest_leaderboard'))
 
 # ------------------- TEST YOURSELF MODE -------------------
 import random
@@ -2425,6 +2446,11 @@ def endless_start():
     # Completely reset any existing endless mode data to ensure clean start
     reset_endless_mode_session()
     
+    # Generate unique endless ID for this session
+    endless_id = hashlib.md5(f"{time.time()}_{player_name}".encode()).hexdigest()
+    session['endless_id'] = endless_id
+    endless_feedback_cache[endless_id] = []  # Store feedback in cache instead of session
+    
     # Initialize fresh endless mode session state
     session['endless_score'] = 0
     session['endless_hp'] = 100
@@ -2647,24 +2673,25 @@ def endless_game():
                     game_mode='endless'
                 )
             
-            # Store feedback for this question
+            # Store feedback in cache instead of session to avoid cookie size limit
             question_feedback = question.get('feedback', 'No additional information available.')
-            if 'endless_feedback_list' not in session:
-                session['endless_feedback_list'] = []
-            
-            feedback_entry = {
-                'question': question.get('q', ''),
-                'user_answer': user_answer,
-                'correct_answer': correct_answer,
-                'correct': is_correct,
-                'feedback': question_feedback,
-                'match_type': feedback_type,
-                'similarity': similarity_score
-            }
-            session['endless_feedback_list'].append(feedback_entry)
-            # Limit to last 50 entries to prevent session overflow
-            if len(session['endless_feedback_list']) > 50:
-                session['endless_feedback_list'] = session['endless_feedback_list'][-50:]
+            endless_id = session.get('endless_id')
+            if endless_id:
+                if endless_id not in endless_feedback_cache:
+                    endless_feedback_cache[endless_id] = []
+                
+                feedback_entry = {
+                    'question': question.get('q', ''),
+                    'user_answer': user_answer,
+                    'correct_answer': correct_answer,
+                    'correct': is_correct,
+                    'feedback': question_feedback,
+                    'match_type': feedback_type,
+                    'similarity': similarity_score
+                }
+                endless_feedback_cache[endless_id].append(feedback_entry)
+                # Limit to last 100 entries
+                endless_feedback_cache[endless_id] = endless_feedback_cache[endless_id][-100:]
             
             session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
             if is_correct:
@@ -2802,7 +2829,10 @@ def endless_result():
     correct = session.get('endless_correct', 0)
     wrong = session.get('endless_wrong', 0)
     total_time = time.time() - session.get('endless_start_time', time.time())
-    feedback_list = session.get('endless_feedback_list', [])
+    
+    # Get feedback from cache instead of session
+    endless_id = session.get('endless_id')
+    feedback_list = endless_feedback_cache.get(endless_id, []) if endless_id else []
     
     # Get player name (student name or guest name)
     if session.get('is_student'):
@@ -2853,9 +2883,20 @@ def endless_result():
         session.pop('endless_feedback_list', None)
         session.pop('player_name', None)
         
+        # Clean up cache
+        if endless_id and endless_id in endless_feedback_cache:
+            endless_feedback_cache.pop(endless_id, None)
+        session.pop('endless_id', None)
+        
         flash(f'Score saved to leaderboard! {player_name}: {score} points', 'success')
         print(f"[DEBUG ENDLESS_RESULT] Redirecting to leaderboard after save")
-        return redirect(url_for('leaderboard'))
+        
+        # Redirect to appropriate leaderboard based on whether user is student or guest
+        if session.get('is_student'):
+            return redirect(url_for('leaderboard'))
+        else:
+            return redirect(url_for('guest_leaderboard'))
+    
     return render_template('endless_result.html',
                           score=score,
                           highest_streak=highest_streak,

@@ -304,5 +304,50 @@
         "wrong_answers": 10,
         "game_mode": "endless",
         "date": "2025-11-30 13:41:39"
+    },
+    {
+        "player": "JF",
+        "score": 60,
+        "time": 80.88,
+        "correct_answers": 6,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 13:53:14"
+    },
+    {
+        "player": "JF",
+        "score": 140,
+        "time": 98.29,
+        "correct_answers": 14,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 14:01:30"
+    },
+    {
+        "player": "JF",
+        "score": 20,
+        "time": 19.09,
+        "correct_answers": 2,
+        "wrong_answers": 10,
+        "game_mode": "endless",
+        "date": "2025-11-30 14:01:55"
+    },
+    {
+        "player": "JJ",
+        "score": 0,
+        "time": 2.72,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "endless",
+        "date": "2025-11-30 14:03:48"
+    },
+    {
+        "player": "hg",
+        "score": 140,
+        "time": 100.43,
+        "correct_answers": 14,
+        "wrong_answers": 12,
+        "game_mode": "endless",
+        "date": "2025-11-30 14:08:51"
     }
 ]

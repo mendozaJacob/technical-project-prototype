@@ -3996,5 +3996,29 @@
       "score": 0,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764529290.0915356,
+    "event_type": "endless_mode_quit",
+    "player_name": "JF",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 24,
+      "final_score": 140,
+      "max_streak": 5,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764529428.7318733,
+    "event_type": "endless_mode_quit",
+    "player_name": "JJ",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "final_score": 0,
+      "max_streak": 0,
+      "reason": "player_quit"
+    }
   }
 ]

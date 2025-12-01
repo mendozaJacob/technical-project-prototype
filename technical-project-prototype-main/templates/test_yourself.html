@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quiz Battle: Dungeons of Knowledge - Test Yourself</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; background: #2e3d1f; color: #f3eac2; }
+        .container { max-width: 600px; margin: 40px auto; background: #f3eac2; border: 6px solid #4b2e05; border-radius: 24px; box-shadow: 0 0 24px #0008; padding: 32px 24px 24px 24px; text-align: center; }
+    .timer { font-size: 1.3em; color: #b22222; margin-bottom: 12px; }
+    .questions-left { font-size: 1em; color: #4b2e05; margin-bottom: 10px; }
+        .progress { margin-bottom: 12px; }
+    .question { font-size: 1.2em; margin: 18px 0; color: #4b2e05; background: #fffbe6; border-radius: 8px; padding: 12px; }
+        .btn { font-family: 'Times New Roman', Times, serif; }
+        
+        /* Question Type Styles */
+        .answer-options { margin: 20px 0; }
+        .option-button { background: #fffbe6; border: 3px solid #4b2e05; border-radius: 12px; padding: 15px 20px; margin: 10px 0; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 15px; }
+        .option-button:hover { background: #ffeebc; transform: scale(1.02); }
+        .option-button.selected { background: #4b2e05; color: #f3eac2; }
+        .option-letter { font-weight: bold; font-size: 1.2em; min-width: 30px; }
+        .option-text { flex: 1; }
+        .tf-buttons { display: flex; gap: 20px; justify-content: center; margin: 20px 0; }
+        .tf-button { background: #fffbe6; border: 3px solid #4b2e05; border-radius: 12px; padding: 20px 30px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 120px; }
+        .tf-button:hover { background: #ffeebc; transform: scale(1.05); }
+        .tf-button.selected { background: #4b2e05; color: #f3eac2; }
+        .tf-icon { font-size: 2em; font-weight: bold; }
+        .tf-text { font-size: 1.1em; font-weight: bold; }
+        .selected-answer { background: #e8f5e8; border: 2px solid #4caf50; border-radius: 8px; padding: 10px; margin: 15px 0; color: #2e7d32; font-weight: bold; text-align: center; }
+        .short-answer-input { width: 100%; max-width: 500px; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .btn:disabled:hover { background: #ccc; transform: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h1 style="color:#4b2e05; font-size:2em; font-weight:bold; background:#fffbe6; border-radius:8px; padding:10px 0;">🧙‍♂️ Test Yourself</h1>
+    <div class="timer" id="timer">Time Left: {{ time_left_min }}m {{ '%02d' % time_left_sec }}s</div>
+    <div class="questions-left">Questions Left: {{ 40 - q_index }}</div>
+        <div class="progress">Question {{ q_number }} of 40 | Correct: {{ correct_count }}</div>
+        {% if question and question['q'] %}
+            <div class="question">{{ question['q'] }}</div>
+        {% else %}
+            <div class="question" style="color: red;">No question available.</div>
+        {% endif %}
+        <form method="POST" autocomplete="off" id="testAnswerForm">
+            {% set question_type = question.get('type', 'short_answer') %}
+            
+            {% if question_type == 'multiple_choice' %}
+                <!-- Multiple Choice Options -->
+                <div class="answer-options">
+                    {% for i in range(question.options|length) %}
+                    {% set option_letter = ['A', 'B', 'C', 'D'][i] %}
+                    <div class="option-button" onclick="selectTestOption('{{ option_letter|lower }}', '{{ question.options[i] }}')">
+                        <span class="option-letter">{{ option_letter }})</span>
+                        <span class="option-text">{{ question.options[i] }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="answer" id="testSelectedAnswer" required>
+                <div class="selected-answer" id="testSelectedDisplay" style="display: none;">
+                    Selected: <span id="testSelectedText"></span>
+                </div>
+                <button type="submit" class="btn" id="testSubmitButton" disabled>Submit</button>
+                
+            {% elif question_type == 'true_false' %}
+                <!-- True/False Buttons -->
+                <div class="tf-buttons">
+                    <div class="tf-button" onclick="selectTestTrueFalse('True')">
+                        <span class="tf-icon">✓</span>
+                        <span class="tf-text">True</span>
+                    </div>
+                    <div class="tf-button" onclick="selectTestTrueFalse('False')">
+                        <span class="tf-icon">✗</span>
+                        <span class="tf-text">False</span>
+                    </div>
+                </div>
+                <input type="hidden" name="answer" id="testTfAnswer" required>
+                <div class="selected-answer" id="testTfSelectedDisplay" style="display: none;">
+                    Selected: <span id="testTfSelectedText"></span>
+                </div>
+                <button type="submit" class="btn" id="testTfSubmitButton" disabled>Submit</button>
+                
+            {% else %}
+                <!-- Short Answer Input -->
+                <input type="text" name="answer" placeholder="Type your answer..." required autocomplete="off" class="short-answer-input">
+                <button type="submit" class="btn">Submit</button>
+            {% endif %}
+        </form>
+    </div>
+<script type="text/javascript">
+    // Live countdown timer (in minutes and seconds)
+    var timeLeft = {{ total_seconds_left|int }};
+    function updateTimer() {
+        if (timeLeft < 0) timeLeft = 0;
+        var min = Math.floor(timeLeft / 60);
+        var sec = timeLeft % 60;
+        document.getElementById('timer').textContent = `Time Left: ${min}m ${sec < 10 ? '0' : ''}${sec}s`;
+        if (timeLeft > 0) {
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        }
+    }
+    updateTimer();
+    
+    // Question type interaction functions for test yourself
+    function selectTestOption(letter, optionText) {
+        // Clear previous selections
+        document.querySelectorAll('.option-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select current option
+        event.target.closest('.option-button').classList.add('selected');
+        
+        // Set the answer values
+        document.getElementById('testSelectedAnswer').value = optionText;
+        document.getElementById('testSelectedDisplay').style.display = 'block';
+        document.getElementById('testSelectedText').textContent = letter.toUpperCase() + ') ' + optionText;
+        
+        // Enable submit button
+        document.getElementById('testSubmitButton').disabled = false;
+    }
+    
+    function selectTestTrueFalse(answer) {
+        // Clear previous selections
+        document.querySelectorAll('.tf-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select current option
+        event.target.closest('.tf-button').classList.add('selected');
+        
+        // Set the answer values
+        document.getElementById('testTfAnswer').value = answer;
+        document.getElementById('testTfSelectedDisplay').style.display = 'block';
+        document.getElementById('testTfSelectedText').textContent = answer;
+        
+        // Enable submit button
+        document.getElementById('testTfSubmitButton').disabled = false;
+    }
+</script>
+</body>
+</html>

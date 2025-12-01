@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Dungeons of Knowledge - Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Game Over</h1>
+        <p>{{ outcome }}</p>
+        <p>Final Score: {{ score }}</p>
+        <p>Player HP: {{ player_hp }}</p>
+        <p>Enemy HP: {{ enemy_hp }}</p>
+        <p>Level Reached: {{ level }}</p>
+        <p>Enemy Faced: {{ enemy['name'] }} {{ enemy['avatar'] }}</p>
+        {% if session.get('is_student') %}
+            <a href="{{ url_for('student_dashboard') }}" class="btn">Back to Student Portal</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn">Play Again</a>
+        {% endif %}
+        {% if can_advance %}
+            <form method="post" action="{{ url_for('select_level') }}">
+                <input type="hidden" name="level" value="{{ next_level }}">
+                <button type="submit" class="btn">Advance to Level {{ next_level }}</button>
+            </form>
+        {% else %}
+            <p style="color: red; font-weight: bold;">
+                You need at least 7 correct answers to advance! Try again.
+            </p>
+            <a href="{{ url_for('select_level') }}" class="btn">Replay Level</a>
+        {% endif %}
+    </div>
+</body>
+</html>

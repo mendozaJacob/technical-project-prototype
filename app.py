@@ -270,35 +270,9 @@ def teacher_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-    # --- AI Arrange Questions Route ---
-    @app.route('/teacher/ai-arrange-questions', methods=['POST'])
-    @teacher_required
-    def ai_arrange_questions():
-        data = request.get_json()
-        question_ids = data.get('question_ids', [])
-        strategy = data.get('strategy', 'balanced')
-        # Dummy implementation: evenly distribute questions across 10 levels
-        levels = []
-        num_levels = 10
-        if not question_ids:
-            return jsonify({'success': False, 'error': 'No question IDs provided'})
-        chunk_size = max(1, len(question_ids) // num_levels)
-        for i in range(num_levels):
-            start = i * chunk_size
-            end = start + chunk_size
-            levels.append({
-                'level': i + 1,
-                'question_ids': question_ids[start:end]
-            })
-        # Add any remaining questions to the last level
-        if len(question_ids) > num_levels * chunk_size:
-            levels[-1]['question_ids'].extend(question_ids[num_levels * chunk_size:])
-        return jsonify({
-            'success': True,
-            'levels': levels,
-            'strategy': strategy,
-            'total_questions': len(question_ids)
-        })
+
+
+    # ...existing code...
 
 # Helper function to check allowed file extensions
 def allowed_file(filename):
@@ -1314,21 +1288,20 @@ def choose_character():
 # Route for the game page
 @app.route('/game', methods=['GET', 'POST'])
 def game():
+    # ...existing code...
     # Ensure player has selected a level and has basic session data initialized
-    if 'selected_level' not in session:
+    if 'selected_level' not in session or 'character' not in session:
         flash('Please select a level first.', 'warning')
         return redirect(url_for('select_level'))
-    
     # Ensure player has a name
-    if not session.get('player_name'):
+    if not session.get('player_name') or not session.get('character'):
         flash('Please set your name first.', 'warning')
         return redirect(url_for('index'))
     
     # Get settings (needed for both initialization and debug checks)
     settings = get_current_game_settings()
-    
     # Initialize HP if not set (for new games)
-    if 'player_hp' not in session:
+    if 'player_hp' not in session or 'enemy_hp' not in session:
         session['player_hp'] = settings['base_player_hp']
         session['enemy_hp'] = settings['base_enemy_hp']
         session['score'] = 0
@@ -2157,7 +2130,7 @@ def quit_test_yourself():
                 level=None,
                 score=score,
                 correct_answers=correct_answers,
-                total_questions=total_questions,
+                total_questions=total,
                 time_taken=time_taken
             )
         
@@ -2252,7 +2225,7 @@ def test_yourself():
         # Completely reset session to ensure clean start
         reset_test_yourself_session()
         session['test_user_answers'] = []
-        print(f"[DEBUG] questions list length at test start: {len(questions)}")
+        # ...existing code...
         
         # Use questions from test_yourself pool
         test_pool_questions = get_questions_for_pool('test_yourself')
@@ -2640,7 +2613,7 @@ def endless_start():
         session['endless_recent_questions'] = [selected_question.get('id')]
         print(f"[DEBUG ENDLESS INIT] Using fallback, starting with Q ID: {selected_question.get('id')}")
     else:
-        flash('No questions available. Please contact your teacher to add questions.', 'error')
+        flash('No questions available. Please contact your teacher.', 'error')
         return redirect(url_for('index'))
     
     session['endless_score_initialized'] = True
@@ -2658,78 +2631,64 @@ def endless_game():
     if not session.get('player_name'):
         return redirect(url_for('endless'))
         
-    # Check if game is over
-    if session.get('endless_hp', 0) <= 0:
-        return redirect(url_for('endless_result'))
-        
-    # Timer logic
-    if 'endless_question_start' not in session:
-        session['endless_question_start'] = time.time()
-    elapsed = time.time() - session['endless_question_start']
-    time_left = max(0, 60 - int(elapsed))
-    
-    # Pick or keep the current question
-    if 'endless_current_question' not in session:
-        endless_questions = get_questions_for_pool('endless_mode')
-        if endless_questions:
-            session['endless_current_question'] = random.choice(endless_questions)
-        elif questions:
-            session['endless_current_question'] = random.choice(questions)
-        else:
-            flash('No questions available. Please contact your teacher.', 'error')
-            return redirect(url_for('index'))
-    
-    # Safety check for question
     try:
-        question = session.get('endless_current_question')
-        if not question or not isinstance(question, dict) or not question.get('q'):
-            # Reset and get new question
-            endless_questions = get_questions_for_pool('endless_mode')
-            if not endless_questions:
-                endless_questions = questions
-            if endless_questions:
-                question = random.choice(endless_questions)
-                session['endless_current_question'] = question
-            else:
-                flash('No questions available. Game cannot continue.', 'error')
-                return redirect(url_for('endless_result'))
-    except Exception as e:
-        print(f"[ERROR] Endless question error: {e}")
-        flash('An error occurred. Ending game.', 'error')
-        session['endless_hp'] = 0
-        return redirect(url_for('endless_result'))
-    
-    # Get session variables
-    streak = session.get('endless_streak', 0)
-    score = session.get('endless_score', 0)
-    player_hp = session.get('endless_hp', 100)
-    highest_streak = session.get('endless_highest_streak', 0)
-    total_answered = session.get('endless_total_answered', 0)
-    
-    # Handle timeout
-    if time_left == 0:
-        session['endless_hp'] = session.get('endless_hp', 100) - 10
-        session['endless_streak'] = 0
-        session['endless_wrong'] = session.get('endless_wrong', 0) + 1
-        session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
-        
-        # Check if HP reached 0 after timeout penalty
-        if session.get('endless_hp', 0) <= 0:
-            return redirect(url_for('endless_result'))
-        
-        session['endless_question_start'] = time.time()
-        # Select a different question avoiding recent ones
-        endless_questions = get_questions_for_pool('endless_mode')
-        if not endless_questions:
-            endless_questions = questions
-        
-        if not endless_questions:
-            flash('No questions available. Game cannot continue.', 'error')
-            return redirect(url_for('endless_result'))
-        
         # Get recent questions to avoid - make a copy to avoid reference issues
         recent_q_ids = list(session.get('endless_recent_questions', []))
-        
+        # Add current question to history before selecting new one
+        current_q_id = question.get('id')
+        if current_q_id and current_q_id not in recent_q_ids:
+            recent_q_ids.append(current_q_id)
+            # Keep only last 30 questions in history immediately
+            if len(recent_q_ids) > 30:
+                recent_q_ids = recent_q_ids[-30:]
+            print(f"[DEBUG ENDLESS TIMEOUT] Total questions: {len(endless_questions)}, Recent history: {len(recent_q_ids)}, Current Q ID: {current_q_id}")
+        # Check for duplicate IDs in history
+        unique_history = set(recent_q_ids)
+        if len(recent_q_ids) != len(unique_history):
+            print(f"[WARNING ENDLESS TIMEOUT] History contains duplicates! Cleaning up...")
+            recent_q_ids = list(unique_history)
+        # Filter out recently asked questions
+        available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+        print(f"[DEBUG ENDLESS TIMEOUT] Available questions after filtering: {len(available_questions)}")
+        # If we've exhausted all questions, clear oldest questions from history
+        if not available_questions:
+            print(f"[DEBUG ENDLESS TIMEOUT] Pool exhausted! Keeping only last 10 in history")
+            recent_q_ids = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
+            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
+            print(f"[DEBUG ENDLESS TIMEOUT] After reset - History: {len(recent_q_ids)}, Available: {len(available_questions)}")
+        # Select new question
+        if available_questions:
+            new_question = random.choice(available_questions)
+        else:
+            # Last resort - pick any question
+            print(f"[WARNING ENDLESS TIMEOUT] Last resort: picking from all questions")
+            new_question = random.choice(endless_questions)
+        print(f"[DEBUG ENDLESS TIMEOUT] Selected new question ID: {new_question.get('id')}")
+        # Verify no immediate duplicate
+        if new_question.get('id') == current_q_id:
+            print(f"[ERROR ENDLESS TIMEOUT] DUPLICATE DETECTED! Same as current question. Selecting different one...")
+            # Force selection of a different question
+            different_questions = [q for q in available_questions if q.get('id') != current_q_id]
+            if different_questions:
+                new_question = random.choice(different_questions)
+                print(f"[DEBUG ENDLESS TIMEOUT] Corrected to question ID: {new_question.get('id')}")
+        session['endless_current_question'] = new_question
+        # Add newly selected question to history to prevent immediate repetition
+        new_q_id = new_question.get('id')
+        if new_q_id and new_q_id not in recent_q_ids:
+            recent_q_ids.append(new_q_id)
+            # Keep only last 30
+            if len(recent_q_ids) > 30:
+                recent_q_ids = recent_q_ids[-30:]
+        # Update session with updated history
+        session['endless_recent_questions'] = recent_q_ids
+        print(f"[DEBUG] Updated history length: {len(recent_q_ids)}")
+        return redirect(url_for('endless_game'))
+    except Exception as e:
+        print(f"[ERROR] Endless mode POST error: {str(e)}")
+        # Force game over on error to prevent crash
+        session['endless_hp'] = 0
+        return redirect(url_for('endless_result'))
         # Add current question to history before selecting new one
         current_q_id = question.get('id')
         if current_q_id and current_q_id not in recent_q_ids:
@@ -2790,180 +2749,14 @@ def endless_game():
         # Update session with updated history
         session['endless_recent_questions'] = recent_q_ids
         
+        print(f"[DEBUG] Updated history length: {len(recent_q_ids)}")
+        
         return redirect(url_for('endless_game'))
-    
-    # Handle answer submission
-    if request.method == 'POST':
-        try:
-            user_answer = request.form.get('answer', '').strip().lower()
-            correct_answer = question.get('answer', '').strip().lower()
-            raw_keywords = question.get('keywords', [])
-            if isinstance(raw_keywords, str):
-                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-            else:
-                keywords = [str(k).strip().lower() for k in raw_keywords]
-            # Use fuzzy matching for endless mode
-            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-            
-            # If student and AI grading is enabled, use AI as fallback for uncertain answers
-            if session.get('is_student') and session.get('ai_grading_enabled', False):
-                # Use AI grading for short answers with low confidence (< 0.9)
-                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
-                    try:
-                        ai_result = grade_answer_with_ai(
-                            question=question.get('q', ''),
-                            correct_answer=correct_answer,
-                            student_answer=user_answer,
-                            confidence_threshold=75
-                        )
-                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
-                            is_correct = True
-                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
-                            similarity_score = ai_result.get('confidence', 0) / 100.0
-                    except Exception as e:
-                        print(f"AI grading error: {e}")
-            
-            # Log student answer in real-time
-            if 'student_id' in session:
-                log_student_answer(
-                    student_id=session['student_id'],
-                    student_name=session.get('student_name', 'Unknown'),
-                    question_id=question.get('id', 'unknown'),
-                    question_text=question.get('q', ''),
-                    student_answer=user_answer,
-                    correct_answer=correct_answer,
-                    is_correct=is_correct,
-                    game_mode='endless'
-                )
-            
-            # Store feedback for this question
-            question_feedback = question.get('feedback', 'No additional information available.')
-            if 'endless_feedback_list' not in session:
-                session['endless_feedback_list'] = []
-            
-            feedback_entry = {
-                'question': question.get('q', ''),
-                'user_answer': user_answer,
-                'correct_answer': correct_answer,
-                'correct': is_correct,
-                'feedback': question_feedback,
-                'match_type': feedback_type,
-                'similarity': similarity_score
-            }
-            session['endless_feedback_list'].append(feedback_entry)
-            # Limit to last 50 entries to prevent session overflow
-            if len(session['endless_feedback_list']) > 50:
-                session['endless_feedback_list'] = session['endless_feedback_list'][-50:]
-            
-            session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
-            if is_correct:
-                session['endless_score'] = session.get('endless_score', 0) + 10
-                session['endless_streak'] = session.get('endless_streak', 0) + 1
-                session['endless_correct'] = session.get('endless_correct', 0) + 1
-                if session['endless_streak'] > session.get('endless_highest_streak', 0):
-                    session['endless_highest_streak'] = session['endless_streak']
-                # HP regen after 5 correct in a row
-                if session['endless_streak'] % 5 == 0:
-                    session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
-            else:
-                session['endless_hp'] = session.get('endless_hp', 100) - 10
-                session['endless_streak'] = 0
-                session['endless_wrong'] = session.get('endless_wrong', 0) + 1
-            session['endless_question_start'] = time.time()
-            # Select a different question avoiding recent ones
-            endless_questions = get_questions_for_pool('endless_mode')
-            if not endless_questions:
-                endless_questions = questions
-            
-            # Get recent questions using SET for guaranteed uniqueness
-            recent_q_ids_list = session.get('endless_recent_questions', [])
-            recent_q_ids_set = set(recent_q_ids_list)  # Convert to set to remove any duplicates
-            
-            # Get current question ID - CRITICAL: must exclude this from next selection
-            current_q_id = question.get('id')
-            
-            # Add current question to the exclusion set
-            if current_q_id:
-                recent_q_ids_set.add(current_q_id)
-            
-            print(f"[DEBUG ENDLESS] Total questions: {len(endless_questions)}, History size: {len(recent_q_ids_set)}, Current Q ID: {current_q_id}")
-            
-            # Filter out ALL recently asked questions (using set for O(1) lookup)
-            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids_set]
-            
-            print(f"[DEBUG ENDLESS] Available questions after filtering: {len(available_questions)}")
-            
-            # If we've used up too many questions, reset to smaller history
-            if len(available_questions) < 10:  # Keep at least 10 options available
-                print(f"[DEBUG ENDLESS] Low availability! Resetting to last 5 questions in history")
-                # Keep only the most recent 5 questions (including current)
-                recent_list = list(recent_q_ids_set)
-                recent_q_ids_set = set(recent_list[-5:]) if len(recent_list) > 5 else recent_q_ids_set
-                # Always keep current question in exclusion
-                if current_q_id:
-                    recent_q_ids_set.add(current_q_id)
-                available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids_set]
-                print(f"[DEBUG ENDLESS] After reset - History: {len(recent_q_ids_set)}, Available: {len(available_questions)}")
-            
-            # CRITICAL: Filter out current question explicitly (double-check)
-            if current_q_id:
-                available_questions = [q for q in available_questions if q.get('id') != current_q_id]
-            
-            # Select new question with multiple attempts to avoid duplicates
-            new_question = None
-            max_attempts = 5
-            for attempt in range(max_attempts):
-                if available_questions:
-                    candidate = random.choice(available_questions)
-                    # Verify it's NOT the current question
-                    if candidate.get('id') != current_q_id:
-                        new_question = candidate
-                        break
-                    else:
-                        print(f"[WARNING ENDLESS] Attempt {attempt+1}: Got same question, retrying...")
-                        # Remove this from available and try again
-                        available_questions = [q for q in available_questions if q.get('id') != current_q_id]
-                else:
-                    break
-            
-            # Final fallback if all else fails
-            if not new_question:
-                print(f"[ERROR ENDLESS] Could not find different question! Picking from full pool...")
-                all_different = [q for q in endless_questions if q.get('id') != current_q_id]
-                if all_different:
-                    new_question = random.choice(all_different)
-                else:
-                    # This should never happen with 100 questions
-                    new_question = random.choice(endless_questions)
-            
-            new_q_id = new_question.get('id')
-            print(f"[DEBUG ENDLESS] Selected new question ID: {new_q_id} (Current was: {current_q_id})")
-            
-            # FINAL SAFETY CHECK
-            if new_q_id == current_q_id:
-                print(f"[CRITICAL ERROR] Failed to prevent duplicate! This should never happen!")
-            
-            session['endless_current_question'] = new_question
-            
-            # Update history: convert set back to list, add new question, keep last 30
-            updated_history = list(recent_q_ids_set)
-            if new_q_id and new_q_id not in updated_history:
-                updated_history.append(new_q_id)
-            
-            # Keep only last 30 questions in history
-            if len(updated_history) > 30:
-                updated_history = updated_history[-30:]
-            
-            session['endless_recent_questions'] = updated_history
-            
-            print(f"[DEBUG] Updated history length: {len(recent_q_ids)}")
-            
-            return redirect(url_for('endless_game'))
-        except Exception as e:
-            print(f"[ERROR] Endless mode POST error: {str(e)}")
-            # Force game over on error to prevent crash
-            session['endless_hp'] = 0
-            return redirect(url_for('endless_result'))
+    except Exception as e:
+        print(f"[ERROR] Endless mode POST error: {str(e)}")
+        # Force game over on error to prevent crash
+        session['endless_hp'] = 0
+        return redirect(url_for('endless_result'))
     
     return render_template('endless.html',
                           question=question,
@@ -3004,7 +2797,14 @@ def endless_result():
             session['player_name'] = player_name
         
         # Save to leaderboard for all players
-        save_leaderboard(player_name, score, total_time, correct, wrong, "endless")
+        save_leaderboard(
+            player_name=player_name,
+            score=score,
+            total_time=total_time,
+            correct_answers=correct,
+            wrong_answers=total - correct,
+            game_mode="endless"
+        )
         
         # Save student progress if logged in
         if session.get('is_student') and session.get('student_id'):
@@ -3292,14 +3092,16 @@ def teacher_login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+        # ...existing code...
         if username in TEACHER_CREDENTIALS and TEACHER_CREDENTIALS[username] == password:
+            # ...existing code...
             session['teacher_logged_in'] = True
             session['teacher_username'] = username
             return redirect(url_for('teacher_dashboard'))
         else:
+            # ...existing code...
             return render_template('teacher_login.html', error='Invalid credentials')
-    
+    # ...existing code...
     return render_template('teacher_login.html')
 
 @app.route('/teacher/logout')
@@ -3320,55 +3122,38 @@ def teacher_dashboard():
     }
     return render_template('teacher_dashboard.html', stats=stats)
 
-
+# Single correct route for teacher_ai_generator
+@app.route('/teacher/ai-generator', methods=['GET', 'POST'])
+@teacher_required
+def teacher_ai_generator():
     if request.method == 'POST':
         if 'file' not in request.files:
             return render_template('teacher_ai_generator.html', error='No file selected')
-        
         file = request.files['file']
         if file.filename == '':
             return render_template('teacher_ai_generator.html', error='No file selected')
-        
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            
-            # Extract content from file
             content = extract_text_from_file(file_path)
-            
-            # Truncate content if too long to prevent token issues
-            max_content_length = 8000  # Leave room for prompt and response
+            max_content_length = 8000
             if len(content) > max_content_length:
                 content = content[:max_content_length] + "\n[Content truncated for processing...]"
-                print(f"DEBUG: Content truncated from {len(extract_text_from_file(file_path))} to {len(content)} characters")
-            
-            print(f"DEBUG: Processing file content of {len(content)} characters")
-            
-            # Get form data
             topic = request.form.get('topic')
             difficulty = request.form.get('difficulty')
             question_count = int(request.form.get('question_count', 10))
             context = request.form.get('context', '')
-            
-            # Get selected question types
             selected_question_types = request.form.getlist('question_types')
             if not selected_question_types:
                 selected_question_types = ["short_answer", "multiple_choice", "true_false"]
-            
-            # Generate questions with AI
             generated_questions = generate_questions_with_ai(content, topic, difficulty, question_count, context, selected_question_types)
-            
-            # Clean up uploaded file
             os.remove(file_path)
-            
             if isinstance(generated_questions, dict) and 'error' in generated_questions:
                 return render_template('teacher_ai_generator.html', error=generated_questions['error'])
-            
             return render_template('teacher_ai_generator.html', generated_questions=generated_questions)
         else:
             return render_template('teacher_ai_generator.html', error='Invalid file type')
-    
     return render_template('teacher_ai_generator.html')
 
 @app.route('/teacher/save-questions', methods=['POST'])
@@ -3427,9 +3212,7 @@ def teacher_save_questions():
                         "keywords": question_data.get('keywords', []),
                         "feedback": question_data.get('feedback', ''),
                         "type": question_data.get('type', 'short_answer'),
-                        "options": question_data.get('options', []),
-                        "difficulty": question_data.get('difficulty', 'medium'),
-                        "ai_generated": True
+                        "options": options if question_type == 'multiple_choice' else []
                     }
                     
                     existing_questions.append(formatted_question)
@@ -3682,24 +3465,27 @@ def teacher_levels():
     try:
         with open("data/levels.json", "r", encoding="utf-8") as f:
             levels = json.load(f)
-    except:
+    except Exception:
         levels = []
-
     try:
-        with open('data/enemies.json', encoding='utf-8') as f:
-            enemies = json.load(f)
-    except:
-        enemies = []
+        # ...existing code...
+        return redirect(url_for('endless_game'))
+    except Exception as e:
+        print(f"[ERROR] Endless mode POST error: {str(e)}")
+        # Force game over on error to prevent crash
+        session['endless_hp'] = 0
+        return redirect(url_for('endless_result'))
 
-    # Create a question dictionary for lookup
-    questions_dict = {q.get('id'): q for q in questions}
-
-    # Calculate statistics
-    total_questions = len(questions)
-    avg_questions_per_level = total_questions / len(levels) if levels else 0
-    available_questions = [q for q in questions if q.get('id')]
-
-    # Load chapters
+    # This line should not be reached, but if it is, render the endless.html page
+    return render_template('endless.html',
+                          question=question,
+                          q_number=total_answered + 1,
+                          streak=streak,
+                          score=score,
+                          player_hp=player_hp,
+                          highest_streak=highest_streak,
+                          total_questions=100,
+                          time_left=time_left)
     try:
         with open('data/chapters.json', 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
@@ -3763,26 +3549,44 @@ def teacher_get_question(question_id):
     return jsonify({'error': 'Question not found'}), 404
 
 
-    # The following block was outside any function and caused IndentationError. Commented out for now:
-    # 'feedback': request.form.get('feedback', ''),
-    # 'type': question_type,
-    # 'options': options if question_type == 'multiple_choice' else []
-    # })
-    # break
-    # # Save questions
-    # with open('data/questions.json', 'w', encoding='utf-8') as f:
-    #     json.dump(all_questions, f, indent=2, ensure_ascii=False)
-    # flash('Question updated successfully!')
-    # return redirect(url_for('teacher_questions'))
-    # except Exception as e:
-    #     flash(f'Error updating question: {str(e)}')
-    # return redirect(url_for('teacher_questions'))
+@app.route('/teacher/update-question', methods=['POST'])
+@teacher_required
+def teacher_update_question():
+    try:
+        question_id = int(request.form.get('id'))
+        question_text = request.form.get('question')
+        correct_answer = request.form.get('answer')
+        keywords = request.form.get('keywords', '')
+        feedback = request.form.get('feedback', '')
+        question_type = request.form.get('type', 'short_answer')
+        options = request.form.getlist('options')
+        
+        # Find and update the question
+        for question in questions:
+            if question.get('id') == question_id:
+                question['q'] = question_text
+                question['answer'] = correct_answer
+                question['keywords'] = [k.strip() for k in keywords.split(',') if k.strip()]
+                question['feedback'] = feedback
+                question['type'] = question_type
+                question['options'] = options if question_type == 'multiple_choice' else []
+                break
+        else:
+            return jsonify({'success': False, 'error': 'Question not found'}), 404
+        
+        # Save updated questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(questions, f, indent=2, ensure_ascii=False)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/teacher/delete-question/<int:question_id>', methods=['POST'])
 @teacher_required
 def teacher_delete_question(question_id):
     try:
-        # Load questions
+        # Load existing questions
         with open('data/questions.json', 'r', encoding='utf-8') as f:
             all_questions = json.load(f)
         
@@ -3826,7 +3630,7 @@ def teacher_update_settings():
             'analytics_enabled': 'analytics_enabled' in request.form,
             'auto_save': 'auto_save' in request.form,
             'session_timeout': int(request.form.get('session_timeout', 30)),
-            'timeout_behavior': request.form.get('timeout_behavior', 'penalty')
+            'timeout_behavior': request.form.get('timeout_behavior', 'penalty')  # 'penalty' or 'fail'
         }
         
         # Compare settings to find changes
@@ -3970,12 +3774,39 @@ def teacher_get_level(level_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-        flash(f'Questions for Level {level_id} updated successfully! Now has {len(selected_questions)} questions.')
-        return redirect(url_for('teacher_levels'))
+@app.route('/teacher/update-level-questions', methods=['POST'])
+@teacher_required
+def teacher_update_level_questions():
+    try:
+        level_id = int(request.form.get('level_id'))
+        question_ids = request.form.getlist('questions')
+        question_ids = [int(qid) for qid in question_ids if qid.isdigit()]
+        
+        # Load existing levels
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels = json.load(f)
+        
+        # Find and update the level
+        level_found = False
+        for level in levels:
+            if level['level'] == level_id:
+                print(f"DEBUG: Found level {level_id}, old questions: {level['questions']}")
+                level['questions'] = question_ids
+                level_found = True
+                print(f"DEBUG: Updated level {level_id}, new questions: {level['questions']}")
+                break
+        
+        if not level_found:
+            print(f"DEBUG: Level {level_id} not found in levels!")
+            return jsonify({'success': False, 'error': 'Level not found'}), 404
+        
+        # Save updated levels
+        with open('data/levels.json', 'w', encoding='utf-8') as f:
+            json.dump(levels, f, indent=2, ensure_ascii=False)
+        
+        return jsonify({'success': True, 'message': f'Questions for Level {level_id} updated successfully! Now has {len(selected_questions)} questions.'})
     except Exception as e:
-        flash(f'Error updating level questions: {str(e)}')
-        return redirect(url_for('teacher_levels'))
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/teacher/delete-level/<int:level_id>', methods=['POST'])
 @teacher_required
@@ -3990,13 +3821,13 @@ def teacher_delete_level(level_id):
         levels = [level for level in levels if level['level'] != level_id]
         
         if len(levels) == original_count:
-            return jsonify({'success': False, 'error': f'Level {level_id} not found'})
+            return jsonify({'success': False, 'error': 'Level not found'})
         
         # Save updated levels
         with open('data/levels.json', 'w', encoding='utf-8') as f:
             json.dump(levels, f, indent=2, ensure_ascii=False)
         
-        return jsonify({'success': True, 'message': f'Level {level_id} deleted successfully'})
+        return jsonify({'success': True, 'message': 'Level deleted successfully'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
@@ -4223,7 +4054,7 @@ def teacher_batch_reset_progress():
         student_ids = data.get('student_ids', [])
         
         if not student_ids:
-            return jsonify({'success': False, 'error': 'No students selected'})
+            return jsonify({'success': False, 'error': 'No students selected'}), 400
         
         # Load student progress data
         try:
@@ -4249,8 +4080,7 @@ def teacher_batch_reset_progress():
                     "level_history": [],
                     "score_history": [],
                     "accuracy_history": [],
-                    "character_unlocks": [],
-                    "achievements": []
+                    "total_time": 0
                 }
                 reset_count += 1
         
@@ -4283,7 +4113,7 @@ def teacher_batch_reset_gamemodes():
         student_ids = data.get('student_ids', [])
         
         if not student_ids:
-            return jsonify({'success': False, 'error': 'No students selected'})
+            return jsonify({'success': False, 'error': 'No students selected'}), 400
         
         # Get student names for logging
         student_names = []
@@ -4837,11 +4667,11 @@ def get_questions_for_pool(pool_name):
             if "all" not in topics:
                 question_keywords = question.get("keywords", [])
                 if isinstance(question_keywords, str):
-                    question_keywords = [k.strip() for k in question_keywords.split(',')]
+                    question_keywords = [k.strip() for k in questionKeywords.split(',')]
                 
                 if not any(topic.lower() in [k.lower() for k in question_keywords] for topic in topics):
                     continue
-                    
+            
             pool_questions.append(question)
             
         return pool_questions
@@ -4990,6 +4820,7 @@ if __name__ == "__main__":
     print("🌐 Server running at: http://127.0.0.1:5000")
     print("🎯 Ready for educational adventures!")
     print("📡 Real-time monitoring enabled!")
+    # ...existing code...
     try:
         socketio.run(app, debug=True, host='127.0.0.1', port=5000, use_reloader=False)
     except:

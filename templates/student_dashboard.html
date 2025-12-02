@@ -248,7 +248,7 @@
                 <div class="game-icon">🧪</div>
                 <div class="game-title">Test Yourself</div>
                 <div class="game-description">Quick knowledge test with chapter-based questions.</div>
-                <a href="{{ url_for('select_chapter_test') }}" class="btn btn-large">Select Chapter</a>
+                <a href="{{ url_for('get_chapter', chapter_id=1) }}" class="btn btn-large">Select Chapter</a>
             </div>
             {% else %}
             <div class="game-card disabled">

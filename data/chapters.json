@@ -128,9 +128,10 @@
         100
       ],
       "locked_test_yourself": true,
-      "locked_level_mode": false,
+      "locked_level_mode": true,
       "locked_endless_mode": true,
       "level_range": [
+        1,
         2,
         3,
         4,

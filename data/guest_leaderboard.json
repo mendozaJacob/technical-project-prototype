@@ -2,19 +2,37 @@
     {
         "player": "Anonymous",
         "score": 0,
-        "time": 25.74,
+        "time": 3.62,
         "correct_answers": 0,
-        "wrong_answers": 1,
-        "game_mode": "test_yourself",
-        "date": "2025-12-02 01:20:42"
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 10:20:23"
+    },
+    {
+        "player": "Anonymous",
+        "score": 255,
+        "time": 109.66,
+        "correct_answers": 10,
+        "wrong_answers": 0,
+        "game_mode": "adventure",
+        "date": "2025-11-24 10:38:55"
     },
     {
         "player": "Anonymous",
         "score": 0,
-        "time": 0.0,
+        "time": 115.53,
         "correct_answers": 0,
         "wrong_answers": 0,
         "game_mode": "test_yourself",
-        "date": "2025-12-02 01:20:48"
+        "date": "2025-11-24 10:41:51"
+    },
+    {
+        "player": "Val",
+        "score": 0,
+        "time": 71.08,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "endless",
+        "date": "2025-11-24 10:43:22"
     }
 ]

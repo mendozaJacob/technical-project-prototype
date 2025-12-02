@@ -414,18 +414,22 @@
             <h2 class="modal-header">Edit Chapter</h2>
             <form action="{{ url_for('teacher_edit_chapter') }}" method="POST" id="editForm">
                 <input type="hidden" id="edit_chapter_id" name="chapter_id">
+                
                 <div class="form-group">
                     <label for="edit_name">Chapter Name *</label>
                     <input type="text" id="edit_name" name="name" required>
                 </div>
+                
                 <div class="form-group">
                     <label for="edit_description">Description</label>
                     <textarea id="edit_description" name="description"></textarea>
                 </div>
+                
                 <div class="form-group">
                     <label for="edit_order">Display Order</label>
                     <input type="number" id="edit_order" name="order" min="1">
                 </div>
+
                 <div class="form-group">
                     <label>Lock Status</label>
                     <div class="checkbox-group">
@@ -441,20 +445,13 @@
                         <label for="edit_locked_endless_mode" style="font-weight: normal; margin: 0;">Lock for Endless mode</label>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <label for="edit_level_range">Number of Levels</label>
                     <input type="number" id="edit_level_range" name="level_range" placeholder="e.g., 10" min="1" max="50">
                     <small style="color: #6d4106;">Enter a number (e.g., 10 creates levels 1-10)</small>
                 </div>
-                <div class="form-group">
-                    <label for="edit_levels">Assign Levels to Chapter</label>
-                    <select id="edit_levels" name="levels" multiple style="width:100%;height:120px;">
-                        {% for level in all_levels %}
-                        <option value="{{ level.level }}">Level {{ level.level }}</option>
-                        {% endfor %}
-                    </select>
-                    <small style="color: #6d4106;">Hold Ctrl (Windows) or Command (Mac) to select multiple levels.</small>
-                </div>
+
                 <div class="form-group">
                     <label>Assign Questions</label>
                     <div class="questions-selector" id="editQuestionsSelector">
@@ -468,6 +465,7 @@
                         {% endfor %}
                     </div>
                 </div>
+
                 <div style="text-align: center; margin-top: 30px;">
                     <button type="submit" class="btn btn-success">💾 Save Changes</button>
                     <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
@@ -702,9 +700,9 @@
             fetch('/teacher/toggle-chapter-lock', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: JSON.stringify({ chapter_id: chapterId, mode: mode })
+                body: `chapter_id=${chapterId}&mode=${mode}`
             })
             .then(response => response.json())
             .then(data => {

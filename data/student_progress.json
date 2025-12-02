@@ -1,6 +1,6 @@
 {
   "0001": {
-    "games_played": 4,
+    "games_played": 3,
     "total_score": 85,
     "best_score": 85,
     "levels_completed": [
@@ -36,23 +36,13 @@
         "total_questions": 40,
         "time_taken": 6.1545233726501465,
         "accuracy": 0.0
-      },
-      {
-        "date": "2025-12-02T00:39:52.709408",
-        "game_type": "test_yourself",
-        "level": null,
-        "score": 0,
-        "correct_answers": 0,
-        "total_questions": 40,
-        "time_taken": 4.027833461761475,
-        "accuracy": 0.0
       }
     ],
     "stats": {
       "total_correct": 6,
-      "total_questions": 86,
-      "average_accuracy": 6.98,
-      "total_time": 141.11274552345276
+      "total_questions": 46,
+      "average_accuracy": 13.04,
+      "total_time": 137.08491206169128
     }
   }
 }

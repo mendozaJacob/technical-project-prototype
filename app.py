@@ -185,6 +185,253 @@ def generate_enemy_taunt(question, enemy_name):
     import random
     return random.choice(generic_taunts)
 
+# Automatic Enemy Generation System
+def generate_enemy_name(level, chapter_theme="general", difficulty="Easy"):
+    """Generate an appropriate enemy name based on level, theme, and difficulty"""
+    import random
+    
+    # Theme-based name components
+    theme_prefixes = {
+        "general": ["Novice", "Apprentice", "Journeyman", "Expert", "Master", "Grandmaster"],
+        "linux": ["System", "Terminal", "Shell", "Kernel", "Command", "Script"],
+        "security": ["Cyber", "Secure", "Guardian", "Defender", "Sentinel", "Warden"],
+        "network": ["Network", "Protocol", "Packet", "Router", "Switch", "Gateway"],
+        "python": ["Code", "Script", "Function", "Class", "Module", "Package"],
+        "programming": ["Logic", "Algorithm", "Syntax", "Debug", "Compile", "Execute"],
+        "database": ["Query", "Schema", "Index", "Table", "Record", "Database"],
+        "web": ["Server", "Client", "API", "HTTP", "Browser", "Web"]
+    }
+    
+    theme_suffixes = {
+        "general": ["Guardian", "Keeper", "Warden", "Master", "Lord", "Champion"],
+        "linux": ["Admin", "Daemon", "Process", "Wizard", "Guru", "Sage"],
+        "security": ["Hunter", "Scanner", "Firewall", "Protector", "Shield", "Vault"],
+        "network": ["Router", "Bridge", "Hub", "Node", "Relay", "Gateway"],
+        "python": ["Parser", "Compiler", "Interpreter", "Handler", "Manager", "Controller"],
+        "programming": ["Debugger", "Optimizer", "Validator", "Executor", "Builder", "Tester"],
+        "database": ["Architect", "Designer", "Optimizer", "Administrator", "Analyst", "Engineer"],
+        "web": ["Developer", "Designer", "Architect", "Engineer", "Specialist", "Expert"]
+    }
+    
+    # Difficulty modifiers
+    difficulty_modifiers = {
+        "Easy": ["Apprentice", "Novice", "Junior", "Basic", "Simple"],
+        "Medium": ["Skilled", "Advanced", "Senior", "Professional", "Elite"],
+        "Hard": ["Master", "Expert", "Legendary", "Supreme", "Ultimate"]
+    }
+    
+    # Get appropriate components
+    prefixes = theme_prefixes.get(chapter_theme.lower(), theme_prefixes["general"])
+    suffixes = theme_suffixes.get(chapter_theme.lower(), theme_suffixes["general"])
+    modifiers = difficulty_modifiers.get(difficulty, difficulty_modifiers["Easy"])
+    
+    # Create name based on level progression
+    if level <= 5:
+        prefix = random.choice(prefixes[:2])  # Use easier prefixes
+    elif level <= 15:
+        prefix = random.choice(prefixes[2:4])  # Use medium prefixes
+    else:
+        prefix = random.choice(prefixes[4:])  # Use harder prefixes
+    
+    suffix = random.choice(suffixes)
+    
+    # Sometimes add difficulty modifier
+    if random.random() < 0.3:  # 30% chance
+        modifier = random.choice(modifiers)
+        return f"{modifier} {suffix}"
+    else:
+        return f"{prefix} {suffix}"
+
+def generate_enemy_avatar(level, chapter_theme="general"):
+    """Generate an appropriate emoji avatar for the enemy"""
+    import random
+    
+    theme_avatars = {
+        "general": ["🧙‍♂️", "👨‍💻", "👾", "🧞", "🛡️", "⚔️", "🏰", "🎯", "🔮", "⚡"],
+        "linux": ["💻", "🖥️", "⌨️", "🔧", "⚙️", "🛠️", "📟", "🔍", "📊", "🗃️"],
+        "security": ["🔒", "🛡️", "🔐", "🚨", "👮‍♂️", "🔍", "🚀", "⚡", "🎯", "🛸"],
+        "network": ["🌐", "📡", "🔗", "📶", "🌍", "🛰️", "⚡", "🔌", "📊", "🎛️"],
+        "python": ["🐍", "🐲", "🔥", "⚡", "🧠", "🔮", "📚", "🎯", "⚙️", "🚀"],
+        "programming": ["💻", "🤖", "⚡", "🔧", "⚙️", "🎯", "🧠", "🔮", "🚀", "💡"],
+        "database": ["📊", "🗄️", "📈", "💾", "🔍", "📋", "📁", "🎯", "⚡", "🔧"],
+        "web": ["🌐", "💻", "📱", "🎨", "🔧", "⚡", "🚀", "💡", "🎯", "📊"]
+    }
+    
+    avatars = theme_avatars.get(chapter_theme.lower(), theme_avatars["general"])
+    
+    # Progressive avatar selection based on level
+    if level <= 5:
+        return random.choice(avatars[:3])  # Simpler avatars
+    elif level <= 15:
+        return random.choice(avatars[3:7])  # Medium complexity
+    else:
+        return random.choice(avatars[7:])  # More intimidating avatars
+
+def generate_enemy_taunt_auto(level, chapter_theme="general", difficulty="Easy", enemy_name="Enemy"):
+    """Generate an appropriate taunt for automatically created enemies"""
+    import random
+    
+    theme_taunts = {
+        "general": [
+            f"{enemy_name} challenges your knowledge!",
+            "Can you handle this level of difficulty?",
+            "Let's see what you're made of!",
+            "Your skills will be tested here!",
+            "Prepare for a real challenge!"
+        ],
+        "linux": [
+            "Your command line skills are weak!",
+            "Can you navigate the terminal?",
+            "Let's see your system administration prowess!",
+            "Shell scripting will be your downfall!",
+            "The filesystem maze awaits you!"
+        ],
+        "security": [
+            "Your defenses are inadequate!",
+            "Can you protect against my attacks?",
+            "Security through obscurity won't help you!",
+            "Your firewall knowledge is lacking!",
+            "Let's test your cybersecurity skills!"
+        ],
+        "network": [
+            "Your network knowledge has gaps!",
+            "Can you configure proper routing?",
+            "Protocol understanding is key!",
+            "Let's see your connectivity skills!",
+            "Network troubleshooting will challenge you!"
+        ],
+        "python": [
+            "Your Python code has bugs!",
+            "Can you handle advanced syntax?",
+            "Let's test your programming logic!",
+            "Object-oriented concepts will confuse you!",
+            "Your algorithms need improvement!"
+        ],
+        "programming": [
+            "Your code lacks elegance!",
+            "Can you debug efficiently?",
+            "Algorithm complexity will defeat you!",
+            "Let's see your problem-solving skills!",
+            "Data structures will challenge you!"
+        ],
+        "database": [
+            "Your queries are inefficient!",
+            "Can you design proper schemas?",
+            "Let's test your SQL knowledge!",
+            "Database optimization will challenge you!",
+            "Relational concepts will confuse you!"
+        ],
+        "web": [
+            "Your frontend skills need work!",
+            "Can you handle responsive design?",
+            "Let's test your web standards knowledge!",
+            "API integration will challenge you!",
+            "Your user experience is lacking!"
+        ]
+    }
+    
+    base_taunts = theme_taunts.get(chapter_theme.lower(), theme_taunts["general"])
+    
+    # Add difficulty-based intensity
+    if difficulty == "Hard":
+        intensity_modifiers = ["This will destroy you!", "Prepare for defeat!", "You have no chance!"]
+        if random.random() < 0.4:
+            return random.choice(intensity_modifiers)
+    
+    return random.choice(base_taunts)
+
+def determine_chapter_theme(chapter_name, chapter_description=""):
+    """Determine the theme of a chapter based on its name and description"""
+    text = (chapter_name + " " + chapter_description).lower()
+    
+    # Theme detection keywords
+    theme_keywords = {
+        "linux": ["linux", "command", "shell", "terminal", "system", "admin", "filesystem"],
+        "security": ["security", "cyber", "firewall", "protection", "encryption", "vulnerability"],
+        "network": ["network", "protocol", "routing", "tcp", "ip", "connection", "internet"],
+        "python": ["python", "programming", "code", "script", "function", "class"],
+        "programming": ["programming", "algorithm", "code", "software", "development", "logic"],
+        "database": ["database", "sql", "query", "table", "schema", "data"],
+        "web": ["web", "html", "css", "javascript", "frontend", "backend", "api"]
+    }
+    
+    # Check for theme matches
+    for theme, keywords in theme_keywords.items():
+        if any(keyword in text for keyword in keywords):
+            return theme
+    
+    return "general"
+
+def auto_generate_enemy(level, chapter_id=1, difficulty="Easy"):
+    """Generate a complete enemy for a given level"""
+    # Load chapters to determine theme
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        
+        chapter = None
+        for ch in chapters_data.get('chapters', []):
+            if ch.get('id') == chapter_id:
+                chapter = ch
+                break
+        
+        if chapter:
+            chapter_theme = determine_chapter_theme(
+                chapter.get('name', ''), 
+                chapter.get('description', '')
+            )
+        else:
+            chapter_theme = "general"
+    except:
+        chapter_theme = "general"
+    
+    # Generate enemy components
+    name = generate_enemy_name(level, chapter_theme, difficulty)
+    avatar = generate_enemy_avatar(level, chapter_theme)
+    taunt = generate_enemy_taunt_auto(level, chapter_theme, difficulty, name)
+    
+    # Create enemy object
+    enemy = {
+        "level": level,
+        "name": name,
+        "avatar": avatar,
+        "taunt": taunt,
+        "image": f"enemies/{name.lower().replace(' ', '_')}.jpg",
+        "range": f"Q{level*10-9}–Q{level*10}"  # Approximate range
+    }
+    
+    return enemy
+
+def add_enemy_to_file(enemy):
+    """Add a new enemy to the enemies.json file"""
+    try:
+        # Load existing enemies
+        with open('data/enemies.json', 'r', encoding='utf-8') as f:
+            enemies = json.load(f)
+        
+        # Check if enemy already exists for this level
+        existing_enemy = next((e for e in enemies if e.get('level') == enemy['level']), None)
+        if existing_enemy:
+            print(f"Enemy already exists for level {enemy['level']}: {existing_enemy['name']}")
+            return False
+        
+        # Add new enemy
+        enemies.append(enemy)
+        
+        # Sort by level
+        enemies.sort(key=lambda x: x.get('level', 0))
+        
+        # Save back to file
+        with open('data/enemies.json', 'w', encoding='utf-8') as f:
+            json.dump(enemies, f, indent=2, ensure_ascii=False)
+        
+        print(f"Added new enemy for level {enemy['level']}: {enemy['name']}")
+        return True
+        
+    except Exception as e:
+        print(f"Error adding enemy to file: {str(e)}")
+        return False
+
 # Define the schema for the Whoosh search index
 schema = Schema(
     id=ID(stored=True, unique=True),
@@ -3239,8 +3486,130 @@ def api_get_chapters():
 @app.route('/teacher/add_chapter', methods=['POST'])
 @teacher_required
 def teacher_add_chapter():
-    # Placeholder implementation for adding a chapter
-    return 'Chapter added (placeholder)', 200
+    try:
+        # Get form data
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        order = int(request.form.get('order', 1))
+        locked_test_yourself = bool(request.form.get('locked_test_yourself'))
+        locked_level_mode = bool(request.form.get('locked_level_mode'))
+        locked_endless_mode = bool(request.form.get('locked_endless_mode'))
+        level_range = int(request.form.get('level_range', 10))
+        question_ids = request.form.getlist('question_ids')
+        
+        if not name:
+            flash('Chapter name is required!')
+            return redirect(url_for('teacher_chapters'))
+        
+        # Load existing chapters
+        try:
+            with open('data/chapters.json', 'r', encoding='utf-8') as f:
+                chapters_data = json.load(f)
+        except:
+            chapters_data = {"chapters": [], "metadata": {"last_updated": "", "version": "1.0.0", "total_chapters": 0}}
+        
+        chapters = chapters_data.get('chapters', [])
+        
+        # Find next chapter ID
+        next_id = max([ch.get('id', 0) for ch in chapters], default=0) + 1
+        
+        # Determine level range for the chapter
+        existing_levels = []
+        for ch in chapters:
+            existing_levels.extend(ch.get('level_range', []))
+        
+        # Find next available level range
+        if existing_levels:
+            start_level = max(existing_levels) + 1
+        else:
+            start_level = 1
+            
+        new_level_range = list(range(start_level, start_level + level_range))
+        
+        # Create new chapter
+        from datetime import datetime
+        new_chapter = {
+            "id": next_id,
+            "name": name,
+            "description": description,
+            "order": order,
+            "question_ids": [int(qid) for qid in question_ids] if question_ids else [],
+            "locked_test_yourself": locked_test_yourself,
+            "locked_level_mode": locked_level_mode,
+            "locked_endless_mode": locked_endless_mode,
+            "level_range": new_level_range,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        chapters.append(new_chapter)
+        
+        # Update metadata
+        chapters_data["chapters"] = chapters
+        chapters_data["metadata"]["last_updated"] = datetime.now().isoformat()
+        chapters_data["metadata"]["total_chapters"] = len(chapters)
+        
+        # Save updated chapters
+        with open('data/chapters.json', 'w', encoding='utf-8') as f:
+            json.dump(chapters_data, f, indent=2, ensure_ascii=False)
+        
+        # Generate enemies for all levels in the new chapter
+        enemies_created = 0
+        enemy_creation_errors = []
+        
+        for level_num in new_level_range:
+            try:
+                # Create enemy for this level
+                new_enemy = auto_generate_enemy(level_num, next_id, "Easy")  # Default difficulty for new chapters
+                if add_enemy_to_file(new_enemy):
+                    enemies_created += 1
+                    
+            except Exception as enemy_error:
+                enemy_creation_errors.append(f"Level {level_num}: {str(enemy_error)}")
+        
+        # Create basic levels for the chapter if none exist
+        try:
+            with open('data/levels.json', 'r', encoding='utf-8') as f:
+                levels = json.load(f)
+        except:
+            levels = []
+        
+        levels_created = 0
+        for level_num in new_level_range:
+            # Check if level already exists
+            existing_level = next((l for l in levels if l.get('level') == level_num), None)
+            if not existing_level:
+                # Create basic level structure
+                new_level = {
+                    "level": level_num,
+                    "difficulty": "Easy",
+                    "questions": new_chapter["question_ids"][:10] if new_chapter["question_ids"] else [],
+                    "chapter_id": next_id
+                }
+                levels.append(new_level)
+                levels_created += 1
+        
+        if levels_created > 0:
+            # Save updated levels
+            with open('data/levels.json', 'w', encoding='utf-8') as f:
+                json.dump(levels, f, indent=2, ensure_ascii=False)
+        
+        # Prepare success message
+        success_msg = f'Chapter "{name}" created successfully with {level_range} levels ({start_level}-{start_level + level_range - 1})!'
+        if enemies_created > 0:
+            success_msg += f' {enemies_created} enemies generated automatically.'
+        if levels_created > 0:
+            success_msg += f' {levels_created} basic levels created.'
+        
+        if enemy_creation_errors:
+            success_msg += f' Note: {len(enemy_creation_errors)} enemy generation errors occurred.'
+        
+        flash(success_msg)
+        return redirect(url_for('teacher_chapters'))
+        
+    except Exception as e:
+        flash(f'Error creating chapter: {str(e)}')
+        return redirect(url_for('teacher_chapters'))
 @app.route('/teacher/chapters')
 @teacher_required
 def teacher_chapters():
@@ -3274,22 +3643,54 @@ def teacher_edit_chapter():
     assigned_levels = request.form.getlist('levels')
 
     # Update chapters.json
+    old_level_range = []
+    new_level_range = []
+    
     try:
         with open('data/chapters.json', 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapters = chapters_data.get('chapters', [])
         for chapter in chapters:
             if chapter.get('id') == chapter_id:
+                # Store old level range for comparison
+                old_level_range = chapter.get('level_range', [])
+                
                 chapter['name'] = name
                 chapter['description'] = description
                 chapter['order'] = order
                 chapter['locked_test_yourself'] = locked_test_yourself
                 chapter['locked_level_mode'] = locked_level_mode
                 chapter['locked_endless_mode'] = locked_endless_mode
-                chapter['level_range'] = [int(lvl) for lvl in assigned_levels] if assigned_levels else list(range(1, level_range+1))
+                new_level_range = [int(lvl) for lvl in assigned_levels] if assigned_levels else list(range(1, level_range+1))
+                chapter['level_range'] = new_level_range
                 chapter['question_ids'] = [int(qid) for qid in question_ids]
+                
+                # Update timestamp
+                from datetime import datetime
+                chapter['updated_at'] = datetime.now().isoformat()
+                break
+                
         with open('data/chapters.json', 'w', encoding='utf-8') as f:
             json.dump(chapters_data, f, indent=2, ensure_ascii=False)
+            
+        # Generate enemies for any new levels added to the chapter
+        newly_added_levels = [level for level in new_level_range if level not in old_level_range]
+        enemies_created = 0
+        
+        for level_num in newly_added_levels:
+            try:
+                # Generate enemy for new level
+                new_enemy = auto_generate_enemy(level_num, chapter_id, "Easy")
+                if add_enemy_to_file(new_enemy):
+                    enemies_created += 1
+            except Exception as enemy_error:
+                print(f"Error generating enemy for level {level_num}: {str(enemy_error)}")
+        
+        if enemies_created > 0:
+            flash(f'Chapter updated successfully! {enemies_created} new enemies generated for added levels.')
+        else:
+            flash('Chapter updated successfully!')
+            
     except Exception as e:
         return f'Error updating chapter: {str(e)}', 500
 
@@ -3952,7 +4353,33 @@ def teacher_add_level():
         with open('data/levels.json', 'w', encoding='utf-8') as f:
             json.dump(levels, f, indent=2, ensure_ascii=False)
         
-        flash(f'Level {next_level} added successfully with {len(question_ids)} questions!')
+        # Automatically generate enemy for the new level
+        try:
+            # Determine which chapter this level belongs to
+            chapter_id = 1  # Default to chapter 1
+            with open('data/chapters.json', 'r', encoding='utf-8') as f:
+                chapters_data = json.load(f)
+            
+            # Find the appropriate chapter based on level range
+            for chapter in chapters_data.get('chapters', []):
+                level_range = chapter.get('level_range', [])
+                if next_level in level_range:
+                    chapter_id = chapter.get('id', 1)
+                    break
+            
+            # Generate and add enemy
+            new_enemy = auto_generate_enemy(next_level, chapter_id, difficulty)
+            enemy_added = add_enemy_to_file(new_enemy)
+            
+            if enemy_added:
+                flash(f'Level {next_level} added successfully with {len(question_ids)} questions! Enemy "{new_enemy["name"]}" created automatically.')
+            else:
+                flash(f'Level {next_level} added successfully with {len(question_ids)} questions! (Enemy generation skipped - already exists)')
+                
+        except Exception as enemy_error:
+            print(f"Error generating enemy: {str(enemy_error)}")
+            flash(f'Level {next_level} added successfully with {len(question_ids)} questions! (Note: Auto enemy generation failed)')
+        
         return redirect(url_for('teacher_levels'))
     except Exception as e:
         flash(f'Error adding level: {str(e)}')

@@ -2517,6 +2517,38 @@ def test_yourself():
         flash('Test Yourself mode is currently disabled.', 'error')
         return redirect(url_for('index'))
     
+    # Load chapters to check lock status
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        chapters = []
+    
+    # Check if a specific chapter is requested and if it's locked
+    chapter_id = request.args.get('chapter_id')
+    if chapter_id:
+        try:
+            chapter_id = int(chapter_id)
+            chapter = None
+            for ch in chapters:
+                if ch.get('id') == chapter_id:
+                    chapter = ch
+                    break
+            
+            if chapter and chapter.get('locked_test_yourself', False):
+                flash('This chapter\'s Test Yourself mode is locked.', 'error')
+                return redirect(url_for('select_chapter_test'))
+                
+        except ValueError:
+            pass  # Continue with normal flow if chapter validation fails
+    else:
+        # If no specific chapter requested, check if any chapters are available
+        available_chapters = [ch for ch in chapters if not ch.get('locked_test_yourself', False)]
+        if not available_chapters:
+            flash('Test Yourself mode is locked for all chapters.', 'error')
+            return redirect(url_for('index'))
+    
     # Reset test state for a true new start (GET with ?new=1) or if no session data exists
     if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
         # Completely reset session to ensure clean start
@@ -2855,6 +2887,38 @@ def endless():
         flash('Endless Mode is currently disabled.', 'error')
         return redirect(url_for('index'))
     
+    # Load chapters to check lock status  
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        chapters = []
+    
+    # Check if a specific chapter is requested and if it's locked
+    chapter_id = request.args.get('chapter_id')
+    if chapter_id:
+        try:
+            chapter_id = int(chapter_id)
+            chapter = None
+            for ch in chapters:
+                if ch.get('id') == chapter_id:
+                    chapter = ch
+                    break
+            
+            if chapter and chapter.get('locked_endless_mode', False):
+                flash('This chapter\'s Endless Mode is locked.', 'error')
+                return redirect(url_for('index'))
+                
+        except ValueError:
+            pass  # Continue with normal flow if chapter validation fails
+    else:
+        # If no specific chapter requested, check if any chapters are available
+        available_chapters = [ch for ch in chapters if not ch.get('locked_endless_mode', False)]
+        if not available_chapters:
+            flash('Endless Mode is locked for all chapters.', 'error')
+            return redirect(url_for('index'))
+    
     # Show setup page if no player name is set or if this is a fresh start
     if not session.get('player_name') or not session.get('endless_score_initialized'):
         return render_template('endless_setup.html')
@@ -2873,6 +2937,38 @@ def endless_start():
     if not settings.get('endless_mode_enabled', True):
         flash('Endless Mode is currently disabled.', 'error')
         return redirect(url_for('index'))
+    
+    # Load chapters to check lock status
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        chapters = []
+    
+    # Check if a specific chapter is requested and if it's locked
+    chapter_id = request.form.get('chapter_id') or request.args.get('chapter_id')
+    if chapter_id:
+        try:
+            chapter_id = int(chapter_id)
+            chapter = None
+            for ch in chapters:
+                if ch.get('id') == chapter_id:
+                    chapter = ch
+                    break
+            
+            if chapter and chapter.get('locked_endless_mode', False):
+                flash('This chapter\'s Endless Mode is locked.', 'error')
+                return redirect(url_for('index'))
+                
+        except ValueError:
+            pass  # Continue with normal flow if chapter validation fails
+    else:
+        # If no specific chapter requested, check if any chapters are available
+        available_chapters = [ch for ch in chapters if not ch.get('locked_endless_mode', False)]
+        if not available_chapters:
+            flash('Endless Mode is locked for all chapters.', 'error')
+            return redirect(url_for('index'))
     # Get player name from form
     player_name = request.form.get('player_name', '').strip()
     if not player_name:
@@ -4247,6 +4343,104 @@ def teacher_delete_question(question_id):
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/add-question', methods=['POST'])
+@teacher_required
+def teacher_add_question():
+    try:
+        # Get form data
+        question_text = request.form.get('question', '').strip()
+        answer = request.form.get('answer', '').strip()
+        keywords = request.form.get('keywords', '').strip()
+        difficulty = request.form.get('difficulty', 'Easy')
+        ai_generated = bool(request.form.get('ai_generated', False))
+        
+        if not question_text or not answer:
+            flash('Question and answer are required!')
+            return redirect(url_for('teacher_questions'))
+        
+        # Load existing questions
+        try:
+            with open('data/questions.json', 'r', encoding='utf-8') as f:
+                questions = json.load(f)
+        except:
+            questions = []
+        
+        # Find next question ID
+        next_id = max([q.get('id', 0) for q in questions], default=0) + 1
+        
+        # Create new question
+        new_question = {
+            "id": next_id,
+            "q": question_text,
+            "answer": answer,
+            "keywords": keywords,
+            "difficulty": difficulty,
+            "ai_generated": ai_generated,
+            "created_at": datetime.now().isoformat()
+        }
+        
+        # Add to questions list
+        questions.append(new_question)
+        
+        # Save questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(questions, f, indent=2, ensure_ascii=False)
+        
+        flash(f'Question {next_id} added successfully!')
+        return redirect(url_for('teacher_questions'))
+        
+    except Exception as e:
+        flash(f'Error adding question: {str(e)}')
+        return redirect(url_for('teacher_questions'))
+
+@app.route('/teacher/edit-question', methods=['POST'])
+@teacher_required
+def teacher_edit_question():
+    try:
+        # Get form data
+        question_id = int(request.form.get('question_id'))
+        question_text = request.form.get('question', '').strip()
+        answer = request.form.get('answer', '').strip()
+        keywords = request.form.get('keywords', '').strip()
+        difficulty = request.form.get('difficulty', 'Easy')
+        ai_generated = bool(request.form.get('ai_generated', False))
+        
+        if not question_text or not answer:
+            flash('Question and answer are required!')
+            return redirect(url_for('teacher_questions'))
+        
+        # Load existing questions
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
+            questions = json.load(f)
+        
+        # Find and update the question
+        question_found = False
+        for question in questions:
+            if question.get('id') == question_id:
+                question['q'] = question_text
+                question['answer'] = answer
+                question['keywords'] = keywords
+                question['difficulty'] = difficulty
+                question['ai_generated'] = ai_generated
+                question['updated_at'] = datetime.now().isoformat()
+                question_found = True
+                break
+        
+        if not question_found:
+            flash(f'Question {question_id} not found!')
+            return redirect(url_for('teacher_questions'))
+        
+        # Save questions
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
+            json.dump(questions, f, indent=2, ensure_ascii=False)
+        
+        flash(f'Question {question_id} updated successfully!')
+        return redirect(url_for('teacher_questions'))
+        
+    except Exception as e:
+        flash(f'Error updating question: {str(e)}')
+        return redirect(url_for('teacher_questions'))
 
 @app.route('/teacher/update-settings', methods=['POST'])
 @teacher_required

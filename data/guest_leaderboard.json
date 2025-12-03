@@ -34,5 +34,59 @@
         "wrong_answers": 0,
         "game_mode": "endless",
         "date": "2025-11-24 10:43:22"
+    },
+    {
+        "player": "John Doe",
+        "score": 0,
+        "time": 2.81,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-12-02 22:31:40"
+    },
+    {
+        "player": "Val",
+        "score": 0,
+        "time": 4.95,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "endless",
+        "date": "2025-12-02 22:31:52"
+    },
+    {
+        "player": "Val",
+        "score": 0,
+        "time": 40.32,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "endless",
+        "date": "2025-12-02 22:33:17"
+    },
+    {
+        "player": "Val",
+        "score": 0,
+        "time": 2.98,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-12-02 22:39:47"
+    },
+    {
+        "player": "Val",
+        "score": 0,
+        "time": 3.64,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "endless",
+        "date": "2025-12-02 22:39:58"
+    },
+    {
+        "player": "Val",
+        "score": 0,
+        "time": 6.02,
+        "correct_answers": 0,
+        "wrong_answers": 0,
+        "game_mode": "test_yourself",
+        "date": "2025-12-02 22:41:13"
     }
 ]

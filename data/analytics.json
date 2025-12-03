@@ -882,5 +882,77 @@
       "questions_answered": 1,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764732700.0916278,
+    "event_type": "test_yourself_quit",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764732712.4044056,
+    "event_type": "endless_mode_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "final_score": 0,
+      "max_streak": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764732797.8294373,
+    "event_type": "endless_mode_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "final_score": 0,
+      "max_streak": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764733187.205397,
+    "event_type": "test_yourself_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764733198.0048804,
+    "event_type": "endless_mode_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "final_score": 0,
+      "max_streak": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1764733273.623456,
+    "event_type": "test_yourself_quit",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
   }
 ]

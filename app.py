@@ -2352,15 +2352,15 @@ except json.JSONDecodeError as e:
 
 # Load questions from the JSON file
 try:
-    questions_file = os.path.join(os.path.dirname(__file__), 'data', 'old_questions.json')
+    questions_file = os.path.join(os.path.dirname(__file__), 'data', 'questions.json')
     with open(questions_file, encoding='utf-8') as f:
         questions = json.load(f)
     print(f"Questions loaded successfully! Loaded {len(questions)} questions.")
 except FileNotFoundError:
-    print("Error: old_questions.json file not found.")
+    print("Error: questions.json file not found.")
     questions = []
 except json.JSONDecodeError as e:
-    print(f"Error: Failed to decode old_questions.json - {e}")
+    print(f"Error: Failed to decode questions.json - {e}")
     questions = []
 
 # Add questions to the Whoosh index
@@ -3139,7 +3139,7 @@ def teacher_save_questions():
             print(f"DEBUG: Successfully parsed after HTML decode: {len(all_questions)} questions")
         
         # Load existing questions
-        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
             existing_questions = json.load(f)
         
         print(f"DEBUG: Loaded {len(existing_questions)} existing questions")
@@ -3181,7 +3181,7 @@ def teacher_save_questions():
                 continue
         
         # Save updated questions
-        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
             json.dump(existing_questions, f, indent=2, ensure_ascii=False)
         
         print(f"DEBUG: Saved {saved_count} questions to file")
@@ -3467,7 +3467,7 @@ def teacher_add_question():
         feedback = request.form.get('feedback', '')
         
         # Load existing questions
-        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
             existing_questions = json.load(f)
         
         # Find next ID
@@ -3499,7 +3499,7 @@ def teacher_add_question():
         existing_questions.append(new_question)
         
         # Save questions
-        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
             json.dump(existing_questions, f, indent=2, ensure_ascii=False)
         
         flash('Question added successfully!')
@@ -3524,7 +3524,7 @@ def teacher_edit_question():
         question_id = int(request.form.get('question_id'))
 
         # Load questions
-        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
             all_questions = json.load(f)
 
         # Get question type and options for editing
@@ -3552,7 +3552,7 @@ def teacher_edit_question():
                 break
 
         # Save questions
-        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
             json.dump(all_questions, f, indent=2, ensure_ascii=False)
 
         flash('Question updated successfully!')
@@ -3567,14 +3567,14 @@ def teacher_edit_question():
 def teacher_delete_question(question_id):
     try:
         # Load questions
-        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
             all_questions = json.load(f)
 
         # Remove question
         all_questions = [q for q in all_questions if q.get('id') != question_id]
 
         # Save questions
-        with open('data/old_questions.json', 'w', encoding='utf-8') as f:
+        with open('data/questions.json', 'w', encoding='utf-8') as f:
             json.dump(all_questions, f, indent=2, ensure_ascii=False)
         
         return jsonify({'success': True})
@@ -4530,7 +4530,7 @@ def recreate_search_index():
         
         # Reload questions
         global questions
-        with open('data/old_questions.json', 'r', encoding='utf-8') as f:
+        with open('data/questions.json', 'r', encoding='utf-8') as f:
             questions = json.load(f)
         
         # Rebuild index

@@ -4020,5 +4020,28 @@
       "max_streak": 0,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764765244.7051,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764765248.665906,
+    "event_type": "game_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 0,
+      "questions_answered": 0,
+      "reason": "player_quit"
+    }
   }
 ]

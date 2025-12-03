@@ -1,169 +1,30 @@
-
-# --- Defensive Imports & Config Loading (from app_fixed) ---
-import os
+﻿def load_chapters():
+    import json
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {"chapters": []}
+# ------------------- ENDLESS MODE -------------------
+# (Moved below app initialization)
+# This code ensures Flask and Whoosh are installed before importing them, preventing runtime errors
+import subprocess
 import sys
+import os
 import json
 import time
-import random
-import threading
 import requests
+import hashlib
 import difflib
 from datetime import datetime
 from functools import wraps
 from werkzeug.utils import secure_filename
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
-
-# Optional socket support
-try:
-    from flask_socketio import SocketIO
-except Exception:
-    SocketIO = None
-
-# Whoosh optional (kept for compatibility if present)
-try:
-    from whoosh.fields import Schema, TEXT, ID
-    from whoosh import index
-except Exception:
-    Schema = None
-    index = None
-
-# Load config with safe defaults
-try:
-    from config import (TEACHER_CREDENTIALS, AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_KEY,
-                        OPENAI_MODEL, GEMINI_MODEL, AI_MODEL, UPLOAD_FOLDER, ALLOWED_EXTENSIONS,
-                        MAX_CONTENT_LENGTH)
-except Exception:
-    TEACHER_CREDENTIALS = {'admin': 'password'}
-    AI_PROVIDER = 'openai'
-    OPENAI_API_KEY = ''
-    GEMINI_API_KEY = ''
-    OPENAI_MODEL = 'gpt-4o'
-    GEMINI_MODEL = 'gemini'
-    AI_MODEL = None
-    UPLOAD_FOLDER = 'uploads'
-    ALLOWED_EXTENSIONS = {'txt', 'md', 'pdf', 'docx'}
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-
-# App init
-app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET', 'unix_rpg_secret')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
-os.makedirs('data', exist_ok=True)
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-# Optional SocketIO init
-socketio = None
-if SocketIO is not None:
-    try:
-        socketio = SocketIO(app, cors_allowed_origins='*')
-    except Exception as e:
-        print(f"SocketIO unavailable: {e}")
-        socketio = None
-
-# Files
-LEADERBOARD_FILE = os.path.join('data', 'leaderboard.json')
-GUEST_LEADERBOARD_FILE = os.path.join('data', 'guest_leaderboard.json')
-ANALYTICS_FILE = os.path.join('data', 'analytics.json')
-STUDENTS_FILE = os.path.join('data', 'students.json')
-QUESTIONS_FILE = os.path.join('data', 'questions.json')
-LEVELS_FILE = os.path.join('data', 'levels.json')
-CHAPTERS_FILE = os.path.join('data', 'chapters.json')
-
-# -------------------- Helpers (from app_fixed) --------------------
-def load_json_file(path, default=None):
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return default
-    except Exception as e:
-        print(f"Error loading {path}: {e}")
-        return default
-
-def save_json_file(path, data):
-    try:
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f"Error saving {path}: {e}")
-
-def load_chapters():
-    return load_json_file(CHAPTERS_FILE, {"chapters": []})
-
-def load_students():
-    return load_json_file(STUDENTS_FILE, [])
-
-def load_questions():
-    return load_json_file(QUESTIONS_FILE, [])
-
-def load_levels():
-    return load_json_file(LEVELS_FILE, [])
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# -------------------- AI Helpers (from app_fixed) --------------------
-def is_ai_configured():
-    if AI_PROVIDER == 'gemini':
-        return bool(GEMINI_API_KEY and GEMINI_API_KEY.strip() and len(GEMINI_API_KEY) > 10)
-    elif AI_PROVIDER == 'openai':
-        return bool(OPENAI_API_KEY and OPENAI_API_KEY.strip() and len(OPENAI_API_KEY) > 10)
-    return False
-
-def get_ai_config_error_message():
-    if AI_PROVIDER == 'gemini':
-        return 'Gemini API key not configured. Please set GEMINI_API_KEY in config.py.'
-    elif AI_PROVIDER == 'openai':
-        return 'OpenAI API key not configured. Please set OPENAI_API_KEY in config.py.'
-    return 'AI provider not configured.'
-
-def call_openai_api(prompt, max_tokens=1000):
-    try:
-        if not OPENAI_API_KEY:
-            return 'OpenAI API key missing'
-        headers = {'Authorization': f'Bearer {OPENAI_API_KEY}', 'Content-Type': 'application/json'}
-        data = {'model': OPENAI_MODEL, 'messages': [{'role': 'user', 'content': prompt}], 'max_tokens': max_tokens}
-        resp = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data, timeout=60)
-        if resp.status_code == 200:
-            return resp.json()['choices'][0]['message']['content']
-        return f"Error: {resp.status_code} - {resp.text}"
-    except Exception as e:
-        return f"Error calling OpenAI: {e}"
-
-def call_gemini_api(prompt, max_tokens=1000):
-    try:
-        if not GEMINI_API_KEY:
-            return 'Gemini API key missing'
-        url = f'https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}'
-        data = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'maxOutputTokens': max_tokens}}
-        resp = requests.post(url, json=data, timeout=60)
-        if resp.status_code == 200:
-            result = resp.json()
-            if 'candidates' in result and len(result['candidates']) > 0:
-                cand = result['candidates'][0]
-                if 'content' in cand and 'parts' in cand['content']:
-                    return cand['content']['parts'][0]['text']
-                return 'Gemini: unexpected response format'
-            return 'Gemini: no candidates returned'
-        return f"Gemini Error: {resp.status_code} - {resp.text}"
-    except Exception as e:
-        return f"Error calling Gemini: {e}"
-
-def call_ai_api(prompt, max_tokens=1000):
-    if AI_PROVIDER == 'gemini':
-        return call_gemini_api(prompt, max_tokens)
-    return call_openai_api(prompt, max_tokens)
-
-# -------------------- Safe emit (from app_fixed) --------------------
-def safe_emit(event, data, room=None):
-    if socketio:
-        try:
-            socketio.emit(event, data, room=room)
-        except Exception as e:
-            print(f"Socket emit failed: {e}")
-
-# ...existing code...
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask_socketio import SocketIO, emit, join_room, leave_room
+from whoosh.fields import Schema, TEXT, ID
+from whoosh import index
+from config import TEACHER_CREDENTIALS, AI_PROVIDER, OPENAI_API_KEY, GEMINI_API_KEY, OPENAI_MODEL, GEMINI_MODEL, AI_MODEL, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, MAX_CONTENT_LENGTH
+import threading
 
 # Constants
 LEADERBOARD_FILE = "data/leaderboard.json"
@@ -210,10 +71,7 @@ def generate_enemy_taunt(question, enemy_name):
     # Extract key topics from question
     if isinstance(keywords, str):
         keywords = [k.strip().lower() for k in keywords.split(',')]
-    else:
-        keywords = [str(k).strip().lower() for k in keywords]
-    
-    # Topic-based taunts
+
     taunt_templates = {
         'ls': [
             "Can you even list a directory?",
@@ -368,6 +226,10 @@ app.secret_key = "unix_rpg_secret"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+# Configure session for better cookie handling
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 # Initialize Flask-SocketIO
 try:
     socketio = SocketIO(app, cors_allowed_origins="*")
@@ -412,6 +274,36 @@ def teacher_required(f):
             return redirect(url_for('teacher_login'))
         return f(*args, **kwargs)
     return decorated_function
+
+    # --- AI Arrange Questions Route ---
+    @app.route('/teacher/ai-arrange-questions', methods=['POST'])
+    @teacher_required
+    def ai_arrange_questions():
+        data = request.get_json()
+        question_ids = data.get('question_ids', [])
+        strategy = data.get('strategy', 'balanced')
+        # Dummy implementation: evenly distribute questions across 10 levels
+        levels = []
+        num_levels = 10
+        if not question_ids:
+            return jsonify({'success': False, 'error': 'No question IDs provided'})
+        chunk_size = max(1, len(question_ids) // num_levels)
+        for i in range(num_levels):
+            start = i * chunk_size
+            end = start + chunk_size
+            levels.append({
+                'level': i + 1,
+                'question_ids': question_ids[start:end]
+            })
+        # Add any remaining questions to the last level
+        if len(question_ids) > num_levels * chunk_size:
+            levels[-1]['question_ids'].extend(question_ids[num_levels * chunk_size:])
+        return jsonify({
+            'success': True,
+            'levels': levels,
+            'strategy': strategy,
+            'total_questions': len(question_ids)
+        })
 
 # Helper function to check allowed file extensions
 def allowed_file(filename):
@@ -889,6 +781,8 @@ def normalize_true_false_answer(answer):
 
 # Helper function to save leaderboard data
 def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answers, game_mode="adventure", level=None):
+    print(f"[DEBUG SAVE_LEADERBOARD] Called with: player={player_name}, score={score}, mode={game_mode}, is_student={session.get('is_student')}")
+    
     # Save to student leaderboard if it's a logged-in student
     if session.get('is_student') and session.get('student_id'):
         # Get actual student name from students.json instead of relying on player_name
@@ -929,6 +823,8 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
 
         with open(LEADERBOARD_FILE, "w", encoding="utf-8") as f:
             json.dump(leaderboard, f, indent=4)
+        
+        print(f"[DEBUG SAVE_LEADERBOARD] Successfully saved to STUDENT leaderboard: {LEADERBOARD_FILE}")
     
     # Save to guest leaderboard if it's a guest player (not a student)
     else:
@@ -951,13 +847,18 @@ def save_leaderboard(player_name, score, total_time, correct_answers, wrong_answ
         try:
             with open(GUEST_LEADERBOARD_FILE, "r", encoding="utf-8") as f:
                 guest_leaderboard = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+            print(f"[DEBUG SAVE_LEADERBOARD] Loaded {len(guest_leaderboard)} existing guest records")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"[DEBUG SAVE_LEADERBOARD] Creating new guest leaderboard file: {e}")
             guest_leaderboard = []
 
         guest_leaderboard.append(record)
+        print(f"[DEBUG SAVE_LEADERBOARD] Added record, now have {len(guest_leaderboard)} total records")
 
         with open(GUEST_LEADERBOARD_FILE, "w", encoding="utf-8") as f:
             json.dump(guest_leaderboard, f, indent=4)
+        
+        print(f"[DEBUG SAVE_LEADERBOARD] Successfully saved to GUEST leaderboard: {GUEST_LEADERBOARD_FILE}")
 
 def load_leaderboard():
     """Load leaderboard data from file"""
@@ -1312,6 +1213,14 @@ def select_level():
         # Auto-save initial game state
         auto_save_progress()
         
+        # Set player name for both students and guests
+        if session.get('is_student') and session.get('student_name'):
+            # For students, use their logged-in name
+            session['player_name'] = session.get('student_name')
+        elif not session.get('player_name'):
+            # For guests without a name, set a default and let them change it later
+            session['player_name'] = 'Guest Player'
+        
         # Check if student is logged in and has a character
         if session.get('is_student') and 'student_id' in session:
             students = load_students()
@@ -1423,10 +1332,15 @@ def game():
         flash('Please select a level first.', 'warning')
         return redirect(url_for('select_level'))
     
-    # Ensure player has a name
+    # Ensure player has a name - handle both students and guests
     if not session.get('player_name'):
-        flash('Please set your name first.', 'warning')
-        return redirect(url_for('index'))
+        # For logged-in students, use their name
+        if session.get('is_student') and session.get('student_name'):
+            session['player_name'] = session.get('student_name')
+        # For guests, redirect to set name
+        else:
+            flash('Please set your name first.', 'warning')
+            return redirect(url_for('index'))
     
     # Get settings (needed for both initialization and debug checks)
     settings = get_current_game_settings()
@@ -1446,14 +1360,9 @@ def game():
     if session.get('q_index', 0) >= len(questions):
         return redirect(url_for('result'))
     
-    # Debug HP check
+    # Check if the game is over (HP check)
     current_hp = session.get('player_hp', 100)
-    if settings.get('debug_mode', False):
-        print(f"DEBUG: HP Check - current_hp: {current_hp}, q_index: {session.get('q_index', 0)}")
-    
     if current_hp <= 0:
-        if settings.get('debug_mode', False):
-            print(f"DEBUG: Redirecting to you_lose due to HP <= 0 (HP: {current_hp})")
         return redirect(url_for('you_lose'))
 
 
@@ -1470,7 +1379,6 @@ def game():
     # Only allow playing the selected level
     current_level = selected_level
     level_questions = get_questions_for_level(current_level, levels)
-    print(f"DEBUG: Level {current_level} questions: {len(level_questions)} questions loaded")  # Debugging
     if not level_questions:
         flash(f'No questions available for level {current_level}. Please contact your teacher.', 'error')
         return redirect(url_for('select_level'))
@@ -1514,8 +1422,6 @@ def game():
     # Fallback 1: try to find an enemy that matches the current level
     if not enemy:
         enemy = next((e for e in enemies if e.get("level") == current_level), None)
-        if enemy:
-            print(f"DEBUG: Found level-based enemy for level {current_level}: {enemy.get('name', 'Unknown')}")
     
     # Fallback 2: use enemy based on level progression (level-1 as index)
     if not enemy and isinstance(enemies, list) and enemies:
@@ -1524,7 +1430,6 @@ def game():
             enemy = enemies[level_based_index]
             # Update session to match this enemy for consistency
             session['enemy_index'] = level_based_index
-            print(f"DEBUG: Using level-based index {level_based_index} for level {current_level}: {enemy.get('name', 'Unknown')}")
         except Exception:
             enemy = None
     
@@ -1532,7 +1437,7 @@ def game():
     if not enemy:
         enemy = {"name": "Unknown Enemy", "avatar": "❓", "taunt": "No enemies found for this level."}
     
-    print(f"DEBUG: Final selected enemy for level {current_level}: {enemy.get('name', 'Unknown')} (enemy_index: {session.get('enemy_index')})")
+    # Enemy selected for current level
 
     # Determine enemy image URL to mirror how player avatar images are used
     enemy_image = None
@@ -1584,7 +1489,7 @@ def game():
     # Attach enemy_image into the template context
 
     # Initialize or reset the timer for the current question
-    # Always reset timer on GET request (when returning from feedback)
+    # Always reset timer on GET request
     if request.method == 'GET' or "level_start_time" not in session:
         session["level_start_time"] = time.time()
         # Initialize current_timer if not set
@@ -2275,7 +2180,6 @@ def quit_test_yourself():
         
         # Clear all test yourself session data completely
         reset_test_yourself_session()
-        session.pop('test_chapter_id', None)  # Clear chapter selection
         
         accuracy = (correct_answers / questions_answered * 100) if questions_answered > 0 else 0
         flash(f'Test Yourself completed (quit). Score: {score}, Accuracy: {accuracy:.1f}% - Saved to leaderboard!', 'success')
@@ -2284,7 +2188,7 @@ def quit_test_yourself():
         print(f"Error in quit_test_yourself route: {e}")
         flash('Test session ended.', 'info')
     
-    return redirect(url_for('select_chapter_test'))
+    return redirect(url_for('leaderboard'))
 
 @app.route('/quit_endless')
 def quit_endless():
@@ -2366,41 +2270,19 @@ def test_yourself():
         flash('Test Yourself mode is currently disabled.', 'error')
         return redirect(url_for('index'))
     
-    # Get chapter_id from query params or session
-    chapter_id = request.args.get('chapter_id', type=int)
-    if chapter_id:
-        session['test_chapter_id'] = chapter_id
-    elif 'test_chapter_id' not in session:
-        # No chapter selected, redirect to chapter selection
-        return redirect(url_for('select_chapter_test'))
-    else:
-        chapter_id = session.get('test_chapter_id')
-    
-    # Verify chapter is unlocked
-    chapter = get_chapter_by_id(chapter_id)
-    if not chapter:
-        flash('Chapter not found. Please select a valid chapter.', 'error')
-        return redirect(url_for('select_chapter_test'))
-    
-    if chapter.get('locked_test_yourself', False):
-        flash('This chapter is currently locked. Please contact your teacher.', 'error')
-        return redirect(url_for('select_chapter_test'))
-    
     # Reset test state for a true new start (GET with ?new=1) or if no session data exists
     if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
         # Completely reset session to ensure clean start
         reset_test_yourself_session()
         session['test_user_answers'] = []
-        session['test_chapter_id'] = chapter_id
-        print(f"[DEBUG] Starting Test Yourself with chapter {chapter_id}: {chapter.get('name')}")
+        print(f"[DEBUG] questions list length at test start: {len(questions)}")
         
-        # Get questions from the selected chapter
-        chapter_questions = get_questions_for_chapter(chapter_id)
-        if not chapter_questions:
-            flash(f'No questions available in {chapter.get("name")}. Please contact your teacher.', 'error')
-            return redirect(url_for('select_chapter_test'))
+        # Use questions from test_yourself pool
+        test_pool_questions = get_questions_for_pool('test_yourself')
+        if not test_pool_questions:
+            test_pool_questions = questions  # Fallback to all questions
         
-        valid_questions = [q for q in chapter_questions if q.get('q') and str(q.get('q')).strip()]
+        valid_questions = [q for q in test_pool_questions if q.get('q') and str(q.get('q')).strip()]
         if not valid_questions:
             session['test_question_ids'] = []
         elif len(valid_questions) >= 40:
@@ -2422,7 +2304,7 @@ def test_yourself():
         # Debug: Verify uniqueness using set comparison
         question_ids = session['test_question_ids']
         unique_ids = set(question_ids)
-        print(f"[DEBUG TEST INIT] Chapter {chapter_id}: Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs (set-verified)")
+        print(f"[DEBUG TEST INIT] Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs (set-verified)")
         if len(question_ids) != len(unique_ids):
             duplicate_ids = [id for id in unique_ids if question_ids.count(id) > 1]
             print(f"[CRITICAL TEST INIT] Duplicate question IDs found despite set conversion: {duplicate_ids}")
@@ -2651,7 +2533,7 @@ def test_yourself_result():
 try:
     with open('data/enemies.json', encoding='utf-8') as f:
         enemies = json.load(f)
-    print(f"DEBUG: Enemies loaded successfully: {enemies}")  # Debugging
+    print("Enemies loaded successfully!")
 except FileNotFoundError:
     print("Error: enemies.json file not found.")
     enemies = []
@@ -3299,7 +3181,140 @@ def check_auto_save(player_name):
     })
 
 # =============== TEACHER PORTAL ROUTES ===============
+@app.route('/teacher/toggle-chapter-lock', methods=['POST'])
+@teacher_required
+def toggle_chapter_lock():
+    # Handle both form data and JSON data
+    if request.is_json:
+        data = request.get_json()
+        chapter_id = int(data.get('chapter_id'))
+        mode = data.get('mode')
+    else:
+        chapter_id = int(request.form.get('chapter_id'))
+        mode = request.form.get('mode')
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+        updated = False
+        for chapter in chapters:
+            if chapter.get('id') == chapter_id:
+                if mode == 'test_yourself':
+                    chapter['locked_test_yourself'] = not chapter.get('locked_test_yourself', True)
+                elif mode == 'level_mode':
+                    chapter['locked_level_mode'] = not chapter.get('locked_level_mode', True)
+                elif mode == 'endless_mode':
+                    chapter['locked_endless_mode'] = not chapter.get('locked_endless_mode', True)
+                updated = True
+        if updated:
+            with open('data/chapters.json', 'w', encoding='utf-8') as f:
+                json.dump(chapters_data, f, indent=2, ensure_ascii=False)
+            return jsonify({'success': True})
+        else:
+            return jsonify({'error': 'Chapter not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+@app.route('/teacher/get-chapter/<int:chapter_id>', methods=['GET'])
+@teacher_required
+def get_chapter(chapter_id):
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapter = next((ch for ch in chapters_data.get('chapters', []) if ch.get('id') == chapter_id), None)
+        if chapter:
+            return jsonify(chapter)
+        else:
+            return jsonify({'error': 'Chapter not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+@app.route('/api/chapters', methods=['GET'])
+@teacher_required
+def api_get_chapters():
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        return jsonify(chapters_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+@app.route('/teacher/add_chapter', methods=['POST'])
+@teacher_required
+def teacher_add_chapter():
+    # Placeholder implementation for adding a chapter
+    return 'Chapter added (placeholder)', 200
+@app.route('/teacher/chapters')
+@teacher_required
+def teacher_chapters():
+    # Load chapters from chapters.json
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+    except Exception as e:
+        chapters = []
+    # Load levels for assignment dropdown
+    try:
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            all_levels = json.load(f)
+    except Exception as e:
+        all_levels = []
+    return render_template('teacher_chapters.html', chapters=chapters, all_levels=all_levels)
 
+@app.route('/teacher/edit_chapter', methods=['POST'])
+@teacher_required
+def teacher_edit_chapter():
+    chapter_id = int(request.form.get('chapter_id'))
+    name = request.form.get('name')
+    description = request.form.get('description')
+    order = int(request.form.get('order', 1))
+    locked_test_yourself = bool(request.form.get('locked_test_yourself'))
+    locked_level_mode = bool(request.form.get('locked_level_mode'))
+    locked_endless_mode = bool(request.form.get('locked_endless_mode'))
+    level_range = int(request.form.get('level_range', 10))
+    question_ids = request.form.getlist('question_ids')
+    assigned_levels = request.form.getlist('levels')
+
+    # Update chapters.json
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+        for chapter in chapters:
+            if chapter.get('id') == chapter_id:
+                chapter['name'] = name
+                chapter['description'] = description
+                chapter['order'] = order
+                chapter['locked_test_yourself'] = locked_test_yourself
+                chapter['locked_level_mode'] = locked_level_mode
+                chapter['locked_endless_mode'] = locked_endless_mode
+                chapter['level_range'] = [int(lvl) for lvl in assigned_levels] if assigned_levels else list(range(1, level_range+1))
+                chapter['question_ids'] = [int(qid) for qid in question_ids]
+        with open('data/chapters.json', 'w', encoding='utf-8') as f:
+            json.dump(chapters_data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        return f'Error updating chapter: {str(e)}', 500
+
+    # Update levels.json
+    try:
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels = json.load(f)
+        assigned_level_nums = [int(lvl) for lvl in assigned_levels]
+        for level in levels:
+            if level.get('level') in assigned_level_nums:
+                level['chapter_id'] = chapter_id
+            elif 'chapter_id' in level and level['chapter_id'] == chapter_id and level.get('level') not in assigned_level_nums:
+                del level['chapter_id']
+        with open('data/levels.json', 'w', encoding='utf-8') as f:
+            json.dump(levels, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        return f'Error updating levels: {str(e)}', 500
+
+    return redirect(url_for('teacher_chapters'))
+
+@app.route('/teacher/delete_chapter/<int:chapter_id>', methods=['POST'])
+@teacher_required
+def teacher_delete_chapter(chapter_id):
+    # Placeholder implementation for deleting a chapter
+    return f'Chapter {chapter_id} deleted (placeholder)', 200
 @app.route('/teacher/login', methods=['GET', 'POST'])
 def teacher_login():
     if request.method == 'POST':
@@ -3350,7 +3365,6 @@ def teacher_ai_generator():
                              chapters=chapters, 
                              error=get_ai_config_error_message())
     
-    if request.method == 'POST':
         if 'file' not in request.files:
             return render_template('teacher_ai_generator.html', chapters=chapters, error='No file selected')
         
@@ -3484,63 +3498,6 @@ def teacher_save_questions():
         
         print(f"DEBUG: Saved {saved_count} questions to file")
         
-        # Get target chapter and level from form
-        target_chapter_id = request.form.get('target_chapter', '').strip()
-        target_level = request.form.get('target_level', '').strip()
-        
-        # Assign to chapter if specified
-        if target_chapter_id:
-            try:
-                target_chapter_id = int(target_chapter_id)
-                chapters_data = load_chapters()
-                
-                for chapter in chapters_data.get("chapters", []):
-                    if chapter.get("id") == target_chapter_id:
-                        # Get the IDs of newly saved questions
-                        new_question_ids = list(range(next_id - saved_count, next_id))
-                        
-                        # Add to chapter's question_ids (avoid duplicates)
-                        existing_ids = set(chapter.get("question_ids", []))
-                        existing_ids.update(new_question_ids)
-                        chapter["question_ids"] = sorted(list(existing_ids))
-                        chapter["updated_at"] = datetime.now().isoformat()
-                        
-                        save_chapters(chapters_data)
-                        sync_question_pools_with_chapters()
-                        print(f"DEBUG: Added {len(new_question_ids)} questions to chapter {chapter['name']}")
-                        break
-            except Exception as e:
-                print(f"DEBUG: Error assigning to chapter: {e}")
-        
-        # Assign to level if specified
-        if target_level:
-            try:
-                target_level = int(target_level)
-                
-                # Load levels
-                with open('data/levels.json', 'r', encoding='utf-8') as f:
-                    levels_data = json.load(f)
-                
-                # Get the IDs of newly saved questions
-                new_question_ids = list(range(next_id - saved_count, next_id))
-                
-                # Find the level and add questions
-                for level_obj in levels_data:
-                    if level_obj.get("level") == target_level:
-                        # Add to level's questions (avoid duplicates)
-                        existing_ids = set(level_obj.get("questions", []))
-                        existing_ids.update(new_question_ids)
-                        level_obj["questions"] = sorted(list(existing_ids))
-                        print(f"DEBUG: Added {len(new_question_ids)} questions to level {target_level}")
-                        break
-                
-                # Save updated levels
-                with open('data/levels.json', 'w', encoding='utf-8') as f:
-                    json.dump(levels_data, f, indent=2, ensure_ascii=False)
-                
-            except Exception as e:
-                print(f"DEBUG: Error assigning to level: {e}")
-        
         # Reload global questions variable
         global questions
         questions = existing_questions
@@ -3550,25 +3507,7 @@ def teacher_save_questions():
         # Recreate search index
         recreate_search_index()
         
-        # Build success message
-        success_msg = f'Successfully added {saved_count} questions to the question bank!'
-        
-        # Add chapter assignment info
-        if target_chapter_id:
-            try:
-                chapters_data = load_chapters()
-                for chapter in chapters_data.get("chapters", []):
-                    if chapter.get("id") == int(target_chapter_id):
-                        success_msg += f' Questions assigned to chapter: {chapter["name"]}.'
-                        break
-            except:
-                pass
-        
-        # Add level assignment info
-        if target_level:
-            success_msg += f' Questions assigned to Level {target_level}.'
-        
-        flash(success_msg)
+        flash(f'Successfully added {saved_count} questions to the question bank!')
         return redirect(url_for('teacher_dashboard'))
         
     except Exception as e:
@@ -3586,8 +3525,13 @@ def teacher_ai_grading():
     
     ai_grading_enabled = session.get('ai_grading_enabled', False)
     
-    # Check if AI API is properly configured using the helper function
-    api_key_configured = is_ai_configured()
+    # Check if AI API is properly configured based on provider
+    if AI_PROVIDER == "gemini":
+        api_key_configured = bool(GEMINI_API_KEY and GEMINI_API_KEY != 'your-gemini-api-key-here')
+    elif AI_PROVIDER == "openai":
+        api_key_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != 'your-openai-api-key-here')
+    else:
+        api_key_configured = False
     
     return render_template('teacher_ai_grading.html', 
                          config=config, 
@@ -3614,19 +3558,6 @@ def teacher_update_ai_config():
 @app.route('/teacher/test-ai-grading', methods=['POST'])
 @teacher_required
 def teacher_test_ai_grading():
-    # Check if AI is configured before testing
-    if not is_ai_configured():
-        config = {
-            'ai_model': session.get('ai_model', AI_MODEL),
-            'confidence_threshold': session.get('confidence_threshold', 80),
-            'custom_prompt': session.get('custom_prompt', '')
-        }
-        return render_template('teacher_ai_grading.html',
-                             config=config,
-                             ai_grading_enabled=session.get('ai_grading_enabled', False),
-                             api_key_configured=False,
-                             test_result={'error': get_ai_config_error_message()})
-    
     # This route is for teachers only to test AI grading functionality
     # Student AI grading happens automatically during gameplay when enabled
     question = request.form.get('test_question')
@@ -3793,55 +3724,6 @@ def teacher_analytics():
     
     return render_template('teacher_analytics.html', **analytics_data)
 
-@app.route('/teacher/student-progress-data/<username>')
-@teacher_required
-def get_student_progress_data(username):
-    """API endpoint to get individual student progress data"""
-    try:
-        # Load all students to find the student ID
-        students = load_students()
-        student = next((s for s in students if s.get('username') == username), None)
-        
-        if not student:
-            return jsonify({'error': 'Student not found'}), 404
-        
-        student_id = student.get('id')
-        
-        # Load leaderboard data for this student
-        leaderboard = get_leaderboard_data()
-        student_games = [entry for entry in leaderboard if entry.get('player') == username]
-        
-        # Calculate statistics
-        total_attempts = len(student_games)
-        avg_score = sum(game.get('score', 0) for game in student_games) / total_attempts if total_attempts > 0 else 0
-        highest_score = max((game.get('score', 0) for game in student_games), default=0)
-        total_time = sum(game.get('time', 0) for game in student_games)
-        
-        # Load student progress
-        progress_data = load_student_progress()
-        student_progress = progress_data.get(str(student_id), {})
-        levels_completed = student_progress.get('levels_completed', 0)
-        
-        # Get recent games (last 5)
-        recent_games = sorted(student_games, key=lambda x: x.get('timestamp', ''), reverse=True)[:5]
-        for game in recent_games:
-            # Format date from timestamp if available
-            game['date'] = game.get('timestamp', 'N/A')[:10] if game.get('timestamp') else 'N/A'
-        
-        return jsonify({
-            'username': username,
-            'total_attempts': total_attempts,
-            'avg_score': round(avg_score, 1),
-            'highest_score': highest_score,
-            'levels_completed': levels_completed,
-            'total_time': total_time,
-            'recent_games': recent_games
-        })
-        
-    except Exception as e:
-        print(f"Error fetching student progress: {e}")
-        return jsonify({'error': 'Failed to load student data'}), 500
-
 @app.route('/teacher/levels')
 @teacher_required
 def teacher_levels():
@@ -3851,46 +3733,64 @@ def teacher_levels():
             levels = json.load(f)
     except:
         levels = []
-    
+
     try:
         with open('data/enemies.json', encoding='utf-8') as f:
             enemies = json.load(f)
     except:
         enemies = []
-    
-    # Load chapters
-    chapters_data = load_chapters()
-    chapters = sorted(chapters_data.get("chapters", []), key=lambda x: x.get("order", 0))
-    
-    # Create a map of level number to chapter
-    level_to_chapter = {}
-    for chapter in chapters:
-        for level_num in chapter.get("level_range", []):
-            level_to_chapter[level_num] = {
-                "id": chapter.get("id"),
-                "name": chapter.get("name"),
-                "order": chapter.get("order", 0)
-            }
-    
+
     # Create a question dictionary for lookup
     questions_dict = {q.get('id'): q for q in questions}
-    
+
     # Calculate statistics
     total_questions = len(questions)
     avg_questions_per_level = total_questions / len(levels) if levels else 0
     available_questions = [q for q in questions if q.get('id')]
-    
+
+    # Load chapters
+    try:
+        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            chapters_data = json.load(f)
+        chapters = chapters_data.get('chapters', [])
+    except Exception:
+        chapters = []
+
+    # Map level number to chapter object
+    level_to_chapter = {}
+    for chapter in chapters:
+        if 'level_range' in chapter:
+            for lvl in chapter['level_range']:
+                level_to_chapter[lvl] = chapter
+    for lvl in levels:
+        if 'chapter_id' in lvl:
+            chapter_obj = next((ch for ch in chapters if ch.get('id') == lvl['chapter_id']), None)
+            if chapter_obj:
+                level_to_chapter[lvl['level']] = chapter_obj
+
+    # Filtering logic
+    from flask import request
+    chapter_filter = request.args.get('chapter_id', '')
+    if chapter_filter:
+        try:
+            chapter_filter_id = int(chapter_filter)
+            filtered_levels = [lvl for lvl in levels if lvl.get('chapter_id') == chapter_filter_id]
+        except ValueError:
+            filtered_levels = levels
+    else:
+        filtered_levels = levels
+
     template_data = {
-        'levels': levels,
+        'levels': filtered_levels,
         'enemies': enemies,
         'questions_dict': questions_dict,
         'total_questions': total_questions,
         'avg_questions_per_level': int(avg_questions_per_level),
         'available_questions': available_questions,
         'chapters': chapters,
-        'level_to_chapter': level_to_chapter
+        'level_to_chapter': level_to_chapter,
+        'chapter_filter': chapter_filter
     }
-    
     return render_template('teacher_levels.html', **template_data)
 
 @app.route('/teacher/settings')
@@ -3901,59 +3801,7 @@ def teacher_settings():
     return render_template('teacher_settings.html', settings=settings)
 
 # Additional teacher portal routes for full functionality
-@app.route('/teacher/add-question', methods=['POST'])
-@teacher_required
-def teacher_add_question():
-    try:
-        # Get form data
-        question_text = request.form.get('question')
-        answer = request.form.get('answer')
-        keywords = request.form.get('keywords', '')
-        difficulty = request.form.get('difficulty', 'medium')
-        feedback = request.form.get('feedback', '')
-        
-        # Load existing questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
-            existing_questions = json.load(f)
-        
-        # Find next ID
-        next_id = max([q.get('id', 0) for q in existing_questions]) + 1
-        
-        # Get question type and options
-        question_type = request.form.get('question_type', 'short_answer')
-        options = []
-        if question_type == 'multiple_choice':
-            # Get multiple choice options
-            for i in range(1, 5):  # Support up to 4 options
-                option = request.form.get(f'option_{i}', '').strip()
-                if option:
-                    options.append(option)
-        
-        # Create new question
-        new_question = {
-            'id': next_id,
-            'q': question_text,
-            'answer': answer,
-            'keywords': [k.strip() for k in keywords.split(',') if k.strip()],
-            'difficulty': difficulty,
-            'feedback': feedback,
-            'type': question_type,
-            'options': options if question_type == 'multiple_choice' else [],
-            'ai_generated': False
-        }
-        
-        existing_questions.append(new_question)
-        
-        # Save questions
-        with open('data/questions.json', 'w', encoding='utf-8') as f:
-            json.dump(existing_questions, f, indent=2, ensure_ascii=False)
-        
-        flash('Question added successfully!')
-        return redirect(url_for('teacher_questions'))
-        
-    except Exception as e:
-        flash(f'Error adding question: {str(e)}')
-        return redirect(url_for('teacher_questions'))
+
 
 @app.route('/teacher/get-question/<int:question_id>')
 @teacher_required
@@ -3963,50 +3811,21 @@ def teacher_get_question(question_id):
         return jsonify(question)
     return jsonify({'error': 'Question not found'}), 404
 
-@app.route('/teacher/edit-question', methods=['POST'])
-@teacher_required
-def teacher_edit_question():
-    try:
-        question_id = int(request.form.get('question_id'))
-        
-        # Load questions
-        with open('data/questions.json', 'r', encoding='utf-8') as f:
-            all_questions = json.load(f)
-        
-        # Get question type and options for editing
-        question_type = request.form.get('question_type', 'short_answer')
-        options = []
-        if question_type == 'multiple_choice':
-            # Get multiple choice options
-            for i in range(1, 5):  # Support up to 4 options
-                option = request.form.get(f'option_{i}', '').strip()
-                if option:
-                    options.append(option)
-        
-        # Find and update question
-        for i, q in enumerate(all_questions):
-            if q.get('id') == question_id:
-                all_questions[i].update({
-                    'q': request.form.get('question'),
-                    'answer': request.form.get('answer'),
-                    'keywords': [k.strip() for k in request.form.get('keywords', '').split(',') if k.strip()],
-                    'difficulty': request.form.get('difficulty', 'medium'),
-                    'feedback': request.form.get('feedback', ''),
-                    'type': question_type,
-                    'options': options if question_type == 'multiple_choice' else []
-                })
-                break
-        
-        # Save questions
-        with open('data/questions.json', 'w', encoding='utf-8') as f:
-            json.dump(all_questions, f, indent=2, ensure_ascii=False)
-        
-        flash('Question updated successfully!')
-        return redirect(url_for('teacher_questions'))
-        
-    except Exception as e:
-        flash(f'Error updating question: {str(e)}')
-        return redirect(url_for('teacher_questions'))
+
+    # The following block was outside any function and caused IndentationError. Commented out for now:
+    # 'feedback': request.form.get('feedback', ''),
+    # 'type': question_type,
+    # 'options': options if question_type == 'multiple_choice' else []
+    # })
+    # break
+    # # Save questions
+    # with open('data/questions.json', 'w', encoding='utf-8') as f:
+    #     json.dump(all_questions, f, indent=2, ensure_ascii=False)
+    # flash('Question updated successfully!')
+    # return redirect(url_for('teacher_questions'))
+    # except Exception as e:
+    #     flash(f'Error updating question: {str(e)}')
+    # return redirect(url_for('teacher_questions'))
 
 @app.route('/teacher/delete-question/<int:question_id>', methods=['POST'])
 @teacher_required
@@ -4200,34 +4019,7 @@ def teacher_get_level(level_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/teacher/level-questions', methods=['POST'])
-@teacher_required
-def teacher_level_questions():
-    try:
-        # Get form data
-        level_id = int(request.form.get('level_number'))  # HTML template uses 'level_number'
-        selected_questions = request.form.getlist('questions')
-        
-        # Load existing levels
-        with open('data/levels.json', 'r', encoding='utf-8') as f:
-            levels = json.load(f)
-        
-        # Find and update the level's questions
-        level_found = False
-        for level in levels:
-            if level['level'] == level_id:
-                level['questions'] = [int(qid) for qid in selected_questions]
-                level_found = True
-                break
-        
-        if not level_found:
-            flash(f'Level {level_id} not found!')
-            return redirect(url_for('teacher_levels'))
-        
-        # Save updated levels
-        with open('data/levels.json', 'w', encoding='utf-8') as f:
-            json.dump(levels, f, indent=2, ensure_ascii=False)
-        
+
         flash(f'Questions for Level {level_id} updated successfully! Now has {len(selected_questions)} questions.')
         return redirect(url_for('teacher_levels'))
     except Exception as e:
@@ -5066,431 +4858,6 @@ def save_question_pools(pools_data):
     with open(pools_file, 'w', encoding='utf-8') as f:
         json.dump(pools_data, f, indent=2, ensure_ascii=False)
 
-def load_chapters():
-    """Load chapters configuration"""
-    try:
-        with open(CHAPTERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        # Return default empty chapters structure
-        return {
-            "chapters": [],
-            "metadata": {
-                "last_updated": datetime.now().isoformat(),
-                "version": "1.0.0",
-                "total_chapters": 0
-            }
-        }
-
-def save_chapters(chapters_data):
-    """Save chapters configuration"""
-    chapters_data["metadata"]["last_updated"] = datetime.now().isoformat()
-    chapters_data["metadata"]["total_chapters"] = len(chapters_data.get("chapters", []))
-    with open(CHAPTERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(chapters_data, f, indent=2, ensure_ascii=False)
-
-def get_chapter_by_id(chapter_id):
-    """Get a specific chapter by ID"""
-    chapters_data = load_chapters()
-    for chapter in chapters_data.get("chapters", []):
-        if chapter.get("id") == chapter_id:
-            return chapter
-    return None
-
-def get_unlocked_chapters(mode='test_yourself'):
-    """Get all unlocked chapters for a specific mode"""
-    chapters_data = load_chapters()
-    lock_key = 'locked_test_yourself' if mode == 'test_yourself' else 'locked_level_mode'
-    return [ch for ch in chapters_data.get("chapters", []) if not ch.get(lock_key, False)]
-
-def get_questions_for_chapter(chapter_id):
-    """Get all questions for a specific chapter"""
-    chapter = get_chapter_by_id(chapter_id)
-    if not chapter:
-        return []
-    
-    chapter_question_ids = set(chapter.get('question_ids', []))
-    return [q for q in questions if q.get('id') in chapter_question_ids]
-
-def get_next_chapter_id():
-    """Get the next available chapter ID"""
-    chapters_data = load_chapters()
-    if not chapters_data.get("chapters"):
-        return 1
-    return max(ch.get("id", 0) for ch in chapters_data["chapters"]) + 1
-
-def sync_question_pools_with_chapters():
-    """Sync question pools based on unlocked chapters"""
-    try:
-        chapters_data = load_chapters()
-        pools_data = load_question_pools()
-        
-        # Get unlocked questions for each mode
-        test_yourself_questions = set()
-        level_mode_questions = set()
-        endless_mode_questions = set()
-        
-        for chapter in chapters_data.get("chapters", []):
-            question_ids = set(chapter.get("question_ids", []))
-            
-            # Add to test_yourself pool if chapter is unlocked for test_yourself
-            if not chapter.get("locked_test_yourself", False):
-                test_yourself_questions.update(question_ids)
-            
-            # Add to level_based pool if chapter is unlocked for level_mode
-            if not chapter.get("locked_level_mode", False):
-                level_mode_questions.update(question_ids)
-            
-            # Add to endless_mode pool if chapter is unlocked for endless_mode
-            if not chapter.get("locked_endless_mode", False):
-                endless_mode_questions.update(question_ids)
-        
-        # Update question pools
-        if "test_yourself" in pools_data["pools"]:
-            pools_data["pools"]["test_yourself"]["question_ids"] = sorted(list(test_yourself_questions))
-            # Auto-disable pool if no questions available
-            pools_data["pools"]["test_yourself"]["enabled"] = len(test_yourself_questions) > 0
-        
-        if "level_based" in pools_data["pools"]:
-            pools_data["pools"]["level_based"]["question_ids"] = sorted(list(level_mode_questions))
-            # Auto-disable pool if no questions available
-            pools_data["pools"]["level_based"]["enabled"] = len(level_mode_questions) > 0
-        
-        if "endless_mode" in pools_data["pools"]:
-            pools_data["pools"]["endless_mode"]["question_ids"] = sorted(list(endless_mode_questions))
-            # Auto-disable pool if no questions available
-            pools_data["pools"]["endless_mode"]["enabled"] = len(endless_mode_questions) > 0
-        
-        save_question_pools(pools_data)
-        print(f"[SYNC] Updated pools - Test Yourself: {len(test_yourself_questions)} questions (enabled: {len(test_yourself_questions) > 0}), Level Mode: {len(level_mode_questions)} questions (enabled: {len(level_mode_questions) > 0}), Endless Mode: {len(endless_mode_questions)} questions (enabled: {len(endless_mode_questions) > 0})")
-        
-    except Exception as e:
-        print(f"[ERROR] Failed to sync question pools: {e}")
-
-def ensure_levels_exist(level_range):
-    """Ensure all levels in the range exist in levels.json"""
-    try:
-        # Load existing levels
-        try:
-            with open('data/levels.json', 'r', encoding='utf-8') as f:
-                levels = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            levels = []
-        
-        existing_level_numbers = {level.get('level') for level in levels}
-        levels_created = []
-        
-        # Create missing levels
-        for level_num in level_range:
-            if level_num not in existing_level_numbers:
-                # Determine difficulty based on level number
-                if level_num <= 3:
-                    difficulty = "Easy"
-                elif level_num <= 7:
-                    difficulty = "Intermediate"
-                else:
-                    difficulty = "Hard"
-                
-                new_level = {
-                    "level": level_num,
-                    "difficulty": difficulty,
-                    "questions": []  # Start with empty questions
-                }
-                levels.append(new_level)
-                levels_created.append(level_num)
-        
-        # Sort levels by level number
-        if levels_created:
-            levels.sort(key=lambda x: x.get('level', 0))
-            
-            # Save updated levels
-            with open('data/levels.json', 'w', encoding='utf-8') as f:
-                json.dump(levels, f, indent=2, ensure_ascii=False)
-            
-            print(f"[LEVELS] Created {len(levels_created)} new levels: {levels_created}")
-        
-        return levels_created
-        
-    except Exception as e:
-        print(f"[ERROR] Failed to ensure levels exist: {e}")
-        return []
-
-def auto_distribute_questions_to_levels(chapter_id):
-    """Automatically distribute chapter questions across its levels"""
-    try:
-        chapters_data = load_chapters()
-        chapter = next((ch for ch in chapters_data.get("chapters", []) if ch.get("id") == chapter_id), None)
-        
-        if not chapter:
-            return
-        
-        question_ids = chapter.get("question_ids", [])
-        level_range = chapter.get("level_range", [])
-        
-        if not question_ids or not level_range:
-            return
-        
-        # Load levels
-        with open('data/levels.json', 'r', encoding='utf-8') as f:
-            levels = json.load(f)
-        
-        # Calculate questions per level
-        questions_per_level = max(1, len(question_ids) // len(level_range))
-        
-        # Distribute questions evenly across levels
-        question_idx = 0
-        for level_num in level_range:
-            for level_obj in levels:
-                if level_obj.get("level") == level_num:
-                    # Get the next batch of questions for this level
-                    end_idx = min(question_idx + questions_per_level, len(question_ids))
-                    level_questions = question_ids[question_idx:end_idx]
-                    
-                    if level_questions:
-                        # Add to existing questions (avoid duplicates)
-                        existing = set(level_obj.get("questions", []))
-                        existing.update(level_questions)
-                        level_obj["questions"] = sorted(list(existing))
-                        print(f"[DISTRIBUTE] Added {len(level_questions)} questions to Level {level_num}")
-                    
-                    question_idx = end_idx
-                    break
-        
-        # Save updated levels
-        with open('data/levels.json', 'w', encoding='utf-8') as f:
-            json.dump(levels, f, indent=2, ensure_ascii=False)
-        
-        print(f"[DISTRIBUTE] Distributed {len(question_ids)} questions across {len(level_range)} levels for chapter {chapter_id}")
-        
-    except Exception as e:
-        print(f"[ERROR] Failed to distribute questions to levels: {e}")
-
-def ai_arrange_questions_by_difficulty(questions_list):
-    """Use AI to arrange questions from easiest to hardest"""
-    try:
-        # Prepare question summaries for AI
-        question_summaries = []
-        for q in questions_list[:50]:  # Limit to prevent token overflow
-            question_summaries.append({
-                'id': q.get('id'),
-                'question': q.get('q', '')[:150],  # Truncate long questions
-                'keywords': q.get('keywords', [])
-            })
-        
-        prompt = f"""Analyze these {len(question_summaries)} questions and arrange them from EASIEST to HARDEST based on:
-- Complexity of concepts
-- Required prior knowledge
-- Question difficulty level
-
-Questions:
-{json.dumps(question_summaries, indent=2)}
-
-Return ONLY a JSON array of question IDs in order from easiest to hardest.
-Format: {{"question_ids": [1, 5, 3, ...]}}"""
-
-        response = call_ai_api(prompt, max_tokens=2000)
-        
-        # Check if response is an error message
-        if isinstance(response, str) and ('error' in response.lower() or 'api' in response.lower()):
-            print(f"[ERROR] AI API returned error: {response}")
-            return response  # Return error message
-        
-        print(f"[DEBUG] AI response for difficulty arrangement: {response[:300]}")
-        
-        # Parse AI response
-        if isinstance(response, str):
-            # Try to find JSON in the response
-            json_match = re.search(r'\{[^}]*"question_ids"[^}]*\}', response, re.DOTALL)
-            if json_match:
-                try:
-                    result = json.loads(json_match.group())
-                    return result.get('question_ids', [])
-                except json.JSONDecodeError as e:
-                    print(f"[ERROR] JSON parsing failed: {e}")
-            
-            # Alternative: look for array format
-            array_match = re.search(r'\[[^\]]*\]', response)
-            if array_match:
-                try:
-                    ids = json.loads(array_match.group())
-                    if isinstance(ids, list) and all(isinstance(x, int) for x in ids):
-                        return ids
-                except json.JSONDecodeError:
-                    pass
-        
-        print(f"[ERROR] Could not parse AI response: {response[:200]}")
-        return "AI returned invalid response format - could not find question IDs"
-    except Exception as e:
-        print(f"[ERROR] AI difficulty arrangement failed: {e}")
-        return f"Error: {str(e)}"
-
-def ai_arrange_questions_by_topic(questions_list):
-    """Use AI to group questions by topic/subject"""
-    try:
-        question_summaries = []
-        for q in questions_list[:50]:
-            question_summaries.append({
-                'id': q.get('id'),
-                'question': q.get('q', '')[:150],
-                'keywords': q.get('keywords', [])
-            })
-        
-        prompt = f"""Analyze these {len(question_summaries)} questions and group them by TOPIC/SUBJECT:
-- Identify main topics (e.g., Math, Science, History, Geography, etc.)
-- Group related questions together
-- Within each topic, arrange from easier to harder
-
-Questions:
-{json.dumps(question_summaries, indent=2)}
-
-Return ONLY a JSON object with topics and their question IDs:
-Format: {{"topics": [{{"name": "Math", "question_ids": [1,2,3]}}, ...]}}"""
-
-        response = call_ai_api(prompt, max_tokens=2000)
-        
-        # Check if response is an error message
-        if isinstance(response, str) and ('error' in response.lower() or 'api' in response.lower()):
-            print(f"[ERROR] AI API returned error: {response}")
-            return response  # Return error message
-        
-        print(f"[DEBUG] AI response for topic arrangement: {response[:300]}")
-        
-        if isinstance(response, str):
-            # Try to find JSON in the response
-            json_match = re.search(r'\{[^}]*"topics"[^}]*\}', response, re.DOTALL)
-            if json_match:
-                try:
-                    result = json.loads(json_match.group())
-                    # Flatten topics into single ordered list
-                    ordered_ids = []
-                    for topic in result.get('topics', []):
-                        ordered_ids.extend(topic.get('question_ids', []))
-                    return ordered_ids
-                except json.JSONDecodeError as e:
-                    print(f"[ERROR] JSON parsing failed: {e}")
-        
-        print(f"[ERROR] Could not parse AI response: {response[:200]}")
-        return "AI returned invalid response format - could not find topics"
-    except Exception as e:
-        print(f"[ERROR] AI topic arrangement failed: {e}")
-        return f"Error: {str(e)}"
-
-def ai_arrange_questions_learning_path(questions_list):
-    """Use AI to create a logical learning progression"""
-    try:
-        question_summaries = []
-        for q in questions_list[:50]:
-            question_summaries.append({
-                'id': q.get('id'),
-                'question': q.get('q', '')[:150],
-                'keywords': q.get('keywords', [])
-            })
-        
-        prompt = f"""Analyze these {len(question_summaries)} questions and arrange them in a LEARNING PATH:
-- Start with foundational concepts
-- Progress to more complex topics
-- Ensure each question builds on previous knowledge
-- Create a logical educational progression
-
-Questions:
-{json.dumps(question_summaries, indent=2)}
-
-Return ONLY a JSON array of question IDs in optimal learning order.
-Format: {{"question_ids": [1, 5, 3, ...]}}"""
-
-        response = call_ai_api(prompt, max_tokens=2000)
-        
-        # Check if response is an error message
-        if isinstance(response, str) and ('error' in response.lower() or 'api' in response.lower()):
-            print(f"[ERROR] AI API returned error: {response}")
-            return response  # Return error message
-        
-        print(f"[DEBUG] AI response for learning path: {response[:300]}")
-        
-        if isinstance(response, str):
-            # Try to find JSON in the response
-            json_match = re.search(r'\{[^}]*"question_ids"[^}]*\}', response, re.DOTALL)
-            if json_match:
-                try:
-                    result = json.loads(json_match.group())
-                    return result.get('question_ids', [])
-                except json.JSONDecodeError as e:
-                    print(f"[ERROR] JSON parsing failed: {e}")
-            
-            # Alternative: look for array format
-            array_match = re.search(r'\[[^\]]*\]', response)
-            if array_match:
-                try:
-                    ids = json.loads(array_match.group())
-                    if isinstance(ids, list) and all(isinstance(x, int) for x in ids):
-                        return ids
-                except json.JSONDecodeError:
-                    pass
-        
-        print(f"[ERROR] Could not parse AI response: {response[:200]}")
-        return "AI returned invalid response format - could not find question IDs"
-    except Exception as e:
-        print(f"[ERROR] AI learning path arrangement failed: {e}")
-        return f"Error: {str(e)}"
-
-def ai_arrange_questions_balanced(questions_list):
-    """Use AI to create balanced distribution across levels"""
-    try:
-        question_summaries = []
-        for q in questions_list[:50]:
-            question_summaries.append({
-                'id': q.get('id'),
-                'question': q.get('q', '')[:150],
-                'keywords': q.get('keywords', [])
-            })
-        
-        prompt = f"""Analyze these {len(question_summaries)} questions and distribute them EVENLY across 10 levels:
-- Each level should have mixed difficulty
-- Each level should have varied topics
-- Balance question types across levels
-- Aim for 10 questions per level
-
-Questions:
-{json.dumps(question_summaries, indent=2)}
-
-Return ONLY a JSON object with level assignments:
-Format: {{"levels": [{{"level": 1, "question_ids": [1,2,3,...]}}, ...]}}"""
-
-        response = call_ai_api(prompt, max_tokens=2000)
-        
-        if isinstance(response, str) and '{' in response:
-            json_start = response.find('{')
-            json_end = response.rfind('}') + 1
-            json_str = response[json_start:json_end]
-            result = json.loads(json_str)
-            return result.get('levels', [])
-        
-        return []
-    except Exception as e:
-        print(f"[ERROR] AI balanced arrangement failed: {e}")
-        return []
-
-def distribute_questions_to_levels(question_ids, num_levels=10):
-    """Distribute question IDs evenly across levels"""
-    questions_per_level = len(question_ids) // num_levels
-    remainder = len(question_ids) % num_levels
-    
-    levels = []
-    current_index = 0
-    
-    for level_num in range(1, num_levels + 1):
-        # Calculate how many questions this level gets
-        count = questions_per_level + (1 if level_num <= remainder else 0)
-        
-        level_questions = question_ids[current_index:current_index + count]
-        levels.append({
-            'level': level_num,
-            'question_ids': level_questions
-        })
-        current_index += count
-    
-    return levels
-
 def get_questions_for_pool(pool_name):
     """Get questions assigned to a specific pool"""
     pools_data = load_question_pools()
@@ -5571,35 +4938,6 @@ question_pools = initialize_question_pools()
 def teacher_question_pools():
     
     pools_data = load_question_pools()
-    chapters_data = load_chapters()
-    chapters = chapters_data.get("chapters", [])
-    
-    # Load levels data
-    try:
-        with open('data/levels.json', 'r', encoding='utf-8') as f:
-            levels = json.load(f)
-    except Exception:
-        levels = []
-    
-    # Create a map of question_id to chapter info
-    question_to_chapter = {}
-    for chapter in chapters:
-        for q_id in chapter.get("question_ids", []):
-            question_to_chapter[q_id] = {
-                "id": chapter.get("id"),
-                "name": chapter.get("name"),
-                "order": chapter.get("order", 0)
-            }
-    
-    # Create a map of question_id to level info
-    question_to_level = {}
-    for level in levels:
-        level_num = level.get("level")
-        for q_id in level.get("questions", []):
-            question_to_level[q_id] = {
-                "level": level_num,
-                "difficulty": level.get("difficulty", "Unknown")
-            }
     
     # Get statistics for each pool
     for pool_name, pool in pools_data["pools"].items():
@@ -5613,11 +4951,7 @@ def teacher_question_pools():
     return render_template('teacher_question_pools.html', 
                          pools=pools_data["pools"], 
                          metadata=pools_data["metadata"],
-                         all_questions=questions,
-                         chapters=chapters,
-                         question_to_chapter=question_to_chapter,
-                         levels=levels,
-                         question_to_level=question_to_level)
+                         all_questions=questions)
 
 @app.route('/teacher/update-pool-settings', methods=['POST'])
 @teacher_required
@@ -5677,311 +5011,6 @@ def teacher_assign_questions_to_pool():
     
     return redirect(url_for('teacher_question_pools'))
 
-# ==================== CHAPTER MANAGEMENT ROUTES ====================
-
-@app.route('/teacher/chapters')
-@teacher_required
-def teacher_chapters():
-    """Teacher chapter management page"""
-    try:
-        chapters_data = load_chapters()
-        chapters = sorted(chapters_data.get("chapters", []), key=lambda x: x.get("order", 0))
-        
-        # Load all questions for assignment
-        questions_file = os.path.join(os.path.dirname(__file__), 'data', 'questions.json')
-        with open(questions_file, encoding='utf-8') as f:
-            all_questions = json.load(f)
-        
-        return render_template('teacher_chapters.html', 
-                             chapters=chapters,
-                             all_questions=all_questions)
-    except Exception as e:
-        flash(f'Error loading chapters: {str(e)}', 'error')
-        return redirect(url_for('teacher_dashboard'))
-
-@app.route('/teacher/add-chapter', methods=['POST'])
-@teacher_required
-def teacher_add_chapter():
-    """Add a new chapter"""
-    try:
-        chapters_data = load_chapters()
-        
-        # Parse level_range as a number and generate sequential range
-        level_count = request.form.get('level_range', '10')
-        try:
-            num_levels = int(level_count)
-            level_range = list(range(1, num_levels + 1))  # Generate [1, 2, 3, ..., num_levels]
-        except (ValueError, TypeError):
-            level_range = list(range(1, 11))  # Default to 10 levels
-        
-        new_chapter = {
-            "id": get_next_chapter_id(),
-            "name": request.form.get('name', '').strip(),
-            "description": request.form.get('description', '').strip(),
-            "order": int(request.form.get('order', len(chapters_data.get("chapters", [])) + 1)),
-            "question_ids": [int(qid) for qid in request.form.getlist('question_ids') if qid],
-            "locked_test_yourself": request.form.get('locked_test_yourself') == 'on',
-            "locked_level_mode": request.form.get('locked_level_mode') == 'on',
-            "locked_endless_mode": request.form.get('locked_endless_mode') == 'on',
-            "level_range": level_range,
-            "created_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
-        }
-        
-        if not new_chapter["name"]:
-            flash('Chapter name is required!', 'error')
-            return redirect(url_for('teacher_chapters'))
-        
-        # Ensure all levels in the level_range exist in levels.json
-        ensure_levels_exist(level_range)
-        
-        chapters_data.setdefault("chapters", []).append(new_chapter)
-        save_chapters(chapters_data)
-        sync_question_pools_with_chapters()
-        
-        flash(f'Chapter "{new_chapter["name"]}" created successfully!', 'success')
-    except Exception as e:
-        flash(f'Error creating chapter: {str(e)}', 'error')
-    
-    return redirect(url_for('teacher_chapters'))
-
-@app.route('/teacher/edit-chapter', methods=['POST'])
-@teacher_required
-def teacher_edit_chapter():
-    """Edit an existing chapter"""
-    try:
-        chapter_id = int(request.form.get('chapter_id'))
-        chapters_data = load_chapters()
-        
-        # Parse level_range as a number and generate sequential range
-        level_count = request.form.get('level_range', '10')
-        try:
-            num_levels = int(level_count)
-            level_range = list(range(1, num_levels + 1))  # Generate [1, 2, 3, ..., num_levels]
-        except (ValueError, TypeError):
-            level_range = list(range(1, 11))  # Default to 10 levels
-        
-        for chapter in chapters_data.get("chapters", []):
-            if chapter.get("id") == chapter_id:
-                chapter["name"] = request.form.get('name', '').strip()
-                chapter["description"] = request.form.get('description', '').strip()
-                chapter["order"] = int(request.form.get('order', chapter.get("order", 1)))
-                chapter["question_ids"] = [int(qid) for qid in request.form.getlist('question_ids') if qid]
-                chapter["locked_test_yourself"] = request.form.get('locked_test_yourself') == 'on'
-                chapter["locked_level_mode"] = request.form.get('locked_level_mode') == 'on'
-                chapter["locked_endless_mode"] = request.form.get('locked_endless_mode') == 'on'
-                chapter["level_range"] = level_range
-                chapter["updated_at"] = datetime.now().isoformat()
-                
-                # Ensure all levels in the updated level_range exist
-                ensure_levels_exist(level_range)
-                
-                # Auto-distribute questions if requested
-                if request.form.get('auto_distribute') == 'on':
-                    auto_distribute_questions_to_levels(chapter_id)
-                
-                break
-        
-        save_chapters(chapters_data)
-        sync_question_pools_with_chapters()
-        flash('Chapter updated successfully!', 'success')
-    except Exception as e:
-        flash(f'Error updating chapter: {str(e)}', 'error')
-    
-    return redirect(url_for('teacher_chapters'))
-
-@app.route('/teacher/delete-chapter/<int:chapter_id>', methods=['POST'])
-@teacher_required
-def teacher_delete_chapter(chapter_id):
-    """Delete a chapter"""
-    try:
-        chapters_data = load_chapters()
-        chapters_data["chapters"] = [ch for ch in chapters_data.get("chapters", []) if ch.get("id") != chapter_id]
-        save_chapters(chapters_data)
-        sync_question_pools_with_chapters()
-        flash('Chapter deleted successfully!', 'success')
-    except Exception as e:
-        flash(f'Error deleting chapter: {str(e)}', 'error')
-    
-    return redirect(url_for('teacher_chapters'))
-
-@app.route('/teacher/toggle-chapter-lock', methods=['POST'])
-@teacher_required
-def teacher_toggle_chapter_lock():
-    """Toggle lock status for a chapter in a specific mode"""
-    try:
-        chapter_id = int(request.form.get('chapter_id'))
-        mode = request.form.get('mode')  # 'test_yourself' or 'level_mode'
-        
-        chapters_data = load_chapters()
-        
-        for chapter in chapters_data.get("chapters", []):
-            if chapter.get("id") == chapter_id:
-                lock_key = f'locked_{mode}'
-                chapter[lock_key] = not chapter.get(lock_key, False)
-                chapter["updated_at"] = datetime.now().isoformat()
-                break
-        
-        save_chapters(chapters_data)
-        sync_question_pools_with_chapters()
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-@app.route('/teacher/get-chapter/<int:chapter_id>')
-@teacher_required
-def teacher_get_chapter(chapter_id):
-    """Get chapter data as JSON for editing"""
-    try:
-        chapter = get_chapter_by_id(chapter_id)
-        if chapter:
-            return jsonify(chapter)
-        return jsonify({'error': 'Chapter not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/teacher/ai-arrange-questions', methods=['POST'])
-@teacher_required
-def teacher_ai_arrange_questions():
-    """Use AI to arrange questions for a chapter"""
-    try:
-        # Check if AI is properly configured using helper function
-        if not is_ai_configured():
-            return jsonify({
-                'success': False, 
-                'error': get_ai_config_error_message()
-            }), 400
-        
-        data = request.get_json()
-        strategy = data.get('strategy', 'difficulty')  # difficulty, topic, learning_path, balanced
-        question_ids = data.get('question_ids', [])
-        
-        if not question_ids:
-            return jsonify({'success': False, 'error': 'No questions provided'}), 400
-        
-        # Get full question objects
-        questions_file = os.path.join(os.path.dirname(__file__), 'data', 'questions.json')
-        with open(questions_file, encoding='utf-8') as f:
-            all_questions = json.load(f)
-        
-        # Filter to only the provided question IDs
-        selected_questions = [q for q in all_questions if q.get('id') in question_ids]
-        
-        if not selected_questions:
-            return jsonify({'success': False, 'error': 'No valid questions found'}), 400
-        
-        print(f"[AI ARRANGE] Strategy: {strategy}, Questions: {len(selected_questions)}")
-        
-        # Apply AI arrangement based on strategy
-        if strategy == 'difficulty':
-            arranged_ids = ai_arrange_questions_by_difficulty(selected_questions)
-            if arranged_ids and not isinstance(arranged_ids, str):
-                # Distribute across 10 levels
-                levels = distribute_questions_to_levels(arranged_ids, 10)
-            else:
-                error_msg = arranged_ids if isinstance(arranged_ids, str) else 'AI arrangement failed - no results returned'
-                print(f"[ERROR] AI difficulty arrangement failed: {error_msg}")
-                return jsonify({'success': False, 'error': error_msg}), 500
-                
-        elif strategy == 'topic':
-            arranged_ids = ai_arrange_questions_by_topic(selected_questions)
-            if arranged_ids and not isinstance(arranged_ids, str):
-                levels = distribute_questions_to_levels(arranged_ids, 10)
-            else:
-                error_msg = arranged_ids if isinstance(arranged_ids, str) else 'AI arrangement failed - no results returned'
-                print(f"[ERROR] AI topic arrangement failed: {error_msg}")
-                return jsonify({'success': False, 'error': error_msg}), 500
-                
-        elif strategy == 'learning_path':
-            arranged_ids = ai_arrange_questions_learning_path(selected_questions)
-            if arranged_ids and not isinstance(arranged_ids, str):
-                levels = distribute_questions_to_levels(arranged_ids, 10)
-            else:
-                error_msg = arranged_ids if isinstance(arranged_ids, str) else 'AI arrangement failed - no results returned'
-                print(f"[ERROR] AI learning path arrangement failed: {error_msg}")
-                return jsonify({'success': False, 'error': error_msg}), 500
-                
-        elif strategy == 'balanced':
-            levels = ai_arrange_questions_balanced(selected_questions)
-            if not levels:
-                # Fallback to simple distribution
-                print("[WARN] Balanced arrangement failed, using fallback distribution")
-                levels = distribute_questions_to_levels(question_ids, 10)
-        else:
-            return jsonify({'success': False, 'error': 'Invalid strategy'}), 400
-        
-        print(f"[AI ARRANGE] Generated {len(levels)} levels")
-        
-        return jsonify({
-            'success': True,
-            'strategy': strategy,
-            'levels': levels,
-            'total_questions': len(question_ids)
-        })
-        
-    except Exception as e:
-        print(f"[ERROR] AI arrangement failed: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/teacher/apply-ai-arrangement', methods=['POST'])
-@teacher_required
-def teacher_apply_ai_arrangement():
-    """Apply AI-arranged questions to chapter and update levels"""
-    try:
-        data = request.get_json()
-        chapter_id = data.get('chapter_id')
-        levels_data = data.get('levels', [])
-        
-        if not chapter_id or not levels_data:
-            return jsonify({'success': False, 'error': 'Missing chapter_id or levels data'}), 400
-        
-        # Update levels.json with new question assignments
-        with open('data/levels.json', 'r', encoding='utf-8') as f:
-            all_levels = json.load(f)
-        
-        # Update each level with new questions from AI arrangement
-        for level_arrangement in levels_data:
-            level_num = level_arrangement.get('level')
-            new_questions = level_arrangement.get('question_ids', [])
-            
-            # Find and update this level
-            for level in all_levels:
-                if level.get('level') == level_num:
-                    level['questions'] = new_questions
-                    break
-        
-        # Save updated levels
-        with open('data/levels.json', 'w', encoding='utf-8') as f:
-            json.dump(all_levels, f, indent=2, ensure_ascii=False)
-        
-        # Update chapter with all question IDs and level range
-        chapters_data = load_chapters()
-        for chapter in chapters_data.get("chapters", []):
-            if chapter.get("id") == chapter_id:
-                # Collect all question IDs from all levels
-                all_question_ids = []
-                level_numbers = []
-                for level_arrangement in levels_data:
-                    all_question_ids.extend(level_arrangement.get('question_ids', []))
-                    level_numbers.append(level_arrangement.get('level'))
-                
-                chapter['question_ids'] = list(set(all_question_ids))  # Remove duplicates
-                chapter['level_range'] = sorted(level_numbers)
-                chapter['updated_at'] = datetime.now().isoformat()
-                break
-        
-        save_chapters(chapters_data)
-        
-        return jsonify({
-            'success': True,
-            'message': 'AI arrangement applied successfully',
-            'levels_updated': len(levels_data)
-        })
-        
-    except Exception as e:
-        print(f"[ERROR] Applying AI arrangement failed: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
 # WebSocket event handlers
 @socketio.on('connect')
 def on_connect():
@@ -6011,7 +5040,7 @@ if __name__ == "__main__":
     print("🎯 Ready for educational adventures!")
     print("📡 Real-time monitoring enabled!")
     try:
-        socketio.run(app, debug=True, host='127.0.0.1', port=5000)
+        socketio.run(app, debug=True, host='127.0.0.1', port=5000, use_reloader=False)
     except:
         # Fallback if SocketIO is not available
         print("⚠️  SocketIO not available, running without real-time features")

@@ -492,7 +492,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('questionsModal')">&times;</span>
             <h2 style="color: #4b2e05;">Manage Questions for Level <span id="questionsLevelNumber"></span></h2>
-            <form action="{{ url_for('teacher_level_questions') }}" method="POST">
+            <form action="{{ url_for('teacher_questions') }}" method="POST">
                 <input type="hidden" id="questionsLevelId" name="level_number">
                 <div class="form-group">
                     <label>Available Questions:</label>

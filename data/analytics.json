@@ -778,5 +778,109 @@
       "questions_answered": 3,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764713145.5651042,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764728683.0150883,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764728976.2471147,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764729194.3860319,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764729378.7021759,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764729618.8257089,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764730365.7560375,
+    "event_type": "level_selected",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764730368.7574391,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 126,
+      "user_answer": "true",
+      "correct_answer": "true",
+      "is_correct": true,
+      "time_taken": 2.9868075847625732,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764730373.7499838,
+    "event_type": "game_quit",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "score": 20,
+      "questions_answered": 1,
+      "reason": "player_quit"
+    }
   }
 ]

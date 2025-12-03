@@ -522,35 +522,41 @@ def teacher_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-    # --- AI Arrange Questions Route ---
-    @app.route('/teacher/ai-arrange-questions', methods=['POST'])
-    @teacher_required
-    def ai_arrange_questions():
-        data = request.get_json()
-        question_ids = data.get('question_ids', [])
-        strategy = data.get('strategy', 'balanced')
-        # Dummy implementation: evenly distribute questions across 10 levels
-        levels = []
-        num_levels = 10
-        if not question_ids:
-            return jsonify({'success': False, 'error': 'No question IDs provided'})
-        chunk_size = max(1, len(question_ids) // num_levels)
-        for i in range(num_levels):
-            start = i * chunk_size
-            end = start + chunk_size
-            levels.append({
-                'level': i + 1,
-                'question_ids': question_ids[start:end]
-            })
-        # Add any remaining questions to the last level
-        if len(question_ids) > num_levels * chunk_size:
-            levels[-1]['question_ids'].extend(question_ids[num_levels * chunk_size:])
-        return jsonify({
-            'success': True,
-            'levels': levels,
-            'strategy': strategy,
-            'total_questions': len(question_ids)
+# --- AI Arrange Questions Route ---
+@app.route('/teacher/ai-arrange-questions', methods=['POST'])
+@teacher_required
+def ai_arrange_questions():
+    data = request.get_json()
+    question_ids = data.get('question_ids', [])
+    strategy = data.get('strategy', 'balanced')
+    
+    # Dummy implementation: evenly distribute questions across 10 levels
+    levels = []
+    num_levels = 10
+    
+    if not question_ids:
+        return jsonify({'success': False, 'error': 'No question IDs provided'})
+    
+    chunk_size = max(1, len(question_ids) // num_levels)
+    
+    for i in range(num_levels):
+        start = i * chunk_size
+        end = start + chunk_size
+        levels.append({
+            'level': i + 1,
+            'question_ids': question_ids[start:end]
         })
+    
+    # Add any remaining questions to the last level
+    if len(question_ids) > num_levels * chunk_size:
+        levels[-1]['question_ids'].extend(question_ids[num_levels * chunk_size:])
+    
+    return jsonify({
+        'success': True,
+        'levels': levels,
+        'strategy': strategy,
+        'total_questions': len(question_ids)
+    })
 
 # Helper function to check allowed file extensions
 def allowed_file(filename):

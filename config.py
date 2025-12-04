@@ -13,7 +13,7 @@ OPENAI_API_KEY = ""  # Set this if using OpenAI
 OPENAI_MODEL = "gpt-3.5-turbo"  # or "gpt-4" for better results
 
 # Gemini Configuration  
-GEMINI_API_KEY = "AIzaSyCthLSHAU_ksitQsFCaosNCB5jl9aLtslM"  # Set this if using Gemini
+GEMINI_API_KEY = "AIzaSyATBxlRuYcd3sme4Kz2O7pu_TIABuF0wtM"  # Set this if using Gemini
 GEMINI_MODEL = "gemini-2.5-flash"  # or "gemini-2.5-pro" for better results
 
 # Legacy support (will use the provider specified above)

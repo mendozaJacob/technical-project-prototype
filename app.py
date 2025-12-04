@@ -3862,18 +3862,46 @@ def teacher_ai_generator():
         print(f"DEBUG: Error loading chapters: {e}")
         chapters = []
     
+    # Load available levels for assignment
+    try:
+        levels_data = load_levels()
+        chapters_data = load_chapters()
+        
+        # Get Chapter 2 levels (levels 11-20)
+        chapter_2 = None
+        for chapter in chapters_data.get("chapters", []):
+            if chapter.get("id") == 2:
+                chapter_2 = chapter
+                break
+        
+        if chapter_2:
+            # Show Chapter 2's levels (11-20) for assignment
+            chapter_2_levels = list(range(11, 21))
+            available_levels = chapter_2_levels
+        else:
+            # Fallback: show next available levels after current max
+            existing_levels = [lvl.get('level') for lvl in levels_data if lvl.get('level')]
+            max_level = max(existing_levels) if existing_levels else 0
+            available_levels = list(range(max_level + 1, max_level + 11))
+            
+    except Exception as e:
+        print(f"DEBUG: Error loading levels: {e}")
+        available_levels = list(range(11, 21))  # Default to Chapter 2 levels
+    
     # Check if AI is configured
     if not is_ai_configured():
         return render_template('teacher_ai_generator.html', 
                              chapters=chapters, 
+                             available_levels=available_levels,
                              error=get_ai_config_error_message())
     
+    if request.method == 'POST':
         if 'file' not in request.files:
-            return render_template('teacher_ai_generator.html', chapters=chapters, error='No file selected')
+            return render_template('teacher_ai_generator.html', chapters=chapters, available_levels=available_levels, error='No file selected')
         
         file = request.files['file']
         if file.filename == '':
-            return render_template('teacher_ai_generator.html', chapters=chapters, error='No file selected')
+            return render_template('teacher_ai_generator.html', chapters=chapters, available_levels=available_levels, error='No file selected')
         
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -3911,17 +3939,18 @@ def teacher_ai_generator():
             os.remove(file_path)
             
             if isinstance(generated_questions, dict) and 'error' in generated_questions:
-                return render_template('teacher_ai_generator.html', chapters=chapters, error=generated_questions['error'])
+                return render_template('teacher_ai_generator.html', chapters=chapters, available_levels=available_levels, error=generated_questions['error'])
             
             return render_template('teacher_ai_generator.html', 
                                  chapters=chapters,
+                                 available_levels=available_levels,
                                  generated_questions=generated_questions,
                                  target_chapter=target_chapter,
                                  target_level=target_level)
         else:
-            return render_template('teacher_ai_generator.html', chapters=chapters, error='Invalid file type')
+            return render_template('teacher_ai_generator.html', chapters=chapters, available_levels=available_levels, error='Invalid file type')
     
-    return render_template('teacher_ai_generator.html', chapters=chapters)
+    return render_template('teacher_ai_generator.html', chapters=chapters, available_levels=available_levels)
 
 @app.route('/teacher/save-questions', methods=['POST'])
 @teacher_required

@@ -313,19 +313,21 @@
         <!-- Chapter Filter -->
         <div style="margin: 30px 0; padding: 20px; background: #fffbe6; border: 2px solid #4b2e05; border-radius: 12px;">
             <label for="chapterFilter" style="font-weight: bold; margin-right: 15px; font-size: 1.1em;">📚 Filter by Chapter:</label>
-            <select id="chapterFilter" onchange="filterLevelsByChapter()" style="padding: 10px; border-radius: 8px; border: 2px solid #4b2e05; font-family: 'Times New Roman', Times, serif; font-size: 1em;">
+            <select id="chapterFilter" onchange="filterLevelsByChapter()" 
+                    style="padding: 10px; border-radius: 8px; border: 2px solid #4b2e05; font-family: 'Times New Roman', Times, serif; font-size: 1em;">
                 <option value="">All Chapters (All Levels)</option>
                 {% for chapter in chapters %}
                 <option value="{{ chapter.id }}">{{ chapter.name }} (Levels {{ chapter.level_range|min }}-{{ chapter.level_range|max }})</option>
                 {% endfor %}
                 <option value="unassigned">Unassigned Levels</option>
             </select>
+
         </div>
 
         <!-- Levels Grid -->
         <div class="levels-grid">
             {% for level in levels %}
-            <div class="level-card" data-chapter-id="{% if level.level in level_to_chapter %}{{ level_to_chapter[level.level].id }}{% else %}unassigned{% endif %}">
+            <div class="level-card" data-chapter-id="{% if level.level in level_to_chapter %}{{ level_to_chapter[level.level].id }}{% else %}unassigned{% endif %}" data-level="{{ level.level }}">
                 <div class="level-header">
                     <h3 class="level-title">Level {{ level.level }}</h3>
                     <div class="level-number">{{ level.level }}</div>
@@ -382,7 +384,7 @@
                         <span>{{ level.questions|length }}/10 questions</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ (level.questions|length / 10 * 100)|round }}%"></div>
+                        <div class="progress-fill" style="width: {{ ((level.questions|length / 10) * 100)|round|int }}%"></div>
                     </div>
                 </div>
 
@@ -521,29 +523,55 @@
             document.getElementById('editLevelNumber').value = levelNumber;
             
             // Load level data
-            fetch(`/teacher/get-level/${levelNumber}`)
+            fetch('/teacher/get-level/' + levelNumber)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('editEnemySelect').value = data.enemy_id || '';
                     
-                    // Populate questions
+                    // Populate questions using server data
                     const selector = document.getElementById('editQuestionSelector');
                     selector.innerHTML = '';
                     
-                    {% for question in available_questions %}
-                    const div{{ question.id }} = document.createElement('div');
-                    div{{ question.id }}.className = 'question-checkbox';
-                    div{{ question.id }}.innerHTML = `
-                        <input type="checkbox" id="editQ{{ question.id }}" name="questions" value="{{ question.id }}" ${data.questions.includes({{ question.id }}) ? 'checked' : ''}>
-                        <label for="editQ{{ question.id }}">
-                            <strong>Q{{ question.id }}:</strong> {{ question.q[:60] }}{% if question.q|length > 60 %}...{% endif %}
-                            <span class="difficulty-badge difficulty-{{ question.get('difficulty', 'medium') }}">
-                                {{ question.get('difficulty', 'Medium').title() }}
-                            </span>
-                        </label>
-                    `;
-                    selector.appendChild(div{{ question.id }});
-                    {% endfor %}
+                    // Create questions dynamically from available questions
+                    const availableQuestions = {{ available_questions|tojson }};
+                    
+                    availableQuestions.forEach(question => {
+                        const div = document.createElement('div');
+                        div.className = 'question-checkbox';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = 'editQ' + question.id;
+                        checkbox.name = 'questions';
+                        checkbox.value = question.id;
+                        if (data.questions.includes(question.id)) {
+                            checkbox.checked = true;
+                        }
+                        
+                        const label = document.createElement('label');
+                        label.setAttribute('for', 'editQ' + question.id);
+                        
+                        const strong = document.createElement('strong');
+                        strong.textContent = 'Q' + question.id + ': ';
+                        
+                        const questionText = document.createTextNode(
+                            question.q.length > 60 ? question.q.substring(0, 60) + '...' : question.q
+                        );
+                        
+                        const span = document.createElement('span');
+                        span.className = 'difficulty-badge difficulty-' + (question.difficulty || 'medium');
+                        span.textContent = (question.difficulty || 'Medium').charAt(0).toUpperCase() + 
+                                         (question.difficulty || 'Medium').slice(1);
+                        
+                        label.appendChild(strong);
+                        label.appendChild(questionText);
+                        label.appendChild(span);
+                        
+                        div.appendChild(checkbox);
+                        div.appendChild(label);
+                        
+                        selector.appendChild(div);
+                    });
                     
                     openModal('editLevelModal');
                 })
@@ -557,26 +585,52 @@
             document.getElementById('questionsLevelId').value = levelNumber;
             
             // Load current questions for this level
-            fetch(`/teacher/get-level/${levelNumber}`)
+            fetch('/teacher/get-level/' + levelNumber)
                 .then(response => response.json())
                 .then(data => {
                     const selector = document.getElementById('questionsSelector');
                     selector.innerHTML = '';
                     
-                    {% for question in available_questions %}
-                    const div{{ question.id }} = document.createElement('div');
-                    div{{ question.id }}.className = 'question-checkbox';
-                    div{{ question.id }}.innerHTML = `
-                        <input type="checkbox" id="questQ{{ question.id }}" name="questions" value="{{ question.id }}" ${data.questions.includes({{ question.id }}) ? 'checked' : ''}>
-                        <label for="questQ{{ question.id }}">
-                            <strong>Q{{ question.id }}:</strong> {{ question.q[:60] }}{% if question.q|length > 60 %}...{% endif %}
-                            <span class="difficulty-badge difficulty-{{ question.get('difficulty', 'medium') }}">
-                                {{ question.get('difficulty', 'Medium').title() }}
-                            </span>
-                        </label>
-                    `;
-                    selector.appendChild(div{{ question.id }});
-                    {% endfor %}
+                    // Create questions dynamically from available questions
+                    const availableQuestions = {{ available_questions|tojson }};
+                    
+                    availableQuestions.forEach(question => {
+                        const div = document.createElement('div');
+                        div.className = 'question-checkbox';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = 'questQ' + question.id;
+                        checkbox.name = 'questions';
+                        checkbox.value = question.id;
+                        if (data.questions.includes(question.id)) {
+                            checkbox.checked = true;
+                        }
+                        
+                        const label = document.createElement('label');
+                        label.setAttribute('for', 'questQ' + question.id);
+                        
+                        const strong = document.createElement('strong');
+                        strong.textContent = 'Q' + question.id + ': ';
+                        
+                        const questionText = document.createTextNode(
+                            question.q.length > 60 ? question.q.substring(0, 60) + '...' : question.q
+                        );
+                        
+                        const span = document.createElement('span');
+                        span.className = 'difficulty-badge difficulty-' + (question.difficulty || 'medium');
+                        span.textContent = (question.difficulty || 'Medium').charAt(0).toUpperCase() + 
+                                         (question.difficulty || 'Medium').slice(1);
+                        
+                        label.appendChild(strong);
+                        label.appendChild(questionText);
+                        label.appendChild(span);
+                        
+                        div.appendChild(checkbox);
+                        div.appendChild(label);
+                        
+                        selector.appendChild(div);
+                    });
                     
                     openModal('questionsModal');
                 })
@@ -586,8 +640,8 @@
         }
 
         function deleteLevel(levelNumber) {
-            if (confirm(`Are you sure you want to delete Level ${levelNumber}? This action cannot be undone.`)) {
-                fetch(`/teacher/delete-level/${levelNumber}`, {
+            if (confirm('Are you sure you want to delete Level ' + levelNumber + '? This action cannot be undone.')) {
+                fetch('/teacher/delete-level/' + levelNumber, {
                     method: 'POST'
                 })
                 .then(response => response.json())
@@ -605,29 +659,22 @@
         }
 
         function filterLevelsByChapter() {
-            const selectedChapterId = document.getElementById('chapterFilter').value;
-            const levelCards = document.querySelectorAll('.level-card');
-            
-            levelCards.forEach(card => {
-                const cardChapterId = card.getAttribute('data-chapter-id');
-                
-                if (selectedChapterId === '') {
-                    // Show all levels
-                    card.style.display = '';
-                } else if (selectedChapterId === 'unassigned' && cardChapterId === 'unassigned') {
-                    // Show unassigned levels
-                    card.style.display = '';
-                } else if (cardChapterId === selectedChapterId) {
-                    // Show levels matching selected chapter
-                    card.style.display = '';
+            const selected = document.getElementById("chapterFilter").value;
+            const levels = document.querySelectorAll(".level-card");
+
+            levels.forEach(level => {
+                const chapterId = level.getAttribute("data-chapter-id");
+
+                if (selected === "" || selected === chapterId) {
+                    level.style.display = "block";
+                } else if (selected === "unassigned" && chapterId === "unassigned") {
+                    level.style.display = "block";
                 } else {
-                    // Hide levels not matching filter
-                    card.style.display = 'none';
+                    level.style.display = "none";
                 }
             });
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';

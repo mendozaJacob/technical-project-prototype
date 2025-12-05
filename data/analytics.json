@@ -954,5 +954,389 @@
       "score": 0,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1764872973.28618,
+    "event_type": "level_selected",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764872986.3518424,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 1,
+      "user_answer": "hostname",
+      "correct_answer": "hostnamectl set-hostname server1.example.com",
+      "is_correct": true,
+      "time_taken": 10.106231212615967,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873004.1212227,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 2,
+      "user_answer": "ls -l",
+      "correct_answer": "ls",
+      "is_correct": true,
+      "time_taken": 8.818315029144287,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873019.7235398,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 3,
+      "user_answer": "useradd",
+      "correct_answer": "useradd student; echo 'student' | passwd --stdin student",
+      "is_correct": true,
+      "time_taken": 12.639859437942505,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873045.342017,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 4,
+      "user_answer": "mkdir /home/student/docs",
+      "correct_answer": "mkdir -p /home/student/docs",
+      "is_correct": true,
+      "time_taken": 23.78886127471924,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873045.3487914,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 4,
+      "user_answer": "mkdir /home/student/docs",
+      "correct_answer": "mkdir -p /home/student/docs",
+      "is_correct": true,
+      "time_taken": 23.79706597328186,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873071.0797215,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 5,
+      "user_answer": "mount /mnt/data /dev/sdb1",
+      "correct_answer": "mount /dev/sdb1 /mnt/data",
+      "is_correct": true,
+      "time_taken": 20.20013451576233,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873089.202192,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 6,
+      "user_answer": "ls",
+      "correct_answer": "systemctl set-default graphical.target",
+      "is_correct": false,
+      "time_taken": 12.436443567276001,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873099.140604,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 7,
+      "user_answer": "rpm",
+      "correct_answer": "dnf install httpd -y",
+      "is_correct": false,
+      "time_taken": 7.156789779663086,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873110.950068,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 8,
+      "user_answer": "cron",
+      "correct_answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
+      "is_correct": true,
+      "time_taken": 9.49981689453125,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873129.923233,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 9,
+      "user_answer": "ls",
+      "correct_answer": "find / -user student 2>/dev/null",
+      "is_correct": false,
+      "time_taken": 16.469618797302246,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873143.7895162,
+    "event_type": "answer_submitted",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 10,
+      "user_answer": "firewall",
+      "correct_answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
+      "is_correct": true,
+      "time_taken": 12.288354396820068,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873147.116113,
+    "event_type": "level_completed",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "final_score": 65,
+      "player_hp": 79,
+      "enemy_hp": 9,
+      "total_time": 173.80349826812744,
+      "correct_answers": 7,
+      "wrong_answers": 3,
+      "level_completed": false
+    }
+  },
+  {
+    "timestamp": 1764873188.7099586,
+    "event_type": "level_selected",
+    "player_name": "Val",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "player_hp": 100,
+      "enemy_hp": 100
+    }
+  },
+  {
+    "timestamp": 1764873200.592456,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 1,
+      "user_answer": "hostname",
+      "correct_answer": "hostnamectl set-hostname server1.example.com",
+      "is_correct": true,
+      "time_taken": 8.087171792984009,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873200.6049354,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 1,
+      "user_answer": "hostname",
+      "correct_answer": "hostnamectl set-hostname server1.example.com",
+      "is_correct": true,
+      "time_taken": 11.875112533569336,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873206.2662253,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 2,
+      "user_answer": "ls",
+      "correct_answer": "ls",
+      "is_correct": true,
+      "time_taken": 4.237574577331543,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873219.8725877,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 3,
+      "user_answer": "useradd",
+      "correct_answer": "useradd student; echo 'student' | passwd --stdin student",
+      "is_correct": true,
+      "time_taken": 12.087482929229736,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873226.4479103,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 4,
+      "user_answer": "mkdir /home/student/docs",
+      "correct_answer": "mkdir -p /home/student/docs",
+      "is_correct": true,
+      "time_taken": 5.447565078735352,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873232.20308,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 5,
+      "user_answer": "mount /mnt/data /dev/sdb1",
+      "correct_answer": "mount /dev/sdb1 /mnt/data",
+      "is_correct": true,
+      "time_taken": 4.204944610595703,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873244.3620925,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 6,
+      "user_answer": "cron",
+      "correct_answer": "systemctl set-default graphical.target",
+      "is_correct": false,
+      "time_taken": 10.828118801116943,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873253.312944,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 7,
+      "user_answer": "rpm",
+      "correct_answer": "dnf install httpd -y",
+      "is_correct": false,
+      "time_taken": 7.3397746086120605,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873259.5037956,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 8,
+      "user_answer": "cron",
+      "correct_answer": "crontab -e; 0 2 * * * /usr/bin/backup.sh",
+      "is_correct": true,
+      "time_taken": 4.818132162094116,
+      "similarity_score": 0.8,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873269.6453056,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 9,
+      "user_answer": "ls",
+      "correct_answer": "find / -user student 2>/dev/null",
+      "is_correct": false,
+      "time_taken": 8.687924861907959,
+      "similarity_score": 0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873283.8895593,
+    "event_type": "answer_submitted",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "question_id": 10,
+      "user_answer": "firewall-cmd",
+      "correct_answer": "firewall-cmd --permanent --add-service=ssh; firewall-cmd --reload",
+      "is_correct": true,
+      "time_taken": 6.62392783164978,
+      "similarity_score": 1.0,
+      "level": 1
+    }
+  },
+  {
+    "timestamp": 1764873286.7725778,
+    "event_type": "level_completed",
+    "player_name": "John Doe",
+    "session_id": "unknown",
+    "data": {
+      "level": 1,
+      "final_score": 115,
+      "player_hp": 79,
+      "enemy_hp": 0,
+      "total_time": 98.05375599861145,
+      "correct_answers": 7,
+      "wrong_answers": 3,
+      "level_completed": true
+    }
   }
 ]

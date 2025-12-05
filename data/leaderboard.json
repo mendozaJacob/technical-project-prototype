@@ -28,5 +28,16 @@
         "wrong_answers": 0,
         "game_mode": "test_yourself",
         "date": "2025-11-21 22:38:47"
+    },
+    {
+        "player": "John Doe",
+        "student_id": "0001",
+        "score": 115,
+        "time": 98.05,
+        "correct_answers": 7,
+        "wrong_answers": 3,
+        "game_mode": "adventure",
+        "date": "2025-12-04 13:34:46",
+        "level": 1
     }
 ]

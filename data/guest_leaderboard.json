@@ -88,5 +88,15 @@
         "wrong_answers": 0,
         "game_mode": "test_yourself",
         "date": "2025-12-02 22:41:13"
+    },
+    {
+        "player": "Val",
+        "score": 65,
+        "time": 173.8,
+        "correct_answers": 7,
+        "wrong_answers": 3,
+        "game_mode": "adventure",
+        "date": "2025-12-04 13:32:27",
+        "level": 1
     }
 ]

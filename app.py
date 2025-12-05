@@ -3864,7 +3864,8 @@ def teacher_ai_generator():
     
     # Load available levels for assignment
     try:
-        levels_data = load_levels()
+        with open('data/levels.json', 'r', encoding='utf-8') as f:
+            levels_data = json.load(f)
         chapters_data = load_chapters()
         
         # Get Chapter 2 levels (levels 11-20)
@@ -3960,6 +3961,11 @@ def teacher_save_questions():
         # Get all questions as one JSON string and selected indices
         all_questions_json = request.form.get('all_questions', '[]')
         selected_indices = request.form.getlist('selected_questions')
+        target_level = request.form.get('target_level')
+        target_chapter = request.form.get('target_chapter')
+        
+        print(f"DEBUG: Target level: {target_level}")
+        print(f"DEBUG: Target chapter: {target_chapter}")
         
         print(f"DEBUG: Saving questions - {len(selected_indices)} selected")
         print(f"DEBUG: Selected indices: {selected_indices}")
@@ -4035,6 +4041,37 @@ def teacher_save_questions():
         questions = existing_questions
         print(f"DEBUG: Reloaded global questions, now {len(questions)} total")
         print(f"DEBUG: AI questions count: {sum(1 for q in questions if q.get('ai_generated', False))}")
+        
+        # Assign questions to level if specified
+        if target_level and saved_count > 0:
+            try:
+                target_level_num = int(target_level)
+                # Get the IDs of the newly saved questions
+                new_question_ids = list(range(next_id - saved_count, next_id))
+                print(f"DEBUG: Assigning questions {new_question_ids} to level {target_level_num}")
+                
+                # Load and update levels
+                with open('data/levels.json', 'r', encoding='utf-8') as f:
+                    levels_data = json.load(f)
+                
+                # Find the target level and add questions
+                for level in levels_data:
+                    if level.get('level') == target_level_num:
+                        if 'questions' not in level:
+                            level['questions'] = []
+                        level['questions'].extend(new_question_ids)
+                        print(f"DEBUG: Added {len(new_question_ids)} questions to level {target_level_num}")
+                        print(f"DEBUG: Level {target_level_num} now has {len(level['questions'])} questions")
+                        break
+                
+                # Save updated levels
+                with open('data/levels.json', 'w', encoding='utf-8') as f:
+                    json.dump(levels_data, f, indent=2, ensure_ascii=False)
+                    
+                print(f"DEBUG: Successfully assigned questions to level {target_level_num}")
+                
+            except Exception as e:
+                print(f"DEBUG: Error assigning questions to level: {str(e)}")
         
         # Recreate search index
         recreate_search_index()

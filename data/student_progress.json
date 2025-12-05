@@ -1,8 +1,8 @@
 {
   "0001": {
-    "games_played": 3,
-    "total_score": 85,
-    "best_score": 85,
+    "games_played": 4,
+    "total_score": 200,
+    "best_score": 115,
     "levels_completed": [
       1
     ],
@@ -36,13 +36,23 @@
         "total_questions": 40,
         "time_taken": 6.1545233726501465,
         "accuracy": 0.0
+      },
+      {
+        "date": "2025-12-04T13:34:46.770675",
+        "game_type": "adventure_mode",
+        "level": 1,
+        "score": 115,
+        "correct_answers": 7,
+        "total_questions": 10,
+        "time_taken": 98.05375599861145,
+        "accuracy": 70.0
       }
     ],
     "stats": {
-      "total_correct": 6,
-      "total_questions": 46,
-      "average_accuracy": 13.04,
-      "total_time": 137.08491206169128
+      "total_correct": 13,
+      "total_questions": 56,
+      "average_accuracy": 23.21,
+      "total_time": 235.13866806030273
     }
   }
 }

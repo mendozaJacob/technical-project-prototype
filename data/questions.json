@@ -1262,7 +1262,7 @@
     "id": 118,
     "q": "Which command is typically used to install Python packages or libraries, such as those that might be needed for cybersecurity scripts?",
     "answer": "pip install",
-    "keywords": [],
+    "keywords": "",
     "feedback": "`pip install` is the correct command for installing Python packages. Understanding how to install necessary components is a fundamental skill for anyone working with Python in cybersecurity.",
     "type": "multiple_choice",
     "options": [
@@ -1272,7 +1272,8 @@
       "yum install"
     ],
     "difficulty": "medium",
-    "ai_generated": true
+    "ai_generated": false,
+    "updated_at": "2025-12-04T19:33:04.972182"
   },
   {
     "id": 119,
@@ -1513,6 +1514,292 @@
     ],
     "feedback": "The content clearly states that 'PDF support requires PyPDF2,' indicating its role in enabling PDF-related features.",
     "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 136,
+    "q": "What is the core concept of cloud computing?",
+    "answer": "Cloud computing provides on-demand access to a shared pool of configurable resources that can be quickly adjusted with minimal management.",
+    "keywords": [
+      "on-demand access",
+      "shared resources",
+      "configurable resources"
+    ],
+    "feedback": "Cloud computing allows users to access resources like networks, servers, storage, and applications over the internet as needed, without owning or managing the underlying infrastructure.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 137,
+    "q": "Which of the following is an essential characteristic of cloud computing that allows resources to be scaled up or down based on demand?",
+    "answer": "Rapid Elasticity",
+    "keywords": [],
+    "feedback": "Rapid Elasticity ensures that cloud resources can be quickly provisioned or de-provisioned to meet fluctuating demands, optimizing resource allocation.",
+    "type": "multiple_choice",
+    "options": [
+      "Broad Network Access",
+      "Rapid Elasticity",
+      "Measured Service",
+      "On-Demand Self-Service"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 138,
+    "q": "Salesforce is an example of an Infrastructure as a Service (IaaS) cloud model.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Salesforce is an example of Software as a Service (SaaS), where users access ready-to-use applications over the internet. IaaS provides virtualized hardware resources.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 139,
+    "q": "Which cloud service model provides virtualized resources like processing, storage, and networking, allowing users to manage their own operating systems and applications?",
+    "answer": "Infrastructure as a Service (IaaS)",
+    "keywords": [
+      "IaaS",
+      "Infrastructure as a Service"
+    ],
+    "feedback": "IaaS gives users the most control over their computing infrastructure, providing the fundamental building blocks like virtual machines, storage, and networks.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 140,
+    "q": "A cloud deployment model that combines two or more different cloud models (e.g., public and private) is known as a:",
+    "answer": "Hybrid Cloud",
+    "keywords": [],
+    "feedback": "Hybrid clouds allow organizations to leverage the benefits of different cloud environments, such as using a private cloud for sensitive data and a public cloud for less critical workloads.",
+    "type": "multiple_choice",
+    "options": [
+      "Public Cloud",
+      "Private Cloud",
+      "Hybrid Cloud",
+      "Virtual Private Cloud"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 141,
+    "q": "In the cloud shared responsibility model, the cloud service provider (CSP) is solely responsible for all security aspects, including customer data protection.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "The shared responsibility model divides security duties. CSPs are responsible for the security *of* the cloud (infrastructure), while customers are responsible for security *in* the cloud (data, access management).",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 142,
+    "q": "According to the shared responsibility model, who is primarily responsible for the security *of* the cloud infrastructure (e.g., physical data centers)?",
+    "answer": "Cloud Service Provider (CSP)",
+    "keywords": [
+      "CSP",
+      "Cloud Service Provider"
+    ],
+    "feedback": "Cloud Service Providers manage the underlying infrastructure, including physical security, network, and virtualization components.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 143,
+    "q": "Which of the following is an example of a Software as a Service (SaaS) offering?",
+    "answer": "Google Docs",
+    "keywords": [],
+    "feedback": "Google Docs is a ready-to-use application accessed via a web browser, fitting the definition of SaaS. Amazon AWS EC2 and Rackspace are IaaS, while Google App Engine is PaaS.",
+    "type": "multiple_choice",
+    "options": [
+      "Amazon AWS EC2",
+      "Google App Engine",
+      "Google Docs",
+      "Rackspace"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 144,
+    "q": "Resource Pooling means that cloud resources are dedicated to a single consumer in a single-tenant model.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Resource Pooling involves sharing a common pool of resources among multiple consumers in a multi-tenant model, allowing for dynamic allocation and efficiency.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 145,
+    "q": "What is a Public Cloud?",
+    "answer": "A Public Cloud is offered by providers to multiple clients sharing resources like processing and storage.",
+    "keywords": [
+      "shared resources",
+      "multiple clients"
+    ],
+    "feedback": "Public clouds are widely available and accessible over the internet, making them cost-effective and scalable for many users.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 146,
+    "q": "What is the primary concept behind cloud computing, as defined in the provided content?",
+    "answer": "Cloud computing enables on-demand access to a shared pool of configurable resources that can be quickly adjusted with minimal management.",
+    "keywords": [
+      "on-demand access",
+      "shared pool",
+      "configurable resources",
+      "minimal management"
+    ],
+    "feedback": "Cloud computing offers flexible, scalable access to computing resources over a network, reducing the need for direct management by the user.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 147,
+    "q": "Which of the following is NOT an essential characteristic of cloud computing?",
+    "answer": "Fixed Capacity",
+    "keywords": [],
+    "feedback": "Cloud computing is characterized by 'Rapid Elasticity,' meaning resources can scale up or down based on demand, not fixed capacity.",
+    "type": "multiple_choice",
+    "options": [
+      "Rapid Elasticity",
+      "Broad Network Access",
+      "Fixed Capacity",
+      "On-Demand Self-Service"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 148,
+    "q": "In Infrastructure as a Service (IaaS), what type of resources are primarily provided to users?",
+    "answer": "IaaS primarily provides virtualized resources like processing, storage, and networking.",
+    "keywords": [
+      "virtualized resources",
+      "processing",
+      "storage",
+      "networking"
+    ],
+    "feedback": "IaaS gives users control over the fundamental computing infrastructure, such as virtual machines, networks, and storage.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 149,
+    "q": "Which cloud service model delivers business applications online, accessible via web browsers?",
+    "answer": "SaaS",
+    "keywords": [],
+    "feedback": "Software as a Service (SaaS) is known for providing fully functional applications directly to end-users over the internet, like Salesforce or Google Docs.",
+    "type": "multiple_choice",
+    "options": [
+      "IaaS",
+      "PaaS",
+      "SaaS",
+      "DaaS"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 150,
+    "q": "True or False: In Platform as a Service (PaaS), users are typically responsible for managing the underlying operating systems and hardware infrastructure.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "In PaaS, the provider manages the operating system, server hardware, and network infrastructure, allowing users to focus on application development and deployment.",
+    "type": "true_false",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 151,
+    "q": "How is a Public Cloud typically characterized in terms of resource sharing?",
+    "answer": "A Public Cloud is offered by providers to multiple clients who share resources like processing and storage.",
+    "keywords": [
+      "multiple clients",
+      "sharing resources",
+      "shared resources"
+    ],
+    "feedback": "Public clouds are designed for broad accessibility and cost-effectiveness by distributing resources among many users.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 152,
+    "q": "What term describes a cloud deployment model that combines two or more different cloud models?",
+    "answer": "Hybrid Cloud",
+    "keywords": [],
+    "feedback": "A Hybrid Cloud leverages the strengths of different cloud environments, allowing for flexibility and optimization across various needs.",
+    "type": "multiple_choice",
+    "options": [
+      "Public Cloud",
+      "Private Cloud",
+      "Hybrid Cloud",
+      "Community Cloud"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 153,
+    "q": "In the Cloud Shared Responsibility Model, who is primarily responsible for the security *of* the cloud (e.g., infrastructure, physical data centers)?",
+    "answer": "The Cloud Service Provider (CSP)",
+    "keywords": [],
+    "feedback": "Cloud Service Providers (CSPs) manage the foundational security of the cloud infrastructure, while customers are responsible for security within their cloud usage.",
+    "type": "multiple_choice",
+    "options": [
+      "The Customer",
+      "The Cloud Service Provider (CSP)",
+      "Third-Party Auditors",
+      "Regulatory Bodies"
+    ],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 154,
+    "q": "According to the Shared Responsibility Model, what type of security aspects do customers typically manage *in* the cloud?",
+    "answer": "Customers typically manage security *in* the cloud, which includes data protection and access management.",
+    "keywords": [
+      "data protection",
+      "access management",
+      "security in the cloud"
+    ],
+    "feedback": "Customers are responsible for securing their data, applications, and configurations within the cloud environment provided by the CSP.",
+    "type": "short_answer",
+    "options": [],
+    "difficulty": "medium",
+    "ai_generated": true
+  },
+  {
+    "id": 155,
+    "q": "True or False: The security responsibilities outlined in the Shared Responsibility Model remain the same regardless of whether IaaS, PaaS, or SaaS is used.",
+    "answer": "false",
+    "keywords": [],
+    "feedback": "Responsibilities vary significantly across IaaS, PaaS, and SaaS models. As the service model shifts from IaaS to SaaS, more security responsibilities are typically handled by the cloud provider.",
+    "type": "true_false",
     "options": [],
     "difficulty": "medium",
     "ai_generated": true

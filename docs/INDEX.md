@@ -1,8 +1,8 @@
-# 📚 Documentation Hub
+# 📚 Quiz Battle: Dungeons of Knowledge - Documentation Hub
 
 Welcome to the comprehensive documentation for Quiz Battle: Dungeons of Knowledge! This organized documentation hub provides everything you need to use, customize, and develop the educational RPG platform.
 
-## 🚀 Quick Start Navigation
+## 🚀 Quick Navigation
 
 ### 👥 **For End Users**
 - **[User Guide](user-guides/USER_GUIDE.md)** - Complete user manual for students and basic setup

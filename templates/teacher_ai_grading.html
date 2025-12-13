@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grading Configuration</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #333; 
+            margin: 0;
+            padding: 20px;
+        }
+        .grading-container { 
+            max-width: 900px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 40px; 
+        }
+        .page-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .config-section {
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #777;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4b2e05;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-group label {
+            display: block;
+            color: #4b2e05;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            font-family: 'Times New Roman', Times, serif;
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4b2e05;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .btn {
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .btn-secondary {
+            background: #8b7355;
+        }
+        .btn-secondary:hover {
+            background: #a68660;
+        }
+        .btn-success {
+            background: #4a7c59;
+        }
+        .btn-success:hover {
+            background: #5a8c69;
+        }
+        .test-section {
+            background: #f0f8ff;
+            border: 2px solid #4b9cdb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .test-result {
+            background: #e8f5e8;
+            border: 1px solid #4a7c59;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-active {
+            background-color: #4a7c59;
+        }
+        .status-inactive {
+            background-color: #777;
+        }
+        .info-box {
+            background: #e6f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="grading-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+            <h1 class="page-title" style="margin: 0;">🎯 AI Grading Configuration</h1>
+            <div></div>
+        </div>
+        
+        {% if success %}
+        <div class="success-message">{{ success }}</div>
+        {% endif %}
+        
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+        
+        <!-- AI Grading Status -->
+        <div class="config-section">
+            <h3 style="color: #4b2e05; margin-bottom: 20px;">
+                <span class="status-indicator {{ 'status-active' if ai_grading_enabled else 'status-inactive' }}"></span>
+                AI Grading Status
+            </h3>
+            
+            <form method="POST" action="{{ url_for('teacher_toggle_ai_grading') }}">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="ai_grading_enabled" {{ 'checked' if ai_grading_enabled else '' }}>
+                        <span class="slider"></span>
+                    </label>
+                    <span style="margin-left: 15px; color: #4b2e05; font-size: 1.1em;">
+                        {{ 'AI Grading Enabled' if ai_grading_enabled else 'AI Grading Disabled' }}
+                    </span>
+                </div>
+                
+                <div class="info-box">
+                    <strong>📝 How AI Grading Works:</strong><br>
+                    When enabled, student answers are evaluated by AI for semantic correctness, not just exact matches. 
+                    This allows for more flexible answers and natural language responses.
+                </div>
+                
+                <button type="submit" class="btn">💾 Update Status</button>
+            </form>
+        </div>
+        
+        <!-- AI Configuration -->
+        <div class="config-section">
+            <h3 style="color: #4b2e05; margin-bottom: 20px;">⚙️ AI Model Configuration</h3>
+            
+            <div class="info-box" style="margin-bottom: 20px;">
+                <strong>Current AI Provider:</strong> {{ 'Google Gemini' if 'gemini' in config.ai_model.lower() else 'OpenAI' if 'gpt' in config.ai_model.lower() else 'Unknown' }}<br>
+                <strong>Current Model:</strong> {{ config.ai_model }}
+            </div>
+            
+            <form method="POST" action="{{ url_for('teacher_update_ai_config') }}">
+                <div class="form-group">
+                    <label for="ai_model">AI Model:</label>
+                    <select id="ai_model" name="ai_model">
+                        <optgroup label="OpenAI Models">
+                            <option value="gpt-3.5-turbo" {{ 'selected' if config.ai_model == 'gpt-3.5-turbo' else '' }}>GPT-3.5 Turbo (Faster, Cost-effective)</option>
+                            <option value="gpt-4" {{ 'selected' if config.ai_model == 'gpt-4' else '' }}>GPT-4 (More Accurate, Higher Cost)</option>
+                        </optgroup>
+                        <optgroup label="Google Gemini Models">
+                            <option value="gemini-1.5-flash" {{ 'selected' if config.ai_model == 'gemini-1.5-flash' else '' }}>Gemini 1.5 Flash (Fastest, Most Cost-effective)</option>
+                            <option value="gemini-1.5-pro" {{ 'selected' if config.ai_model == 'gemini-1.5-pro' else '' }}>Gemini 1.5 Pro (Most Capable)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confidence_threshold">Confidence Threshold (0-100%):</label>
+                    <input type="range" id="confidence_threshold" name="confidence_threshold" 
+                           min="0" max="100" value="{{ config.confidence_threshold or 80 }}"
+                           oninput="document.getElementById('threshold_value').textContent = this.value + '%'">
+                    <div style="text-align: center; margin-top: 5px; font-weight: bold;">
+                        <span id="threshold_value">{{ config.confidence_threshold or 80 }}%</span>
+                    </div>
+                    <small style="color: #333;">Higher values require more certainty for correct answers</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom_prompt">Custom Grading Prompt (Optional):</label>
+                    <textarea id="custom_prompt" name="custom_prompt" 
+                              placeholder="Add specific instructions for the AI grader...">{{ config.custom_prompt or '' }}</textarea>
+                    <small style="color: #333;">Leave empty to use default prompt</small>
+                </div>
+                
+                <button type="submit" class="btn btn-success">💾 Save Configuration</button>
+            </form>
+        </div>
+        
+        <!-- Test AI Grading -->
+        <div class="config-section">
+            <h3 style="color: #4b2e05; margin-bottom: 20px;">🧪 Test AI Grading</h3>
+            
+            <form method="POST" action="{{ url_for('teacher_test_ai_grading') }}">
+                <div class="form-group">
+                    <label for="test_question">Test Question:</label>
+                    <input type="text" id="test_question" name="test_question" 
+                           placeholder="e.g., What command lists files in a directory?" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correct_answer">Expected Answer:</label>
+                    <input type="text" id="correct_answer" name="correct_answer" 
+                           placeholder="e.g., ls" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="student_answer">Student Answer to Test:</label>
+                    <input type="text" id="student_answer" name="student_answer" 
+                           placeholder="e.g., list files" required>
+                </div>
+                
+                <button type="submit" class="btn">🎯 Test AI Grading</button>
+            </form>
+            
+            {% if test_result %}
+            <div class="test-result">
+                <h4 style="color: #4b2e05;">Test Result:</h4>
+                <p><strong>Question:</strong> {{ test_result.question }}</p>
+                <p><strong>Expected:</strong> {{ test_result.expected }}</p>
+                <p><strong>Student Answer:</strong> {{ test_result.student_answer }}</p>
+                <p><strong>AI Decision:</strong> 
+                    {% if test_result.correct %}
+                    <span style="color: #4a7c59;">✅ Correct</span>
+                    {% else %}
+                    <span style="color: #b22222;">❌ Incorrect</span>
+                    {% endif %}
+                </p>
+                <p><strong>Confidence:</strong> {{ test_result.confidence }}%</p>
+                <p><strong>AI Explanation:</strong> {{ test_result.explanation }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- API Key Management -->
+        <div class="config-section">
+            <h3 style="color: #4b2e05; margin-bottom: 20px;">🔑 API Key Management</h3>
+            
+            <div class="info-box">
+                <strong>🔒 Security Note:</strong> API keys should be stored as environment variables or in config.py. 
+                Configure your API key based on your chosen provider (OpenAI or Google Gemini).
+            </div>
+            
+            <p style="color: #4b2e05;">
+                <strong>Current Status:</strong> 
+                {% if api_key_configured %}
+                <span style="color: #4a7c59;">✅ API Key Configured</span>
+                {% else %}
+                <span style="color: #b22222;">❌ API Key Missing</span>
+                {% endif %}
+            </p>
+            
+            {% if not api_key_configured %}
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; color: #333;">
+                <strong>⚠️ Setup Required:</strong><br>
+                <strong>For OpenAI:</strong><br>
+                1. Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a><br>
+                2. Update config.py: <code>OPENAI_API_KEY = "your_key_here"</code><br>
+                3. Set <code>AI_PROVIDER = "openai"</code><br><br>
+                <strong>For Google Gemini:</strong><br>
+                1. Get an API key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a><br>
+                2. Update config.py: <code>GEMINI_API_KEY = "your_key_here"</code><br>
+                3. Set <code>AI_PROVIDER = "gemini"</code><br>
+                4. Restart the application
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

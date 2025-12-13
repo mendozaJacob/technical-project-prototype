@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Dungeons of Knowledge - Feedback</title>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Sound Effects -->
+    <audio id="correctSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/correct.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/correct.wav') }}" type="audio/wav">
+    </audio>
+    <audio id="wrongSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/wrong.mp3') }}" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='sounds/wrong.wav') }}" type="audio/wav">
+    </audio>
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #f3eac2; 
+            margin: 0;
+            padding: 20px;
+        }
+        .feedback-container { 
+            max-width: 700px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 32px 24px 24px 24px; 
+            text-align: center; 
+        }
+        .feedback-title {
+            color: #4b2e05; 
+            font-size: 2em; 
+            font-weight: bold; 
+            background: #fffbe6; 
+            border-radius: 16px; 
+            padding: 18px 0 14px 0; 
+            margin-bottom: 18px;
+        }
+        .feedback-content {
+            color: #4b2e05;
+            background: #fffbe6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            color: #4b2e05;
+            font-weight: bold;
+        }
+        .btn { 
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+    </style>
+</head>
+<body>
+    <div class="feedback-container">
+        <h1 class="feedback-title">📜 Battle Report</h1>
+        
+        <div class="feedback-content">
+            {{ feedback|safe }}
+        </div>
+        
+        <div class="stats">
+            <div>❤️ Player HP: {{ player_hp }}</div>
+            <div>👾 Enemy HP: {{ enemy_hp }}</div>
+            <div>⭐ Score: {{ score }}</div>
+        </div>
+        
+        <a href="{{ url_for('game') }}" class="btn">⚔️ Next Battle</a>
+    </div>
+    
+    <script>
+        // Play sound effect based on feedback content
+        window.addEventListener('DOMContentLoaded', function() {
+            const feedback = "{{ feedback|safe }}";
+            const correctSound = document.getElementById('correctSound');
+            const wrongSound = document.getElementById('wrongSound');
+            
+            // Check if feedback indicates correct or wrong answer
+            if (feedback.includes('🔥') || feedback.includes('🎯') || feedback.includes('✅') || feedback.includes('Triple damage')) {
+                // Correct answer sound
+                if (correctSound) {
+                    correctSound.play().catch(e => console.log('Could not play correct sound:', e));
+                }
+            } else if (feedback.includes('❌') || feedback.includes('Incorrect') || feedback.includes('⏳ Time')) {
+                // Wrong answer or timeout sound
+                if (wrongSound) {
+                    wrongSound.play().catch(e => console.log('Could not play wrong sound:', e));
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Battle: Dungeons of Knowledge - How to Play</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      /* Use the project's gradient background instead of an image */
+      background: linear-gradient(135deg, #2e3d1f 0%, #1a2312 100%);
+      color: #f8e5b3;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .overlay {
+      /* overlay not needed when there's no background image */
+      display: none;
+    }
+
+    h1 {
+      margin-top: 60px;
+      font-size: 2.8em;
+      color: #ffcc66;
+      text-shadow: 2px 2px 10px #8b0000;
+    }
+
+    .scroll-box {
+      max-width: 850px;
+      margin: 40px auto;
+      text-align: left;
+      background: rgba(40, 20, 10, 0.8);
+      padding: 30px 40px;
+      border-radius: 15px;
+      border: 3px solid #b8860b;
+      box-shadow: 0 0 25px #000;
+      
+    }
+
+    ul {
+      list-style-type: "\1F5E1\FE0F "; /* 🗡️ weapon emoji */
+      font-size: 1.2em;
+      line-height: 1.8em;
+      color: #f5deb3;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 30px 15px;
+      padding: 12px 35px;
+      font-size: 1.2em;
+      border: 2px solid #b8860b;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #8b0000, #3b0000);
+      color: #f8e5b3;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 0 10px #000;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: linear-gradient(145deg, #a52a2a, #5a0000);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #ffcc66;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <h1>📜 How to Play</h1>
+
+  <div class="scroll-box">
+    <ul>
+      <li>Each level pits you against a fearsome enemy from the dark realm.</li>
+      <li>Answer each question correctly to deal <strong>damage</strong> to your foe.</li>
+      <li>A wrong answer will cause <strong>you</strong> to lose health instead!</li>
+      <li>Defeat your enemy to advance deeper into the dungeon (10 levels total).</li>
+      <li>Watch your health bar — when it hits 0, your quest ends in defeat!</li>
+      <li>Each enemy taunts you with unique dialogue and reactions.</li>
+      <li>To win, survive all ten duels and claim the title of Champion!</li>
+    </ul>
+  </div>
+
+  {% if is_student %}
+    <a href="{{ url_for('student_dashboard') }}" class="btn">← Back to Student Portal</a>
+    <a href="{{ url_for('select_level') }}" class="btn">⚔️ Begin Battle</a>
+  {% else %}
+    <a href="{{ url_for('index') }}" class="btn">🏰 Return Home</a>
+    <a href="{{ url_for('select_level') }}" class="btn">⚔️ Begin Battle</a>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quiz Battle: Dungeons of Knowledge - Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Search Questions</h1>
+        
+        <!-- Search Form -->
+        <form method="GET" action="{{ url_for('search') }}" style="margin-bottom: 30px;">
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <input type="text" 
+                       name="q" 
+                       value="{{ request.args.get('q', '') }}" 
+                       placeholder="Search by keywords, topics, or question content..." 
+                       style="padding: 10px; font-size: 1.1em; border-radius: 8px; border: 2px solid #4b2e05; width: 400px;">
+                <button type="submit" class="btn">🔍 Search</button>
+            </div>
+            <p style="color: #333; font-size: 0.9em; margin-top: 10px;">
+                💡 Try searching for: "linux", "commands", "users", "networking", "files"
+            </p>
+        </form>
+
+        <!-- Search Results -->
+        {% if request.args.get('q') %}
+            <h2>Search Results for "{{ request.args.get('q') }}"</h2>
+            {% if results %}
+                <div style="text-align: left;">
+                    {% for result in results %}
+                        <div style="background: #fffbe6; border: 2px solid #4b2e05; border-radius: 12px; padding: 20px; margin: 15px 0;">
+                            <div style="font-weight: bold; color: #4b2e05; margin-bottom: 10px;">
+                                📝 Question:
+                            </div>
+                            <div style="font-size: 1.1em; margin-bottom: 15px;">
+                                {{ result['q'] }}
+                            </div>
+                            <div style="font-weight: bold; color: #4b2e05; margin-bottom: 5px;">
+                                ✅ Answer:
+                            </div>
+                            <div style="background: #f0f8ff; padding: 10px; border-radius: 8px; font-family: monospace;">
+                                {{ result['answer'] }}
+                            </div>
+                            {% if result.get('keywords') %}
+                            <div style="margin-top: 10px; font-size: 0.9em; color: #333;">
+                                🏷️ Keywords: {{ result['keywords'] if result['keywords'] is string else ', '.join(result['keywords']) }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; color: #333;">
+                    <strong>No results found for "{{ request.args.get('q') }}"</strong><br>
+                    Try different keywords or check your spelling.
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="background: #e6f3ff; border: 1px solid #b3d9ff; padding: 20px; border-radius: 8px; color: #0066cc;">
+                <strong>🎯 How to use Search:</strong><br>
+                • Search by topic keywords (e.g., "users", "networking")<br>
+                • Search by command names (e.g., "ls", "chmod")<br>
+                • Search by question content<br>
+                • Use this to study specific topics or find answers you're looking for!
+            </div>
+        {% endif %}
+        {% if session.get('is_student') %}
+            <a href="{{ url_for('student_dashboard') }}" class="btn">Back to Student Portal</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn">Back to Home</a>
+        {% endif %}
+    </div>
+</body>
+</html>

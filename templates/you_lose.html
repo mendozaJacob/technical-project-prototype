@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>You Lose</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>💀 Level Failed</h1>
+        <p>Your health dropped to zero! Don't give up - you can try this level again.</p>
+        <p>Level {{ session.get('selected_level', 1) }} Score: <strong>{{ session.get('score', 0) }}</strong></p>
+        <div style="margin-top:20px;">
+            <a href="{{ url_for('game') }}" class="btn btn-primary">🔄 Retry Level {{ session.get('selected_level', 1) }}</a>
+            <a href="{{ url_for('select_level') }}" class="btn">🏰 Back to Level Selection</a>
+            <a href="{{ url_for('index') }}" class="btn">Return to Home</a>
+        </div>
+    </div>
+</body>
+</html>

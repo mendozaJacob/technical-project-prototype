@@ -1,0 +1,14 @@
+This is a test file for AI question generation.
+
+Computer Science Fundamentals:
+- Programming concepts
+- Data structures
+- Algorithms
+- Software development
+
+Topics to cover:
+1. Variables and data types
+2. Control structures (if/else, loops)
+3. Functions and methods
+4. Object-oriented programming
+5. Database concepts

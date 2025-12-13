@@ -4,7 +4,7 @@
 ## 📥 Getting Started with the Executable
 
 ### **Step 1: Download and Run**
-1. **Download** the `QuizBattle_DungeonsOfKnowledge.exe` file (approximately 45-50MB)
+1. **Download** the `QuizBattle_DungeonsOfKnowledge.exe` file (approximately 8MB)
 2. **Extract** if downloaded as a ZIP archive
 3. **Right-click** the executable → **Properties** → **Unblock** (if applicable)
 4. **Double-click** the executable file to launch

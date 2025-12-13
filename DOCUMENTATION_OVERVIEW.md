@@ -35,8 +35,7 @@ docs/
 └── development/               # 🛠️ Development resources
     ├── README.md              # 📖 Folder overview
     ├── IMPLEMENTATION_COMPLETE.md # ✅ Feature specifications
-    ├── SETTINGS_SYSTEM_FIXED.md # ⚙️ Configuration system
-    └── BUILD_SUMMARY.md       # 📦 Latest build information
+    └── SETTINGS_SYSTEM_FIXED.md # ⚙️ Configuration system
 ```
 
 ## 🎯 Documentation by Role

@@ -1328,7 +1328,8 @@ def apply_adaptive_difficulty(base_questions, level_number):
         # Try to get harder questions from higher levels
         try:
             with open("data/levels.json", "r", encoding="utf-8") as f:
-                all_levels = json.load(f)
+                levels_data = json.load(f)
+                all_levels = levels_data.get("levels", [])
             
             harder_questions = []
             for lvl in all_levels:
@@ -1348,7 +1349,8 @@ def apply_adaptive_difficulty(base_questions, level_number):
         # Try to get easier questions from lower levels
         try:
             with open("data/levels.json", "r", encoding="utf-8") as f:
-                all_levels = json.load(f)
+                levels_data = json.load(f)
+                all_levels = levels_data.get("levels", [])
             
             easier_questions = []
             for lvl in all_levels:
@@ -1372,7 +1374,8 @@ def apply_adaptive_difficulty(base_questions, level_number):
 def select_level():
     try:
         with open("data/levels.json", "r", encoding="utf-8") as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get("levels", [])
     except Exception:
         levels = []
     
@@ -1629,7 +1632,8 @@ def game():
     selected_level = session.get('selected_level', 1)
     try:
         with open("data/levels.json", "r", encoding="utf-8") as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get("levels", [])
     except FileNotFoundError:
         return "Error: levels.json file not found."
     except json.JSONDecodeError as e:
@@ -2067,7 +2071,8 @@ def result():
     next_level = session.get('selected_level', 1) + 1
     try:
         with open("data/levels.json", "r", encoding="utf-8") as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get("levels", [])
     except Exception:
         levels = []
     max_level = max([lvl['level'] for lvl in levels], default=1)
@@ -2128,7 +2133,8 @@ def result():
         # If we've unlocked past the maximum level, the player beat the game
         try:
             with open("data/levels.json", "r", encoding="utf-8") as f:
-                levels = json.load(f)
+                levels_data = json.load(f)
+                levels = levels_data.get("levels", [])
         except Exception:
             levels = []
         max_level = max([lvl['level'] for lvl in levels], default=1)
@@ -3678,7 +3684,8 @@ def teacher_add_chapter():
         # Create basic levels for the chapter if none exist
         try:
             with open('data/levels.json', 'r', encoding='utf-8') as f:
-                levels = json.load(f)
+                levels_data = json.load(f)
+                levels = levels_data.get('levels', [])
         except:
             levels = []
         
@@ -3698,9 +3705,18 @@ def teacher_add_chapter():
                 levels_created += 1
         
         if levels_created > 0:
-            # Save updated levels
+            # Save updated levels with proper structure
+            try:
+                with open('data/levels.json', 'r', encoding='utf-8') as f:
+                    levels_data = json.load(f)
+            except:
+                levels_data = {"metadata": {"version": "2.0.0", "last_updated": "2025-12-12", "new_level_threshold_days": 30}, "levels": []}
+            
+            levels_data["levels"] = levels
+            levels_data["metadata"]["last_updated"] = "2025-12-12"
+            
             with open('data/levels.json', 'w', encoding='utf-8') as f:
-                json.dump(levels, f, indent=2, ensure_ascii=False)
+                json.dump(levels_data, f, indent=2, ensure_ascii=False)
         
         # Prepare success message
         success_msg = f'Chapter "{name}" created successfully with {level_range} levels ({start_level}-{start_level + level_range - 1})!'
@@ -3731,7 +3747,8 @@ def teacher_chapters():
     # Load levels for assignment dropdown
     try:
         with open('data/levels.json', 'r', encoding='utf-8') as f:
-            all_levels = json.load(f)
+            levels_data = json.load(f)
+            all_levels = levels_data.get('levels', [])
     except Exception as e:
         all_levels = []
     return render_template('teacher_chapters.html', chapters=chapters, all_levels=all_levels)
@@ -3805,15 +3822,18 @@ def teacher_edit_chapter():
     # Update levels.json
     try:
         with open('data/levels.json', 'r', encoding='utf-8') as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get('levels', [])
         assigned_level_nums = [int(lvl) for lvl in assigned_levels]
         for level in levels:
             if level.get('level') in assigned_level_nums:
                 level['chapter_id'] = chapter_id
             elif 'chapter_id' in level and level['chapter_id'] == chapter_id and level.get('level') not in assigned_level_nums:
                 del level['chapter_id']
+        levels_data['levels'] = levels
+        levels_data['metadata']['last_updated'] = "2025-12-12"
         with open('data/levels.json', 'w', encoding='utf-8') as f:
-            json.dump(levels, f, indent=2, ensure_ascii=False)
+            json.dump(levels_data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         return f'Error updating levels: {str(e)}', 500
 
@@ -4322,7 +4342,8 @@ def teacher_levels():
     # Load levels and enemies
     try:
         with open("data/levels.json", "r", encoding="utf-8") as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get("levels", [])
     except:
         levels = []
 
@@ -4678,7 +4699,8 @@ def teacher_add_level():
         
         # Load existing levels
         with open('data/levels.json', 'r', encoding='utf-8') as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get('levels', [])
         
         # Find the next level number
         next_level = max([level['level'] for level in levels]) + 1
@@ -4695,9 +4717,18 @@ def teacher_add_level():
         
         levels.append(new_level)
         
-        # Save updated levels
+        # Save updated levels with proper structure
+        try:
+            with open('data/levels.json', 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+        except:
+            existing_data = {"metadata": {"version": "2.0.0", "last_updated": "2025-12-12", "new_level_threshold_days": 30}, "levels": []}
+        
+        existing_data["levels"] = levels
+        existing_data["metadata"]["last_updated"] = "2025-12-12"
+        
         with open('data/levels.json', 'w', encoding='utf-8') as f:
-            json.dump(levels, f, indent=2, ensure_ascii=False)
+            json.dump(existing_data, f, indent=2, ensure_ascii=False)
         
         # Automatically generate enemy for the new level
         try:
@@ -4746,7 +4777,8 @@ def teacher_edit_level():
         
         # Load existing levels
         with open('data/levels.json', 'r', encoding='utf-8') as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get('levels', [])
         
         print(f"DEBUG: Loaded {len(levels)} levels")
         
@@ -4766,9 +4798,12 @@ def teacher_edit_level():
             flash(f'Level {level_id} not found!')
             return redirect(url_for('teacher_levels'))
         
-        # Save updated levels
+        # Save updated levels with proper structure
+        levels_data["levels"] = levels
+        levels_data["metadata"]["last_updated"] = "2025-12-12"
+        
         with open('data/levels.json', 'w', encoding='utf-8') as f:
-            json.dump(levels, f, indent=2, ensure_ascii=False)
+            json.dump(levels_data, f, indent=2, ensure_ascii=False)
         
         print(f"DEBUG: Saved levels.json successfully")
         flash(f'Level {level_id} updated successfully with {len(selected_questions)} questions!')
@@ -4783,7 +4818,8 @@ def teacher_get_level(level_id):
     try:
         # Load levels and return specific level data
         with open("data/levels.json", "r", encoding="utf-8") as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get('levels', [])
         
         level = next((l for l in levels if l.get('level') == level_id), None)
         if level:
@@ -4805,7 +4841,8 @@ def teacher_delete_level(level_id):
     try:
         # Load existing levels
         with open(get_resource_path('data/levels.json'), 'r', encoding='utf-8') as f:
-            levels = json.load(f)
+            levels_data = json.load(f)
+            levels = levels_data.get('levels', [])
         
         # Find and remove the level
         original_count = len(levels)
@@ -4814,9 +4851,12 @@ def teacher_delete_level(level_id):
         if len(levels) == original_count:
             return jsonify({'success': False, 'error': f'Level {level_id} not found'})
         
-        # Save updated levels
+        # Save updated levels with proper structure
+        levels_data["levels"] = levels
+        levels_data["metadata"]["last_updated"] = "2025-12-12"
+        
         with open(get_resource_path('data/levels.json'), 'w', encoding='utf-8') as f:
-            json.dump(levels, f, indent=2, ensure_ascii=False)
+            json.dump(levels_data, f, indent=2, ensure_ascii=False)
         
         return jsonify({'success': True, 'message': f'Level {level_id} deleted successfully'})
     except Exception as e:

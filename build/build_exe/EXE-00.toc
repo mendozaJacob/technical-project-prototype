@@ -3,8 +3,7 @@
  False,
  False,
  False,
- 'C:\\flutter\\technical-project-prototype-main - '
- 'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-windowed.ico',
+ 'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-windowed.ico',
  None,
  False,
  False,
@@ -59,140 +58,52 @@
    'Copy\\build\\build_exe\\localpycs\\pyimod04_pywin32.pyc',
    'PYMODULE'),
   ('pyiboot01_bootstrap',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
   ('pyi_rth_inspect',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
-   'PYSOURCE'),
-  ('pyi_rth_pkgutil',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
-   'PYSOURCE'),
-  ('pyi_rth_multiprocessing',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
-   'PYSOURCE'),
-  ('pyi_rth_setuptools',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_setuptools.py',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
    'PYSOURCE'),
   ('app',
    'C:\\flutter\\technical-project-prototype-main - Copy\\app.py',
    'PYSOURCE'),
-  ('python313.dll',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\python313.dll',
+  ('python311.dll',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\python311.dll',
    'BINARY'),
+  ('unicodedata.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\unicodedata.pyd',
+   'EXTENSION'),
   ('select.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\select.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\select.pyd',
    'EXTENSION'),
   ('_socket.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_socket.pyd',
-   'EXTENSION'),
-  ('unicodedata.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\unicodedata.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\_socket.pyd',
    'EXTENSION'),
   ('_lzma.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_lzma.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\_lzma.pyd',
    'EXTENSION'),
   ('_bz2.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_bz2.pyd',
-   'EXTENSION'),
-  ('_overlapped.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_overlapped.pyd',
-   'EXTENSION'),
-  ('_ssl.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_ssl.pyd',
-   'EXTENSION'),
-  ('_queue.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_queue.pyd',
-   'EXTENSION'),
-  ('_ctypes.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_ctypes.pyd',
-   'EXTENSION'),
-  ('_hashlib.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_hashlib.pyd',
-   'EXTENSION'),
-  ('_multiprocessing.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_multiprocessing.pyd',
-   'EXTENSION'),
-  ('pyexpat.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\pyexpat.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\_bz2.pyd',
    'EXTENSION'),
   ('_decimal.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_decimal.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\_decimal.pyd',
    'EXTENSION'),
-  ('_asyncio.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_asyncio.pyd',
+  ('_hashlib.pyd',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\_hashlib.pyd',
    'EXTENSION'),
-  ('_wmi.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_wmi.pyd',
-   'EXTENSION'),
-  ('markupsafe\\_speedups.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe\\_speedups.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('_uuid.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_uuid.pyd',
-   'EXTENSION'),
-  ('_elementtree.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_elementtree.pyd',
-   'EXTENSION'),
-  ('lxml\\sax.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\sax.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('lxml\\objectify.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\objectify.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('lxml\\html\\diff.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\html\\diff.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('lxml\\html\\_difflib.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\html\\_difflib.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('lxml\\builder.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\builder.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('lxml\\_elementpath.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\_elementpath.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('lxml\\etree.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\etree.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('charset_normalizer\\md__mypyc.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\charset_normalizer\\md__mypyc.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('charset_normalizer\\md.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\charset_normalizer\\md.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('pydantic_core\\_pydantic_core.cp313-win_amd64.pyd',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\pydantic_core\\_pydantic_core.cp313-win_amd64.pyd',
-   'EXTENSION'),
-  ('_zoneinfo.pyd',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\_zoneinfo.pyd',
-   'EXTENSION'),
-  ('api-ms-win-crt-stdio-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-stdio-l1-1-0.dll',
-   'BINARY'),
   ('api-ms-win-crt-locale-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-locale-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-crt-math-l1-1-0.dll',
+  ('api-ms-win-crt-time-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-math-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-time-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-crt-environment-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-environment-l1-1-0.dll',
+   'BINARY'),
+  ('VCRUNTIME140.dll',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\VCRUNTIME140.dll',
    'BINARY'),
   ('api-ms-win-crt-convert-l1-1-0.dll',
    'C:\\Program '
@@ -202,59 +113,59 @@
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-conio-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-crt-environment-l1-1-0.dll',
+  ('api-ms-win-crt-stdio-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-environment-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-crt-string-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-string-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-stdio-l1-1-0.dll',
    'BINARY'),
   ('api-ms-win-crt-filesystem-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-filesystem-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-crt-heap-l1-1-0.dll',
+  ('api-ms-win-crt-math-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-heap-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-math-l1-1-0.dll',
    'BINARY'),
-  ('VCRUNTIME140.dll',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\VCRUNTIME140.dll',
-   'BINARY'),
-  ('api-ms-win-crt-time-l1-1-0.dll',
+  ('api-ms-win-crt-string-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-time-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-crt-process-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-process-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-string-l1-1-0.dll',
    'BINARY'),
   ('api-ms-win-crt-runtime-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-runtime-l1-1-0.dll',
    'BINARY'),
-  ('libssl-3.dll',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\libssl-3.dll',
+  ('api-ms-win-crt-process-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-process-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-crt-heap-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-heap-l1-1-0.dll',
    'BINARY'),
   ('libcrypto-3.dll',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\libcrypto-3.dll',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\DLLs\\libcrypto-3.dll',
    'BINARY'),
-  ('libffi-8.dll',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\libffi-8.dll',
+  ('ucrtbase.dll',
+   'C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\ucrtbase.dll',
    'BINARY'),
   ('api-ms-win-crt-utility-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-crt-utility-l1-1-0.dll',
    'BINARY'),
-  ('VCRUNTIME140_1.dll',
-   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\VCRUNTIME140_1.dll',
-   'BINARY'),
-  ('api-ms-win-core-synch-l1-2-0.dll',
+  ('api-ms-win-core-util-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-synch-l1-2-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-util-l1-1-0.dll',
    'BINARY'),
-  ('ucrtbase.dll',
-   'C:\\Program Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\ucrtbase.dll',
+  ('api-ms-win-core-debug-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-debug-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-file-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-file-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-processthreads-l1-1-1.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-processthreads-l1-1-1.dll',
    'BINARY'),
   ('api-ms-win-core-processenvironment-l1-1-0.dll',
    'C:\\Program '
@@ -264,77 +175,41 @@
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-localization-l1-2-0.dll',
    'BINARY'),
-  ('api-ms-win-core-profile-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-profile-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-heap-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-heap-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-sysinfo-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-sysinfo-l1-1-0.dll',
-   'BINARY'),
   ('api-ms-win-core-namedpipe-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-namedpipe-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-timezone-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-timezone-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-string-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-string-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-synch-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-synch-l1-1-0.dll',
    'BINARY'),
   ('api-ms-win-core-errorhandling-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-errorhandling-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-core-rtlsupport-l1-1-0.dll',
+  ('api-ms-win-core-sysinfo-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-rtlsupport-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-sysinfo-l1-1-0.dll',
    'BINARY'),
   ('api-ms-win-core-datetime-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-datetime-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-core-processthreads-l1-1-1.dll',
+  ('api-ms-win-core-string-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-processthreads-l1-1-1.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-string-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-core-interlocked-l1-1-0.dll',
+  ('api-ms-win-core-profile-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-interlocked-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-profile-l1-1-0.dll',
    'BINARY'),
-  ('api-ms-win-core-file-l1-1-0.dll',
+  ('api-ms-win-core-processthreads-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-file-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-memory-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-memory-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-processthreads-l1-1-0.dll',
    'BINARY'),
   ('api-ms-win-core-file-l2-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-file-l2-1-0.dll',
    'BINARY'),
-  ('api-ms-win-core-util-l1-1-0.dll',
+  ('api-ms-win-core-synch-l1-2-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-util-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-libraryloader-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-libraryloader-l1-1-0.dll',
-   'BINARY'),
-  ('api-ms-win-core-processthreads-l1-1-0.dll',
-   'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-processthreads-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-synch-l1-2-0.dll',
    'BINARY'),
   ('api-ms-win-core-handle-l1-1-0.dll',
    'C:\\Program '
@@ -344,13 +219,37 @@
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-file-l1-2-0.dll',
    'BINARY'),
-  ('api-ms-win-core-debug-l1-1-0.dll',
+  ('api-ms-win-core-synch-l1-1-0.dll',
    'C:\\Program '
-   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-debug-l1-1-0.dll',
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-synch-l1-1-0.dll',
    'BINARY'),
   ('api-ms-win-core-console-l1-1-0.dll',
    'C:\\Program '
    'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-console-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-memory-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-memory-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-interlocked-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-interlocked-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-libraryloader-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-libraryloader-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-timezone-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-timezone-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-rtlsupport-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-rtlsupport-l1-1-0.dll',
+   'BINARY'),
+  ('api-ms-win-core-heap-l1-1-0.dll',
+   'C:\\Program '
+   'Files\\Microsoft\\jdk-11.0.16.101-hotspot\\bin\\api-ms-win-core-heap-l1-1-0.dll',
    'BINARY'),
   ('data\\GNED_questions.json',
    'C:\\flutter\\technical-project-prototype-main - '
@@ -398,51 +297,76 @@
   ('data\\students.json',
    'C:\\flutter\\technical-project-prototype-main - Copy\\data\\students.json',
    'DATA'),
-  ('docs\\AI_QUESTION_ASSIGNMENT.md',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\AI_QUESTION_ASSIGNMENT.md',
-   'DATA'),
-  ('docs\\CHAPTER_MANAGEMENT_GUIDE.md',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\CHAPTER_MANAGEMENT_GUIDE.md',
-   'DATA'),
-  ('docs\\CHAPTER_POOL_INTEGRATION.md',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\CHAPTER_POOL_INTEGRATION.md',
-   'DATA'),
-  ('docs\\DOCUMENTATION.md',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\DOCUMENTATION.md',
-   'DATA'),
-  ('docs\\IMPLEMENTATION_COMPLETE.md',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\IMPLEMENTATION_COMPLETE.md',
-   'DATA'),
   ('docs\\INDEX.md',
    'C:\\flutter\\technical-project-prototype-main - Copy\\docs\\INDEX.md',
    'DATA'),
-  ('docs\\JSON_REFERENCE.md',
+  ('docs\\development\\BUILD_SUMMARY.md',
    'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\JSON_REFERENCE.md',
+   'Copy\\docs\\development\\BUILD_SUMMARY.md',
    'DATA'),
-  ('docs\\QUICK_GUIDE.md',
-   'C:\\flutter\\technical-project-prototype-main - Copy\\docs\\QUICK_GUIDE.md',
-   'DATA'),
-  ('docs\\REAL_TIME_MONITORING.md',
+  ('docs\\development\\IMPLEMENTATION_COMPLETE.md',
    'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\REAL_TIME_MONITORING.md',
+   'Copy\\docs\\development\\IMPLEMENTATION_COMPLETE.md',
    'DATA'),
-  ('docs\\SETTINGS_SYSTEM_FIXED.md',
+  ('docs\\development\\README.md',
    'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\SETTINGS_SYSTEM_FIXED.md',
+   'Copy\\docs\\development\\README.md',
    'DATA'),
-  ('docs\\TEACHER_PORTAL_README.md',
+  ('docs\\development\\SETTINGS_SYSTEM_FIXED.md',
    'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\TEACHER_PORTAL_README.md',
+   'Copy\\docs\\development\\SETTINGS_SYSTEM_FIXED.md',
    'DATA'),
-  ('docs\\TEACHER_SETUP.md',
+  ('docs\\teacher-guides\\AI_QUESTION_ASSIGNMENT.md',
    'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\docs\\TEACHER_SETUP.md',
+   'Copy\\docs\\teacher-guides\\AI_QUESTION_ASSIGNMENT.md',
+   'DATA'),
+  ('docs\\teacher-guides\\CHAPTER_MANAGEMENT_GUIDE.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\teacher-guides\\CHAPTER_MANAGEMENT_GUIDE.md',
+   'DATA'),
+  ('docs\\teacher-guides\\README.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\teacher-guides\\README.md',
+   'DATA'),
+  ('docs\\teacher-guides\\REAL_TIME_MONITORING.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\teacher-guides\\REAL_TIME_MONITORING.md',
+   'DATA'),
+  ('docs\\teacher-guides\\TEACHER_PORTAL_README.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\teacher-guides\\TEACHER_PORTAL_README.md',
+   'DATA'),
+  ('docs\\teacher-guides\\TEACHER_SETUP.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\teacher-guides\\TEACHER_SETUP.md',
+   'DATA'),
+  ('docs\\technical\\CHAPTER_POOL_INTEGRATION.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\technical\\CHAPTER_POOL_INTEGRATION.md',
+   'DATA'),
+  ('docs\\technical\\DOCUMENTATION.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\technical\\DOCUMENTATION.md',
+   'DATA'),
+  ('docs\\technical\\JSON_REFERENCE.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\technical\\JSON_REFERENCE.md',
+   'DATA'),
+  ('docs\\technical\\README.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\technical\\README.md',
+   'DATA'),
+  ('docs\\user-guides\\QUICK_GUIDE.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\user-guides\\QUICK_GUIDE.md',
+   'DATA'),
+  ('docs\\user-guides\\README.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\user-guides\\README.md',
+   'DATA'),
+  ('docs\\user-guides\\USER_GUIDE.md',
+   'C:\\flutter\\technical-project-prototype-main - '
+   'Copy\\docs\\user-guides\\USER_GUIDE.md',
    'DATA'),
   ('static\\characters\\character1.png',
    'C:\\flutter\\technical-project-prototype-main - '
@@ -717,271 +641,6 @@
    'C:\\flutter\\technical-project-prototype-main - '
    'Copy\\uploads\\test_content.txt',
    'DATA'),
-  ('Markdown-3.5.1.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\METADATA',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\top_level.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\top_level.txt',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\RECORD',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\REQUESTED',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\REQUESTED',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\LICENSE.md',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\LICENSE.md',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\WHEEL',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\entry_points.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\entry_points.txt',
-   'DATA'),
-  ('Markdown-3.5.1.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\Markdown-3.5.1.dist-info\\INSTALLER',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\METADATA',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\LICENSE',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\LICENSE',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\REQUESTED',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\REQUESTED',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\INSTALLER',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\top_level.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\top_level.txt',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\RECORD',
-   'DATA'),
-  ('setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\importlib_metadata-8.0.0.dist-info\\WHEEL',
-   'DATA'),
-  ('setuptools\\_vendor\\jaraco\\text\\Lorem ipsum.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\setuptools\\_vendor\\jaraco\\text\\Lorem '
-   'ipsum.txt',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\RNG2Schtrn.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\RNG2Schtrn.xsl',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_schematron_skeleton_for_xslt1.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_schematron_skeleton_for_xslt1.xsl',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_schematron_message.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_schematron_message.xsl',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_abstract_expand.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_abstract_expand.xsl',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\rng\\iso-schematron.rng',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\rng\\iso-schematron.rng',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_svrl_for_xslt1.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_svrl_for_xslt1.xsl',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\readme.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\readme.txt',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\XSD2Schtrn.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\XSD2Schtrn.xsl',
-   'DATA'),
-  ('lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_dsdl_include.xsl',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\lxml\\isoschematron\\resources\\xsl\\iso-schematron-xslt1\\iso_dsdl_include.xsl',
-   'DATA'),
-  ('certifi\\cacert.pem',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\certifi\\cacert.pem',
-   'DATA'),
-  ('certifi\\py.typed',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\certifi\\py.typed',
-   'DATA'),
-  ('docx\\templates\\default.docx',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\docx\\templates\\default.docx',
-   'DATA'),
-  ('docx\\templates\\default-styles.xml',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\docx\\templates\\default-styles.xml',
-   'DATA'),
-  ('docx\\templates\\default-settings.xml',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\docx\\templates\\default-settings.xml',
-   'DATA'),
-  ('docx\\templates\\default-footer.xml',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\docx\\templates\\default-footer.xml',
-   'DATA'),
-  ('docx\\templates\\default-header.xml',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\docx\\templates\\default-header.xml',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\REQUESTED',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\REQUESTED',
-   'DATA'),
-  ('werkzeug-2.3.7.dist-info\\LICENSE.rst',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\werkzeug-2.3.7.dist-info\\LICENSE.rst',
-   'DATA'),
-  ('markupsafe-3.0.3.dist-info\\top_level.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\top_level.txt',
-   'DATA'),
-  ('pydantic-2.12.5.dist-info\\licenses\\LICENSE',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\pydantic-2.12.5.dist-info\\licenses\\LICENSE',
-   'DATA'),
-  ('markupsafe-3.0.3.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\INSTALLER',
-   'DATA'),
-  ('werkzeug-2.3.7.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\werkzeug-2.3.7.dist-info\\METADATA',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\RECORD',
-   'DATA'),
-  ('werkzeug-2.3.7.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\werkzeug-2.3.7.dist-info\\INSTALLER',
-   'DATA'),
-  ('click-8.3.1.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\click-8.3.1.dist-info\\INSTALLER',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\LICENSE.rst',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\LICENSE.rst',
-   'DATA'),
-  ('markupsafe-3.0.3.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\RECORD',
-   'DATA'),
-  ('markupsafe-3.0.3.dist-info\\licenses\\LICENSE.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\licenses\\LICENSE.txt',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\WHEEL',
-   'DATA'),
-  ('click-8.3.1.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\click-8.3.1.dist-info\\METADATA',
-   'DATA'),
-  ('click-8.3.1.dist-info\\licenses\\LICENSE.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\click-8.3.1.dist-info\\licenses\\LICENSE.txt',
-   'DATA'),
-  ('pydantic-2.12.5.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\pydantic-2.12.5.dist-info\\METADATA',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\INSTALLER',
-   'DATA'),
-  ('werkzeug-2.3.7.dist-info\\REQUESTED',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\werkzeug-2.3.7.dist-info\\REQUESTED',
-   'DATA'),
-  ('pydantic-2.12.5.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\pydantic-2.12.5.dist-info\\INSTALLER',
-   'DATA'),
-  ('click-8.3.1.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\click-8.3.1.dist-info\\WHEEL',
-   'DATA'),
-  ('itsdangerous-2.2.0.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\itsdangerous-2.2.0.dist-info\\METADATA',
-   'DATA'),
-  ('itsdangerous-2.2.0.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\itsdangerous-2.2.0.dist-info\\RECORD',
-   'DATA'),
-  ('itsdangerous-2.2.0.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\itsdangerous-2.2.0.dist-info\\WHEEL',
-   'DATA'),
-  ('werkzeug-2.3.7.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\werkzeug-2.3.7.dist-info\\RECORD',
-   'DATA'),
-  ('werkzeug-2.3.7.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\werkzeug-2.3.7.dist-info\\WHEEL',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\METADATA',
-   'DATA'),
-  ('click-8.3.1.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\click-8.3.1.dist-info\\RECORD',
-   'DATA'),
-  ('flask-2.3.3.dist-info\\entry_points.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\flask-2.3.3.dist-info\\entry_points.txt',
-   'DATA'),
-  ('markupsafe-3.0.3.dist-info\\METADATA',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\METADATA',
-   'DATA'),
-  ('pydantic-2.12.5.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\pydantic-2.12.5.dist-info\\WHEEL',
-   'DATA'),
-  ('pydantic-2.12.5.dist-info\\RECORD',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\pydantic-2.12.5.dist-info\\RECORD',
-   'DATA'),
-  ('itsdangerous-2.2.0.dist-info\\LICENSE.txt',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\itsdangerous-2.2.0.dist-info\\LICENSE.txt',
-   'DATA'),
-  ('markupsafe-3.0.3.dist-info\\WHEEL',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\markupsafe-3.0.3.dist-info\\WHEEL',
-   'DATA'),
-  ('itsdangerous-2.2.0.dist-info\\INSTALLER',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\itsdangerous-2.2.0.dist-info\\INSTALLER',
-   'DATA'),
   ('base_library.zip',
    'C:\\flutter\\technical-project-prototype-main - '
    'Copy\\build\\build_exe\\base_library.zip',
@@ -989,9 +648,8 @@
  [],
  False,
  False,
- 1765593829,
+ 1765598203,
  [('runw.exe',
-   'C:\\flutter\\technical-project-prototype-main - '
-   'Copy\\.venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
+   'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')],
- 'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python313\\python313.dll')
+ 'C:\\Users\\vclim\\AppData\\Local\\Programs\\Python\\Python311\\python311.dll')

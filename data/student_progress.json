@@ -1,0 +1,58 @@
+{
+  "0001": {
+    "games_played": 4,
+    "total_score": 200,
+    "best_score": 115,
+    "levels_completed": [
+      1
+    ],
+    "game_history": [
+      {
+        "date": "2025-11-18T13:09:40.658273",
+        "game_type": "test_yourself",
+        "level": null,
+        "score": 0,
+        "correct_answers": 0,
+        "total_questions": 0,
+        "time_taken": 7.152557373046875e-07,
+        "accuracy": 0
+      },
+      {
+        "date": "2025-11-18T14:04:47.466154",
+        "game_type": "adventure_mode",
+        "level": 1,
+        "score": 85,
+        "correct_answers": 6,
+        "total_questions": 6,
+        "time_taken": 130.9303879737854,
+        "accuracy": 100.0
+      },
+      {
+        "date": "2025-11-21T22:38:47.619751",
+        "game_type": "test_yourself",
+        "level": null,
+        "score": 0,
+        "correct_answers": 0,
+        "total_questions": 40,
+        "time_taken": 6.1545233726501465,
+        "accuracy": 0.0
+      },
+      {
+        "date": "2025-12-04T13:34:46.770675",
+        "game_type": "adventure_mode",
+        "level": 1,
+        "score": 115,
+        "correct_answers": 7,
+        "total_questions": 10,
+        "time_taken": 98.05375599861145,
+        "accuracy": 70.0
+      }
+    ],
+    "stats": {
+      "total_correct": 13,
+      "total_questions": 56,
+      "average_accuracy": 23.21,
+      "total_time": 235.13866806030273
+    }
+  }
+}

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter Management</title>
+    <style>
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            background: #2e3d1f; 
+            color: #333; 
+            margin: 0;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 20px auto; 
+            background: #f3eac2; 
+            border: 6px solid #4b2e05; 
+            border-radius: 24px; 
+            box-shadow: 0 0 24px #0008; 
+            padding: 40px; 
+        }
+        .page-title {
+            color: #4b2e05; 
+            font-size: 2.5em; 
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .page-subtitle {
+            text-align: center;
+            color: #6d4106;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .btn {
+            font-family: 'Times New Roman', Times, serif;
+            background: #4b2e05;
+            color: #f3eac2;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #6d4106;
+        }
+        .btn-success {
+            background: #4a7c59;
+        }
+        .btn-success:hover {
+            background: #5a8c69;
+        }
+        .btn-danger {
+            background: #c0392b;
+        }
+        .btn-danger:hover {
+            background: #e74c3c;
+        }
+        .chapters-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fffbe6;
+            border: 3px solid #4b2e05;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .chapters-table th {
+            background: #4b2e05;
+            color: #f3eac2;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .chapters-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            color: #4b2e05;
+        }
+        .chapters-table tr:hover {
+            background: #fff8dc;
+        }
+        .lock-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .locked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .unlocked {
+            background: #d4edda;
+            color: #155724;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            overflow-y: auto;
+        }
+        .modal-content {
+            background-color: #f3eac2;
+            margin: 30px auto;
+            padding: 40px;
+            border: 6px solid #4b2e05;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            color: #4b2e05;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .close {
+            color: #4b2e05;
+            float: right;
+            font-size: 36px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+        .close:hover {
+            color: #6d4106;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: #4b2e05;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4b2e05;
+            border-radius: 8px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1em;
+            background: #fffbe6;
+            color: #4b2e05;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .questions-selector {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #4b2e05;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fffbe6;
+        }
+        .question-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .question-item:hover {
+            background: #fff8dc;
+        }
+        .question-item label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            font-weight: normal;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #155724;
+            color: #155724;
+        }
+        .alert-error {
+            background: #f8d7da;
+            border: 2px solid #721c24;
+            color: #721c24;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .lock-toggle {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 2px;
+            font-size: 0.9em;
+        }
+        .lock-toggle:hover {
+            opacity: 0.8;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6d4106;
+        }
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">📚 Chapter Management</h1>
+        <p class="page-subtitle">Organize questions into chapters for Test Yourself and Level Mode</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="header-controls">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn">⬅️ Back to Dashboard</a>
+            <button onclick="openAddModal()" class="btn btn-success">➕ Add New Chapter</button>
+        </div>
+
+        {% if chapters %}
+        <table class="chapters-table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Chapter Name</th>
+                    <th>Description</th>
+                    <th>Questions</th>
+                    <th>Test Yourself</th>
+                    <th>Level Mode</th>
+                    <th>Endless Mode</th>
+                    <th>Level Range</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chapter in chapters %}
+                <tr>
+                    <td>{{ chapter.order }}</td>
+                    <td><strong>{{ chapter.name }}</strong></td>
+                    <td>{{ chapter.description[:50] }}{% if chapter.description|length > 50 %}...{% endif %}</td>
+                    <td>{{ chapter.question_ids|length }} questions</td>
+                    <td>
+                        <span class="lock-toggle {% if chapter.locked_test_yourself %}locked{% else %}unlocked{% endif %}" 
+                              onclick="toggleLock({{ chapter.id }}, 'test_yourself')">
+                            {% if chapter.locked_test_yourself %}🔒 Locked{% else %}🔓 Unlocked{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="lock-toggle {% if chapter.locked_level_mode %}locked{% else %}unlocked{% endif %}" 
+                              onclick="toggleLock({{ chapter.id }}, 'level_mode')">
+                            {% if chapter.locked_level_mode %}🔒 Locked{% else %}🔓 Unlocked{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="lock-toggle {% if chapter.locked_endless_mode %}locked{% else %}unlocked{% endif %}" 
+                              onclick="toggleLock({{ chapter.id }}, 'endless_mode')">
+                            {% if chapter.locked_endless_mode %}🔒 Locked{% else %}🔓 Unlocked{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if chapter.level_range %}
+                            Levels {{ chapter.level_range|join(', ') }}
+                        {% else %}
+                            <em>Not specified</em>
+                        {% endif %}
+                    </td>
+                    <td class="action-buttons">
+                        <button onclick="openAIArrangeModal({{ chapter.id }})" class="btn" style="padding: 6px 12px; font-size: 0.9em; background: #6a4c93;">🤖 AI Arrange</button>
+                        <button onclick="openEditModal({{ chapter.id }})" class="btn" style="padding: 6px 12px; font-size: 0.9em;">✏️ Edit</button>
+                        <form action="{{ url_for('teacher_delete_chapter', chapter_id=chapter.id) }}" method="POST" style="display: inline;" 
+                              onsubmit="return confirm('Are you sure you want to delete this chapter?')">
+                            <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.9em;">🗑️ Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📖</div>
+            <h2>No Chapters Yet</h2>
+            <p>Create your first chapter to organize questions for students!</p>
+            <button onclick="openAddModal()" class="btn btn-success">➕ Create First Chapter</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Add Chapter Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddModal()">&times;</span>
+            <h2 class="modal-header">Add New Chapter</h2>
+            <form action="{{ url_for('teacher_add_chapter') }}" method="POST">
+                <div class="form-group">
+                    <label for="name">Chapter Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="order">Display Order</label>
+                    <input type="number" id="order" name="order" value="{{ chapters|length + 1 }}" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Lock Status</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="locked_test_yourself" name="locked_test_yourself">
+                        <label for="locked_test_yourself" style="font-weight: normal; margin: 0;">Lock for Test Yourself mode</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="locked_level_mode" name="locked_level_mode">
+                        <label for="locked_level_mode" style="font-weight: normal; margin: 0;">Lock for Level mode</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="locked_endless_mode" name="locked_endless_mode">
+                        <label for="locked_endless_mode" style="font-weight: normal; margin: 0;">Lock for Endless mode</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="level_range">Number of Levels</label>
+                    <input type="number" id="level_range" name="level_range" placeholder="e.g., 10" min="1" max="50" value="10">
+                    <small style="color: #6d4106;">Enter a number (e.g., 10 creates levels 1-10)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign Questions</label>
+                    <div class="questions-selector">
+                        {% for question in all_questions %}
+                        <div class="question-item">
+                            <label>
+                                <input type="checkbox" name="question_ids" value="{{ question.id }}">
+                                <span><strong>Q{{ question.id }}:</strong> {{ question.q[:80] }}{% if question.q|length > 80 %}...{% endif %}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn btn-success">➕ Create Chapter</button>
+                    <button type="button" onclick="closeAddModal()" class="btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Chapter Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2 class="modal-header">Edit Chapter</h2>
+            <form action="{{ url_for('teacher_edit_chapter') }}" method="POST" id="editForm">
+                <input type="hidden" id="edit_chapter_id" name="chapter_id">
+                
+                <div class="form-group">
+                    <label for="edit_name">Chapter Name *</label>
+                    <input type="text" id="edit_name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit_description">Description</label>
+                    <textarea id="edit_description" name="description"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit_order">Display Order</label>
+                    <input type="number" id="edit_order" name="order" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Lock Status</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="edit_locked_test_yourself" name="locked_test_yourself">
+                        <label for="edit_locked_test_yourself" style="font-weight: normal; margin: 0;">Lock for Test Yourself mode</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="edit_locked_level_mode" name="locked_level_mode">
+                        <label for="edit_locked_level_mode" style="font-weight: normal; margin: 0;">Lock for Level mode</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="edit_locked_endless_mode" name="locked_endless_mode">
+                        <label for="edit_locked_endless_mode" style="font-weight: normal; margin: 0;">Lock for Endless mode</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_level_range">Number of Levels</label>
+                    <input type="number" id="edit_level_range" name="level_range" placeholder="e.g., 10" min="1" max="50">
+                    <small style="color: #6d4106;">Enter a number (e.g., 10 creates levels 1-10)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign Questions</label>
+                    <div class="questions-selector" id="editQuestionsSelector">
+                        {% for question in all_questions %}
+                        <div class="question-item">
+                            <label>
+                                <input type="checkbox" name="question_ids" value="{{ question.id }}" class="edit-question-checkbox">
+                                <span><strong>Q{{ question.id }}:</strong> {{ question.q[:80] }}{% if question.q|length > 80 %}...{% endif %}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn btn-success">💾 Save Changes</button>
+                    <button type="button" onclick="closeEditModal()" class="btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI Arrange Modal -->
+    <div id="aiArrangeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAIArrangeModal()">&times;</span>
+            <h2 class="modal-header">🤖 AI Question Arrangement</h2>
+            
+            <div style="margin-bottom: 25px;">
+                <p style="color: #6d4106; font-size: 1.1em;">Let AI intelligently arrange questions across 10 levels based on your chosen strategy.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="ai_strategy">Arrangement Strategy</label>
+                <select id="ai_strategy" style="width: 100%; padding: 12px; border: 2px solid #4b2e05; border-radius: 8px; font-family: 'Times New Roman', Times, serif; font-size: 1em; background: #fffbe6;">
+                    <option value="difficulty">📊 By Difficulty (Easiest → Hardest)</option>
+                    <option value="topic">📚 By Topic (Grouped by Subject)</option>
+                    <option value="learning_path">🎯 Learning Path (Progressive Knowledge Building)</option>
+                    <option value="balanced">⚖️ Balanced Mix (Varied difficulty & topics per level)</option>
+                </select>
+                <div style="margin-top: 10px; padding: 12px; background: #fff8dc; border: 1px solid #b8860b; border-radius: 6px;">
+                    <strong style="color: #4b2e05;">Strategy Details:</strong>
+                    <ul style="color: #6d4106; margin: 10px 0; padding-left: 20px;">
+                        <li><strong>Difficulty:</strong> Questions arranged from easiest to hardest across all 10 levels</li>
+                        <li><strong>Topic:</strong> Similar subjects grouped together, progressing through different topics</li>
+                        <li><strong>Learning Path:</strong> AI creates optimal learning sequence with foundational → advanced concepts</li>
+                        <li><strong>Balanced:</strong> Each level gets a mix of difficulties and topics for variety</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="ai_progress" style="display: none; text-align: center; margin: 25px 0;">
+                <div style="font-size: 2em; margin-bottom: 15px;">🤖</div>
+                <div style="color: #6d4106; font-size: 1.2em;">AI is analyzing questions...</div>
+                <div style="margin-top: 10px; color: #888; font-style: italic;">This may take 10-30 seconds</div>
+            </div>
+
+            <div id="ai_preview" style="display: none; max-height: 400px; overflow-y: auto; margin: 20px 0; padding: 15px; background: #fffbe6; border: 2px solid #4b2e05; border-radius: 8px;">
+                <h3 style="color: #4b2e05; margin-bottom: 15px;">📋 Preview: Questions per Level</h3>
+                <div id="ai_preview_content"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button id="ai_arrange_btn" onclick="runAIArrangement()" class="btn" style="background: #6a4c93; padding: 12px 30px;">🤖 Arrange with AI</button>
+                <button id="ai_apply_btn" onclick="applyAIArrangement()" class="btn btn-success" style="display: none; padding: 12px 30px;">✅ Apply Arrangement</button>
+                <button type="button" onclick="closeAIArrangeModal()" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'block';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        function openEditModal(chapterId) {
+            fetch(`/teacher/get-chapter/${chapterId}`)
+                .then(response => response.json())
+                .then(chapter => {
+                    document.getElementById('edit_chapter_id').value = chapter.id;
+                    document.getElementById('edit_name').value = chapter.name;
+                    document.getElementById('edit_description').value = chapter.description;
+                    document.getElementById('edit_order').value = chapter.order;
+                    document.getElementById('edit_locked_test_yourself').checked = chapter.locked_test_yourself;
+                    document.getElementById('edit_locked_level_mode').checked = chapter.locked_level_mode;
+                    document.getElementById('edit_locked_endless_mode').checked = chapter.locked_endless_mode || false;
+                    // Set number of levels (max value in level_range)
+                    const levelRange = chapter.level_range || [];
+                    document.getElementById('edit_level_range').value = levelRange.length > 0 ? Math.max(...levelRange) : 10;
+                    
+                    // Set question checkboxes
+                    const questionIds = new Set(chapter.question_ids || []);
+                    document.querySelectorAll('.edit-question-checkbox').forEach(checkbox => {
+                        checkbox.checked = questionIds.has(parseInt(checkbox.value));
+                    });
+                    
+                    document.getElementById('editModal').style.display = 'block';
+                })
+                .catch(error => {
+                    alert('Error loading chapter data: ' + error);
+                });
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        let currentChapterForAI = null;
+        let aiArrangementResult = null;
+
+        function openAIArrangeModal(chapterId) {
+            currentChapterForAI = chapterId;
+            document.getElementById('ai_progress').style.display = 'none';
+            document.getElementById('ai_preview').style.display = 'none';
+            document.getElementById('ai_arrange_btn').style.display = 'inline-block';
+            document.getElementById('ai_apply_btn').style.display = 'none';
+            document.getElementById('aiArrangeModal').style.display = 'block';
+        }
+
+        function closeAIArrangeModal() {
+            document.getElementById('aiArrangeModal').style.display = 'none';
+            currentChapterForAI = null;
+            aiArrangementResult = null;
+        }
+
+        function runAIArrangement() {
+            if (!currentChapterForAI) return;
+
+            // Get chapter data first
+            fetch(`/teacher/get-chapter/${currentChapterForAI}`)
+                .then(response => response.json())
+                .then(chapter => {
+                    const questionIds = chapter.question_ids || [];
+                    
+                    if (questionIds.length === 0) {
+                        alert('This chapter has no questions assigned. Please add questions first.');
+                        return;
+                    }
+
+                    const strategy = document.getElementById('ai_strategy').value;
+                    
+                    // Show progress
+                    document.getElementById('ai_arrange_btn').style.display = 'none';
+                    document.getElementById('ai_progress').style.display = 'block';
+                    document.getElementById('ai_preview').style.display = 'none';
+
+                    // Call AI arrangement API
+                    fetch('/teacher/ai-arrange-questions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            question_ids: questionIds,
+                            strategy: strategy
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('ai_progress').style.display = 'none';
+                        
+                        if (data.success) {
+                            aiArrangementResult = data;
+                            displayAIPreview(data);
+                            document.getElementById('ai_apply_btn').style.display = 'inline-block';
+                        } else {
+                            alert('AI arrangement failed: ' + (data.error || 'Unknown error'));
+                            document.getElementById('ai_arrange_btn').style.display = 'inline-block';
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('ai_progress').style.display = 'none';
+                        document.getElementById('ai_arrange_btn').style.display = 'inline-block';
+                        alert('Error running AI arrangement: ' + error);
+                    });
+                })
+                .catch(error => {
+                    alert('Error loading chapter: ' + error);
+                });
+        }
+
+        function displayAIPreview(data) {
+            const levels = data.levels || [];
+            const strategy = data.strategy || 'unknown';
+            
+            let html = `<div style="margin-bottom: 15px; padding: 12px; background: #d4edda; border: 2px solid #155724; border-radius: 8px; color: #155724;">
+                <strong>✅ AI Arrangement Complete!</strong><br>
+                Strategy: <strong>${strategy.charAt(0).toUpperCase() + strategy.slice(1).replace('_', ' ')}</strong><br>
+                Total Questions: <strong>${data.total_questions}</strong>
+            </div>`;
+
+            levels.forEach((level, index) => {
+                const questionCount = level.question_ids ? level.question_ids.length : 0;
+                html += `
+                    <div style="margin-bottom: 12px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 6px;">
+                        <strong style="color: #4b2e05;">Level ${level.level}:</strong> 
+                        <span style="color: #6d4106;">${questionCount} questions</span>
+                        <span style="color: #888; font-size: 0.9em;"> (IDs: ${(level.question_ids || []).join(', ')})</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('ai_preview_content').innerHTML = html;
+            document.getElementById('ai_preview').style.display = 'block';
+        }
+
+        function applyAIArrangement() {
+            if (!aiArrangementResult || !currentChapterForAI) {
+                alert('No AI arrangement to apply');
+                return;
+            }
+
+            if (!confirm('Apply this AI arrangement? This will update the level questions.')) {
+                return;
+            }
+
+            fetch('/teacher/apply-ai-arrangement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chapter_id: currentChapterForAI,
+                    levels: aiArrangementResult.levels
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ AI arrangement applied successfully! Questions have been organized across levels.');
+                    location.reload();
+                } else {
+                    alert('Error applying arrangement: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        }
+
+        function toggleLock(chapterId, mode) {
+            fetch('/teacher/toggle-chapter-lock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `chapter_id=${chapterId}&mode=${mode}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error toggling lock: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addModal');
+            const editModal = document.getElementById('editModal');
+            const aiModal = document.getElementById('aiArrangeModal');
+            if (event.target == addModal) {
+                closeAddModal();
+            }
+            if (event.target == editModal) {
+                closeEditModal();
+            }
+            if (event.target == aiModal) {
+                closeAIArrangeModal();
+            }
+        }
+    </script>
+</body>
+</html>

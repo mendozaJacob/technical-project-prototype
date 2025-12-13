@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Battle: Dungeons of Knowledge - Credits</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #1a0033 0%, #4a0080 50%, #1a0033 100%);
+            color: #f8e5b3;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .credits-container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(75, 46, 5, 0.95);
+            border: 6px solid #ffd700;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+            text-align: center;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .credits-title {
+            font-size: 3em;
+            color: #ffd700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 10px #ffd700; }
+            to { text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 30px #ffd700, 0 0 40px #ffd700; }
+        }
+        
+        .congratulations {
+            font-size: 1.8em;
+            color: #f3eac2;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .stats-box {
+            background: rgba(243, 234, 194, 0.2);
+            border: 3px solid #ffd700;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            font-size: 1.3em;
+            margin: 10px 0;
+            color: #f8e5b3;
+        }
+        
+        .stat-label {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .credits-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(243, 234, 194, 0.1);
+            border-radius: 12px;
+        }
+        
+        .credits-heading {
+            font-size: 2em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .credits-text {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #f3eac2;
+            margin: 15px 0;
+        }
+        
+        .credit-role {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .credit-name {
+            color: #f8e5b3;
+            font-size: 1.2em;
+        }
+        
+        .special-thanks {
+            font-size: 1.5em;
+            color: #ffd700;
+            margin: 30px 0 15px 0;
+            font-weight: bold;
+        }
+        
+        .thank-you-message {
+            font-size: 1.4em;
+            color: #f3eac2;
+            margin: 30px 0;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #4b2e05;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+        
+        .btn-group {
+            margin-top: 40px;
+        }
+        
+        .trophy {
+            font-size: 5em;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @media (max-width: 768px) {
+            .credits-container {
+                padding: 20px;
+            }
+            .credits-title {
+                font-size: 2em;
+            }
+            .congratulations {
+                font-size: 1.3em;
+            }
+            .credits-text {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="credits-container">
+        <div class="trophy">🏆</div>
+        
+        <h1 class="credits-title">CONGRATULATIONS!</h1>
+        
+        <p class="congratulations">
+            You have conquered all 10 levels of the Dungeons of Knowledge!
+        </p>
+        
+        <div class="stats-box">
+            <div class="stat-item">
+                <span class="stat-label">Final Score:</span> {{ final_score }}
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Correct Answers:</span> {{ correct_answers }} ✅
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Wrong Answers:</span> {{ wrong_answers }} ❌
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Total Time:</span> {{ total_time }}s ⏱️
+            </div>
+        </div>
+        
+        <div class="credits-section">
+            <h2 class="credits-heading">⚔️ GAME CREDITS ⚔️</h2>
+            
+            <div class="credits-text">
+                <div class="credit-role">Game Design & Development:</div>
+                <div class="credit-name">Jacob Mendoza</div>
+            </div>
+            
+            <div class="credits-text">
+                <div class="credit-role">Project Lead:</div>
+                <div class="credit-name">Development Team</div>
+            </div>
+            
+            <div class="credits-text">
+                <div class="credit-role">Question Database:</div>
+                <div class="credit-name">Educational Content Team</div>
+            </div>
+            
+            <div class="credits-text">
+                <div class="credit-role">Game Mechanics:</div>
+                <div class="credit-name">Flask & Python Framework</div>
+            </div>
+            
+            <p class="special-thanks">✨ Special Thanks ✨</p>
+            
+            <div class="credits-text">
+                To all the teachers, students, and players<br>
+                who made this educational adventure possible!
+            </div>
+            
+            <p class="thank-you-message">
+                Thank you for playing Quiz Battle: Dungeons of Knowledge!<br>
+                Your dedication to learning has been truly inspiring.
+            </p>
+        </div>
+        
+        <div class="btn-group">
+            {% if is_student %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn">
+                    📊 Back to Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn">
+                    🏰 Back to Home
+                </a>
+            {% endif %}
+            
+            <a href="{{ url_for('leaderboard') }}" class="btn">
+                🏆 View Leaderboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

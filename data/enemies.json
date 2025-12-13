@@ -1,0 +1,162 @@
+[
+  {
+    "level": 1,
+    "name": "Novice Gnome",
+    "avatar": "🧙‍♂️",
+    "taunt": "Let's see if you even know what 'ls' does!",
+    "image": "enemies/novice_gnome.jpg",
+    "range": "Q1–Q10"
+  },
+  {
+    "level": 2,
+    "name": "Apprentice Admin",
+    "avatar": "👨‍💻",
+    "taunt": "You've mastered the basics… but can you handle users and groups?",
+    "image": "enemies/apprentice.jpg",
+    "range": "Q11–Q20"
+  },
+  {
+    "level": 3,
+    "name": "Daemon Scribe",
+    "avatar": "👾",
+    "taunt": "Services and mounts are my domain. Tread carefully.",
+    "image": "enemies/daemon.jpg",
+    "range": "Q21–Q30"
+  },
+  {
+    "level": 4,
+    "name": "Shell Warden",
+    "avatar": "🧞",
+    "taunt": "Your shell skills are weak, mortal!",
+    "image": "enemies/warden.jpg",
+    "range": "Q31–Q40"
+  },
+  {
+    "level": 5,
+    "name": "System Guardian",
+    "avatar": "🛡️",
+    "taunt": "Let's see how well you know your systemctl magic.",
+    "image": "enemies/knight.jpg",
+    "range": "Q41–Q50"
+  },
+  {
+    "level": 6,
+    "name": "Kernel Knight",
+    "avatar": "⚔️",
+    "taunt": "Only true warriors understand SELinux and permissions!",
+    "image": "enemies/titan.jpg",
+    "range": "Q51–Q60"
+  },
+  {
+    "level": 7,
+    "name": "Network Phantom",
+    "avatar": "🕸️",
+    "taunt": "Firewalls, DNS, and IPs — your connectivity ends here.",
+    "image": "enemies/phantom.jpg",
+    "range": "Q61–Q70"
+  },
+  {
+    "level": 8,
+    "name": "Storage Titan",
+    "avatar": "💾",
+    "taunt": "LVM, RAID, and mounting madness await you!",
+    "image": "enemies/titan.jpg",
+    "range": "Q71–Q80"
+  },
+  {
+    "level": 9,
+    "name": "Virtual Overlord",
+    "avatar": "🤖",
+    "taunt": "Containers, virtualization, and automation — prove your worth!",
+    "image": "enemies/overlord.jpeg",
+    "range": "Q81–Q90"
+  },
+  {
+    "level": 10,
+    "name": "Root Daemon",
+    "avatar": "🔥",
+    "taunt": "You've reached the core. Only a true sysadmin can defeat me!",
+    "image": "enemies/root_daemon.jpeg",
+    "range": "Q91–Q100"
+  },
+  {
+    "level": 11,
+    "name": "Python Package Pirate",
+    "avatar": "🐍",
+    "taunt": "Arrr! Do ye know the secrets of pip and package management?",
+    "image": "enemies/python_pirate.jpg",
+    "range": "Q116–Q125"
+  },
+  {
+    "level": 12,
+    "name": "Cyber Sleuth",
+    "avatar": "🕵️‍♀️",
+    "taunt": "I've been investigating your coding skills... they're suspicious!",
+    "image": "enemies/cyber_sleuth.jpg",
+    "range": "Q121–Q130"
+  },
+  {
+    "level": 13,
+    "name": "Script Samurai",
+    "avatar": "⚔️",
+    "taunt": "Your Python-fu is weak! Prepare to face my coding blade!",
+    "image": "enemies/script_samurai.jpg",
+    "range": "Q126–Q135"
+  },
+  {
+    "level": 14,
+    "name": "Library Librarian",
+    "avatar": "📚",
+    "taunt": "Shh! Do you know which libraries to import for this challenge?",
+    "image": "enemies/library_librarian.jpg",
+    "range": "Q131–Q140"
+  },
+  {
+    "level": 15,
+    "name": "Code Cryptographer",
+    "avatar": "🔐",
+    "taunt": "I've encrypted my challenges. Can you decode my Python puzzles?",
+    "image": "enemies/code_cryptographer.jpg",
+    "range": "Q26–Q35"
+  },
+  {
+    "level": 16,
+    "name": "Framework Phantom",
+    "avatar": "👻",
+    "taunt": "I haunt developers who don't understand dependency management!",
+    "image": "enemies/framework_phantom.jpg",
+    "range": "Q36–Q45"
+  },
+  {
+    "level": 17,
+    "name": "Security Sphinx",
+    "avatar": "🦁",
+    "taunt": "Answer my cybersecurity riddles, or be forever trapped in bugs!",
+    "image": "enemies/security_sphinx.jpg",
+    "range": "Q46–Q55"
+  },
+  {
+    "level": 18,
+    "name": "Debug Dragon",
+    "avatar": "🐲",
+    "taunt": "Your code burns with errors! Face my fiery debugging challenges!",
+    "image": "enemies/debug_dragon.jpg",
+    "range": "Q56–Q65"
+  },
+  {
+    "level": 19,
+    "name": "API Alchemist",
+    "avatar": "🧪",
+    "taunt": "I brew potent potions from REST APIs and JSON data!",
+    "image": "enemies/api_alchemist.jpg",
+    "range": "Q66–Q75"
+  },
+  {
+    "level": 20,
+    "name": "Master Malware Hunter",
+    "avatar": "🎯",
+    "taunt": "I am the final guardian of Chapter 2! Prove your cybersecurity mastery!",
+    "image": "enemies/malware_hunter.jpg",
+    "range": "Q76–Q85"
+  }
+]

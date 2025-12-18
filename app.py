@@ -21,6 +21,7 @@ def load_chapters():
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {"chapters": []}
+
 # ------------------- ENDLESS MODE -------------------
 # (Moved below app initialization)
 # This code ensures Flask and Whoosh are installed before importing them, preventing runtime errors
@@ -660,6 +661,8 @@ def get_ai_config_error_message():
 
 def call_openai_api(prompt, max_tokens=1000):
     """Call OpenAI API with error handling"""
+    if not HAS_REQUESTS:
+        return "AI grading unavailable: requests module not found"
     try:
         headers = {
             'Authorization': f'Bearer {OPENAI_API_KEY}',
@@ -682,6 +685,8 @@ def call_openai_api(prompt, max_tokens=1000):
 
 def call_gemini_api(prompt, max_tokens=1000):
     """Call Google Gemini API with error handling"""
+    if not HAS_REQUESTS:
+        return "AI grading unavailable: requests module not found"
     try:
         if not GEMINI_API_KEY or GEMINI_API_KEY == 'your-gemini-api-key-here':
             return "Gemini API Error: API key not configured. Please set GEMINI_API_KEY in config.py"
@@ -2529,239 +2534,123 @@ def select_chapter_test():
 
 @app.route('/test_yourself', methods=['GET', 'POST'])
 def test_yourself():
-    # Check if Test Yourself mode is enabled
     settings = get_current_game_settings()
     if not settings.get('test_yourself_enabled', True):
-        flash('Test Yourself mode is currently disabled.', 'error')
+        flash('Test Yourself mode is disabled.', 'error')
         return redirect(url_for('index'))
-    
-    # Load chapters to check lock status
-    try:
-        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
-            chapters_data = json.load(f)
-        chapters = chapters_data.get('chapters', [])
-    except (FileNotFoundError, json.JSONDecodeError):
-        chapters = []
-    
-    # Check if a specific chapter is requested and if it's locked
-    chapter_id = request.args.get('chapter_id')
-    if chapter_id:
-        try:
-            chapter_id = int(chapter_id)
-            chapter = None
-            for ch in chapters:
-                if ch.get('id') == chapter_id:
-                    chapter = ch
-                    break
-            
-            if chapter and chapter.get('locked_test_yourself', False):
-                flash('This chapter\'s Test Yourself mode is locked.', 'error')
-                return redirect(url_for('select_chapter_test'))
-                
-        except ValueError:
-            pass  # Continue with normal flow if chapter validation fails
-    else:
-        # If no specific chapter requested, check if any chapters are available
-        available_chapters = [ch for ch in chapters if not ch.get('locked_test_yourself', False)]
-        if not available_chapters:
-            flash('Test Yourself mode is locked for all chapters.', 'error')
-            return redirect(url_for('index'))
-    
-    # Reset test state for a true new start (GET with ?new=1) or if no session data exists
-    if (request.method == 'GET' and request.args.get('new') == '1') or not session.get('test_question_ids'):
-        # Completely reset session to ensure clean start
-        reset_test_yourself_session()
-        session['test_user_answers'] = []
-        print(f"[DEBUG] questions list length at test start: {len(questions)}")
-        
-        # Use questions from test_yourself pool
-        test_pool_questions = get_questions_for_pool('test_yourself')
-        if not test_pool_questions:
-            test_pool_questions = questions  # Fallback to all questions
-        
-        valid_questions = [q for q in test_pool_questions if q.get('q') and str(q.get('q')).strip()]
-        if not valid_questions:
-            session['test_question_ids'] = []
-        elif len(valid_questions) >= 40:
-            # Use random.sample to guarantee no duplicates (returns unique selection)
-            selected = random.sample(valid_questions, 40)
-            # Extract IDs and convert to set for guaranteed uniqueness
-            question_ids_set = set(q['id'] for q in selected)
-            # Convert back to list and shuffle
-            question_ids_list = list(question_ids_set)
-            random.shuffle(question_ids_list)
-            session['test_question_ids'] = question_ids_list
-        else:
-            # If fewer than 40 questions, use all available without repeats
-            # Use set to ensure absolute uniqueness even with small pools
-            unique_questions = list({q['id']: q for q in valid_questions}.values())
-            random.shuffle(unique_questions)
-            session['test_question_ids'] = [q['id'] for q in unique_questions]
-        
-        # Debug: Verify uniqueness using set comparison
-        question_ids = session['test_question_ids']
-        unique_ids = set(question_ids)
-        print(f"[DEBUG TEST INIT] Selected {len(question_ids)} questions, {len(unique_ids)} unique IDs (set-verified)")
-        if len(question_ids) != len(unique_ids):
-            duplicate_ids = [id for id in unique_ids if question_ids.count(id) > 1]
-            print(f"[CRITICAL TEST INIT] Duplicate question IDs found despite set conversion: {duplicate_ids}")
-            # Force fix by using only unique IDs
-            session['test_question_ids'] = list(unique_ids)
-            random.shuffle(session['test_question_ids'])
-        
+
+    # =========================
+    # 1. INITIALIZE TEST (ONCE)
+    # =========================
+    if request.method == 'GET' and request.args.get('new') == '1':
+        session.clear()
+
+    if 'test_initialized' not in session:
+        session['test_initialized'] = True
         session['test_q_index'] = 0
         session['test_correct'] = 0
+        session['last_answered_qid'] = None
         session['test_start_time'] = time.time()
-        session['test_time_limit'] = 60 * 60  # 1 hour in seconds
+        session['test_time_limit'] = 3600
+        session['test_user_answers'] = []
 
-    # Calculate timer
-    total_seconds_left = max(0, int(session.get('test_time_limit', 3600) - (time.time() - session.get('test_start_time', time.time()))))
-    time_left_min = total_seconds_left // 60
-    time_left_sec = total_seconds_left % 60
-    q_index = session.get('test_q_index', 0)
-    test_question_ids = session.get('test_question_ids', [])
-    
-    # Debug: Print current state
-    print(f"[DEBUG TEST] GET request - q_index={q_index}, total_test_questions={len(test_question_ids)}")
-    if q_index < len(test_question_ids):
-        print(f"[DEBUG TEST] Current question ID: {test_question_ids[q_index]}")
-    
-    # Rebuild the test_questions list from global questions using IDs
-    if not questions:
-        flash('No questions available. Please contact your teacher.', 'error')
-        return redirect(url_for('index'))
-    
-    try:
-        id_to_question = {q['id']: q for q in questions}
-        test_questions = [id_to_question[qid] for qid in test_question_ids if qid in id_to_question]
-        
-        # Store only question count, not full IDs list to reduce session size
-        if 'test_total_questions' not in session:
-            session['test_total_questions'] = len(test_question_ids)
-    except Exception as e:
-        print(f"[ERROR] Failed to rebuild test_questions: {e}")
-        session['test_q_index'] = 40
-        return redirect(url_for('test_yourself_result'))
-    
-    # Check if we've reached the end or time is up (40 questions = indices 0-39)
-    # Using > 39 instead of >= 40 to ensure question 40 (index 39) is displayed
-    if not test_questions or q_index > 39 or total_seconds_left <= 0:
-        print(f"[DEBUG] REDIRECT TO RESULT: test_q_index={q_index}, test_questions={len(test_questions)}, total_seconds_left={total_seconds_left}, test_user_answers={len(session.get('test_user_answers', []))}")
-        session['test_q_index'] = 40
+        # Get question pool
+        pool = get_questions_for_pool('test_yourself') or questions
+        valid = [q for q in pool if q.get('q') and str(q.get('q')).strip()]
+
+        if len(valid) >= 40:
+            selected = random.sample(valid, 40)
+        else:
+            selected = valid.copy()
+            random.shuffle(selected)
+
+        session['test_question_ids'] = [q['id'] for q in selected]
+
+        print(f"[INIT] Test initialized with {len(session['test_question_ids'])} questions")
+
+    # =========================
+    # 2. TIMER
+    # =========================
+    elapsed = time.time() - session['test_start_time']
+    remaining = max(0, session['test_time_limit'] - elapsed)
+
+    if remaining <= 0:
         return redirect(url_for('test_yourself_result'))
 
-    # Skip invalid questions
-    while q_index < len(test_questions) and q_index < 40:
-        try:
-            if test_questions[q_index].get('q') and str(test_questions[q_index].get('q')).strip():
-                break
-            q_index += 1
-            session['test_q_index'] = q_index
-        except (IndexError, KeyError):
-            q_index += 1
-            session['test_q_index'] = q_index
-    
-    # Final check after skipping invalid questions
-    if q_index > 39:
-        session['test_q_index'] = 40
-        return redirect(url_for('test_yourself_result'))
-    
-    # Safety check for question existence
-    try:
-        question = test_questions[q_index]
-        if not question or not question.get('q') or not str(question.get('q')).strip():
-            raise IndexError("Invalid question")
-    except (IndexError, KeyError) as e:
-        print(f"[ERROR] Question access error at index {q_index}: {e}")
-        session['test_q_index'] = 40
+    # =========================
+    # 3. LOAD CURRENT QUESTION
+    # =========================
+    q_index = session['test_q_index']
+    question_ids = session['test_question_ids']
+
+    if q_index >= len(question_ids) or q_index >= 40:
         return redirect(url_for('test_yourself_result'))
 
-    correct_count = session.get('test_correct', 0)
+    id_map = {q['id']: q for q in questions}
+    question = id_map.get(question_ids[q_index])
+
+    if not question:
+        session['test_q_index'] += 1
+        return redirect(url_for('test_yourself'))
+
+    # =========================
+    # 4. HANDLE ANSWER (POST)
+    # =========================
     if request.method == 'POST':
-        try:
-            user_answer = request.form.get('answer', '').strip().lower()
-            correct_answer = question.get('answer', '').strip().lower()
-            # Normalize keywords
-            raw_keywords = question.get('keywords', [])
-            if isinstance(raw_keywords, str):
-                keywords = [k.strip().lower() for k in raw_keywords.split(',') if k.strip()]
-            else:
-                keywords = [str(k).strip().lower() for k in raw_keywords]
-            # Use fuzzy matching for test mode
-            is_correct, feedback_type, similarity_score = check_answer_fuzzy(user_answer, question)
-            
-            # If student and AI grading is enabled, use AI as fallback for uncertain answers
-            if session.get('is_student') and session.get('ai_grading_enabled', False):
-                # Use AI grading for short answers with low confidence (< 0.9)
-                if question.get('type', 'short_answer') == 'short_answer' and not is_correct and similarity_score < 0.9:
-                    try:
-                        ai_result = grade_answer_with_ai(
-                            question=question.get('q', ''),
-                            correct_answer=correct_answer,
-                            student_answer=user_answer,
-                            confidence_threshold=75
-                        )
-                        if ai_result.get('correct', False) and ai_result.get('confidence', 0) >= 75:
-                            is_correct = True
-                            feedback_type = f"AI Grading: {ai_result.get('explanation', 'Accepted')}"
-                            similarity_score = ai_result.get('confidence', 0) / 100.0
-                    except Exception as e:
-                        print(f"AI grading error: {e}")
-            
-            # Log student answer in real-time
-            if 'student_id' in session:
-                log_student_answer(
-                    student_id=session['student_id'],
-                    student_name=session.get('student_name', 'Unknown'),
-                    question_id=question.get('id', 'unknown'),
-                    question_text=question.get('q', ''),
-                    student_answer=user_answer,
-                    correct_answer=correct_answer,
-                    is_correct=is_correct,
-                    game_mode='test_yourself'
-                )
-            
-            session['test_user_answers'].append({
-                'question': question.get('q', '')[:150],  # Further truncate questions
-                'user_answer': user_answer[:100],  # Truncate user answers
-                'correct_answer': correct_answer[:100],  # Truncate correct answers
-                'correct': is_correct,
-                'feedback': question.get('feedback', '')[:150],  # Reduce feedback size
-                'match_type': feedback_type[:50] if isinstance(feedback_type, str) else str(feedback_type)[:50],
-                'similarity': round(similarity_score, 2) if similarity_score else 0
-            })
-            # Keep only essential answers, limit to 40
-            if len(session['test_user_answers']) > 40:
-                session['test_user_answers'] = session['test_user_answers'][-40:]
-            if is_correct:
-                session['test_correct'] = correct_count + 1
-            
-            # Increment question index
-            new_q_index = q_index + 1
-            session['test_q_index'] = new_q_index
-            
-            # Debug logging
-            print(f"[DEBUG TEST POST] Answered Q{q_index + 1} (ID={question.get('id')}), correct={is_correct}")
-            print(f"[DEBUG TEST POST] Moving to next: new_q_index={new_q_index}, total_questions={len(test_question_ids)}")
-            if new_q_index < len(test_question_ids):
-                print(f"[DEBUG TEST POST] Next question ID will be: {test_question_ids[new_q_index]}")
-            
-            return redirect(url_for('test_yourself'))
-        except Exception as e:
-            print(f"[ERROR] Test yourself mode POST error: {str(e)}")
-            # Force game over on error to prevent crash
-            session['test_q_index'] = 40
-            return redirect(url_for('test_yourself_result'))
+        current_qid = question['id']
 
-    return render_template('test_yourself.html',
-                          question=question,
-                          q_number=q_index + 1,
-                          q_index=q_index,
-                          test_questions=test_questions,
-                          correct_count=correct_count,
-                          time_left_min=time_left_min,
-                          time_left_sec=time_left_sec,
-                          total_seconds_left=total_seconds_left)
+        # 🔒 DOUBLE-SUBMIT PROTECTION
+        if session.get('last_answered_qid') == current_qid:
+            print("[LOCK] Duplicate POST blocked")
+            return redirect(url_for('test_yourself'))
+
+        session['last_answered_qid'] = current_qid
+
+        user_answer = request.form.get('answer', '').strip()
+        is_correct, _, similarity = check_answer_fuzzy(user_answer, question)
+
+        if session.get('is_student') and session.get('ai_grading_enabled', False):
+            if not is_correct and similarity < 0.9:
+                ai = grade_answer_with_ai(
+                    question=question['q'],
+                    correct_answer=question.get('answer', ''),
+                    student_answer=user_answer,
+                    confidence_threshold=75
+                )
+                if ai.get('correct'):
+                    is_correct = True
+
+        session['test_user_answers'].append({
+            'qid': current_qid,
+            'answer': user_answer,
+            'correct': is_correct
+        })
+
+        if is_correct:
+            session['test_correct'] += 1
+
+        session['test_q_index'] += 1
+
+        print(f"[POST] Q{q_index+1} answered | Correct={is_correct}")
+
+        return redirect(url_for('test_yourself'))
+
+    # =========================
+    # 5. RENDER QUESTION
+    # =========================
+    mins = int(remaining // 60)
+    secs = int(remaining % 60)
+
+    return render_template(
+        'test_yourself.html',
+        question=question,
+        q_number=q_index + 1,
+        total_questions=len(question_ids),
+        correct_count=session['test_correct'],
+        time_left_min=mins,
+        time_left_sec=secs,
+        total_seconds_left=int(remaining)
+    )
 
 @app.route('/test_yourself_result')
 def test_yourself_result():
@@ -2897,6 +2786,18 @@ except Exception as e:
 # ------------------- ENDLESS MODE -------------------
 import random
 
+def pick_next_endless_question(pool, recent_ids, current_id):
+    if len(recent_ids) > 30:
+        recent_ids[:] = recent_ids[-30:]
+
+    candidates = [q for q in pool if q['id'] not in recent_ids and q['id'] != current_id]
+
+    if not candidates:
+        recent_ids[:] = recent_ids[-10:]
+        candidates = [q for q in pool if q['id'] not in recent_ids and q['id'] != current_id]
+
+    return random.choice(candidates) if candidates else random.choice(pool)
+
 @app.route('/endless')
 def endless():
     # Check if Endless Mode is enabled
@@ -2950,231 +2851,129 @@ def endless():
 
 @app.route('/endless/start', methods=['POST'])
 def endless_start():
-    # Check if Endless Mode is enabled
-    settings = get_current_game_settings()
-    if not settings.get('endless_mode_enabled', True):
-        flash('Endless Mode is currently disabled.', 'error')
+    if not get_current_game_settings().get('endless_mode_enabled', True):
+        flash('Endless Mode is disabled.', 'error')
         return redirect(url_for('index'))
-    
-    # Load chapters to check lock status
-    try:
-        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
-            chapters_data = json.load(f)
-        chapters = chapters_data.get('chapters', [])
-    except (FileNotFoundError, json.JSONDecodeError):
-        chapters = []
-    
-    # Check if a specific chapter is requested and if it's locked
-    chapter_id = request.form.get('chapter_id') or request.args.get('chapter_id')
-    if chapter_id:
-        try:
-            chapter_id = int(chapter_id)
-            chapter = None
-            for ch in chapters:
-                if ch.get('id') == chapter_id:
-                    chapter = ch
-                    break
-            
-            if chapter and chapter.get('locked_endless_mode', False):
-                flash('This chapter\'s Endless Mode is locked.', 'error')
-                return redirect(url_for('index'))
-                
-        except ValueError:
-            pass  # Continue with normal flow if chapter validation fails
-    else:
-        # If no specific chapter requested, check if any chapters are available
-        available_chapters = [ch for ch in chapters if not ch.get('locked_endless_mode', False)]
-        if not available_chapters:
-            flash('Endless Mode is locked for all chapters.', 'error')
-            return redirect(url_for('index'))
-    # Get player name from form
-    player_name = request.form.get('player_name', '').strip()
-    if not player_name:
-        player_name = 'Anonymous Warrior'
-    
-    # Set player name in session
-    session['player_name'] = player_name
-    
-    # Completely reset any existing endless mode data to ensure clean start
-    reset_endless_mode_session()
-    
-    # Initialize fresh endless mode session state
-    session['endless_score'] = 0
-    session['endless_hp'] = 100
-    session['endless_streak'] = 0
-    session['endless_highest_streak'] = 0
-    session['endless_total_answered'] = 0
-    session['endless_correct'] = 0
-    session['endless_wrong'] = 0
-    session['endless_start_time'] = time.time()
-    session['endless_question_start'] = time.time()
-    session['endless_recent_questions'] = []  # Track recent questions to avoid repetition
-    
-    # Use questions from endless mode pool
-    endless_questions = get_questions_for_pool('endless_mode')
-    if endless_questions:
-        selected_question = random.choice(endless_questions)
-        session['endless_current_question'] = selected_question
-        session['endless_recent_questions'] = [selected_question.get('id')]
-        print(f"[DEBUG ENDLESS INIT] Pool has {len(endless_questions)} questions, starting with Q ID: {selected_question.get('id')}")
-    elif questions:
-        # Fallback to all questions if pool is empty
-        selected_question = random.choice(questions)
-        session['endless_current_question'] = selected_question
-        session['endless_recent_questions'] = [selected_question.get('id')]
-        print(f"[DEBUG ENDLESS INIT] Using fallback, starting with Q ID: {selected_question.get('id')}")
-    else:
-        flash('No questions available. Please contact your teacher to add questions.', 'error')
-        return redirect(url_for('index'))
-    
-    session['endless_score_initialized'] = True
-    
+
+    player_name = request.form.get('player_name', '').strip() or 'Anonymous Warrior'
+
+    session.clear()
+    session.update({
+        'player_name': player_name,
+        'endless_score': 0,
+        'endless_hp': 100,
+        'endless_streak': 0,
+        'endless_highest_streak': 0,
+        'endless_total_answered': 0,
+        'endless_correct': 0,
+        'endless_wrong': 0,
+        'endless_recent_questions': [],
+        'endless_last_answered_qid': None,
+        'endless_start_time': time.time(),
+        'endless_question_start': time.time(),
+        'endless_score_initialized': True
+    })
+
+    pool = get_questions_for_pool('endless_mode') or questions
+    first = random.choice(pool)
+
+    session['endless_current_qid'] = first['id']
+    session['endless_recent_questions'] = [first['id']]
+
     return redirect(url_for('endless_game'))
 
 @app.route('/endless/game', methods=['GET', 'POST'])
 def endless_game():
-    # Check if Endless Mode is enabled
-    settings = get_current_game_settings()
-    if not settings.get('endless_mode_enabled', True):
-        flash('Endless Mode is currently disabled.', 'error')
+    if not get_current_game_settings().get('endless_mode_enabled', True):
+        flash('Endless Mode is disabled.', 'error')
         return redirect(url_for('index'))
-    # Check if player name is set, if not redirect to setup
+
     if not session.get('player_name'):
         return redirect(url_for('endless'))
-        
-    # Check if game is over
+
     if session.get('endless_hp', 0) <= 0:
         return redirect(url_for('endless_result'))
-        
-    # Timer logic
-    if 'endless_question_start' not in session:
-        session['endless_question_start'] = time.time()
+
+    pool = get_questions_for_pool('endless_mode') or questions
+    if not pool:
+        flash('No questions available.', 'error')
+        return redirect(url_for('index'))
+
+    id_map = {q['id']: q for q in questions}
+
+    current_qid = session.get('endless_current_qid')
+    question = id_map.get(current_qid)
+
+    if not question:
+        question = random.choice(pool)
+        session['endless_current_qid'] = question['id']
+        current_qid = question['id']
+
+    # ⏱ TIMER
     elapsed = time.time() - session['endless_question_start']
     time_left = max(0, 60 - int(elapsed))
-    
-    # Pick or keep the current question
-    if 'endless_current_question' not in session:
-        endless_questions = get_questions_for_pool('endless_mode')
-        if endless_questions:
-            session['endless_current_question'] = random.choice(endless_questions)
-        elif questions:
-            session['endless_current_question'] = random.choice(questions)
+
+    # ================= POST =================
+    if request.method == 'POST':
+        if session.get('endless_last_answered_qid') == current_qid:
+            return redirect(url_for('endless_game'))
+
+        session['endless_last_answered_qid'] = current_qid
+        session['endless_total_answered'] += 1
+
+        user_answer = request.form.get('answer', '').strip()
+        is_correct, _, _ = check_answer_fuzzy(user_answer, question)
+
+        if is_correct:
+            session['endless_score'] += 10
+            session['endless_correct'] += 1
+            session['endless_streak'] += 1
+            session['endless_highest_streak'] = max(
+                session['endless_highest_streak'],
+                session['endless_streak']
+            )
         else:
-            flash('No questions available. Please contact your teacher.', 'error')
-            return redirect(url_for('index'))
-    
-    # Safety check for question
-    try:
-        question = session.get('endless_current_question')
-        if not question or not isinstance(question, dict) or not question.get('q'):
-            # Reset and get new question
-            endless_questions = get_questions_for_pool('endless_mode')
-            if not endless_questions:
-                endless_questions = questions
-            if endless_questions:
-                question = random.choice(endless_questions)
-                session['endless_current_question'] = question
-            else:
-                flash('No questions available. Game cannot continue.', 'error')
-                return redirect(url_for('endless_result'))
-    except Exception as e:
-        print(f"[ERROR] Endless question error: {e}")
-        flash('An error occurred. Ending game.', 'error')
-        session['endless_hp'] = 0
-        return redirect(url_for('endless_result'))
-    
-    # Get session variables
-    streak = session.get('endless_streak', 0)
-    score = session.get('endless_score', 0)
-    player_hp = session.get('endless_hp', 100)
-    highest_streak = session.get('endless_highest_streak', 0)
-    total_answered = session.get('endless_total_answered', 0)
-    
-    # Handle timeout
-    if time_left == 0:
-        session['endless_hp'] = session.get('endless_hp', 100) - 10
-        session['endless_streak'] = 0
-        session['endless_wrong'] = session.get('endless_wrong', 0) + 1
-        session['endless_total_answered'] = session.get('endless_total_answered', 0) + 1
-        
-        # Check if HP reached 0 after timeout penalty
-        if session.get('endless_hp', 0) <= 0:
-            return redirect(url_for('endless_result'))
-        
+            session['endless_hp'] -= 5
+            session['endless_wrong'] += 1
+            session['endless_streak'] = 0
+
+        recent = session['endless_recent_questions']
+        next_q = pick_next_endless_question(pool, recent, current_qid)
+
+        recent.append(next_q['id'])
+        session['endless_current_qid'] = next_q['id']
         session['endless_question_start'] = time.time()
-        # Select a different question avoiding recent ones
-        endless_questions = get_questions_for_pool('endless_mode')
-        if not endless_questions:
-            endless_questions = questions
-        
-        if not endless_questions:
-            flash('No questions available. Game cannot continue.', 'error')
-            return redirect(url_for('endless_result'))
-        
-        # Get recent questions to avoid - make a copy to avoid reference issues
-        recent_q_ids = list(session.get('endless_recent_questions', []))
-        
-        # Add current question to history before selecting new one
-        current_q_id = question.get('id')
-        if current_q_id and current_q_id not in recent_q_ids:
-            recent_q_ids.append(current_q_id)
-            # Keep only last 30 questions in history immediately
-            if len(recent_q_ids) > 30:
-                recent_q_ids = recent_q_ids[-30:]
-        
-            print(f"[DEBUG ENDLESS TIMEOUT] Total questions: {len(endless_questions)}, Recent history: {len(recent_q_ids)}, Current Q ID: {current_q_id}")
-        
-        # Check for duplicate IDs in history
-        unique_history = set(recent_q_ids)
-        if len(recent_q_ids) != len(unique_history):
-            print(f"[WARNING ENDLESS TIMEOUT] History contains duplicates! Cleaning up...")
-            recent_q_ids = list(unique_history)
-        
-        # Filter out recently asked questions
-        available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
-        
-        print(f"[DEBUG ENDLESS TIMEOUT] Available questions after filtering: {len(available_questions)}")
-        
-        # If we've exhausted all questions, clear oldest questions from history
-        if not available_questions:
-            print(f"[DEBUG ENDLESS TIMEOUT] Pool exhausted! Keeping only last 10 in history")
-            recent_q_ids = recent_q_ids[-10:] if len(recent_q_ids) > 10 else []
-            available_questions = [q for q in endless_questions if q.get('id') not in recent_q_ids]
-            print(f"[DEBUG ENDLESS TIMEOUT] After reset - History: {len(recent_q_ids)}, Available: {len(available_questions)}")
-        
-        # Select new question
-        if available_questions:
-            new_question = random.choice(available_questions)
-        else:
-            # Last resort - pick any question
-            print(f"[WARNING ENDLESS TIMEOUT] Last resort: picking from all questions")
-            new_question = random.choice(endless_questions)
-        
-        print(f"[DEBUG ENDLESS TIMEOUT] Selected new question ID: {new_question.get('id')}")
-        
-        # Verify no immediate duplicate
-        if new_question.get('id') == current_q_id:
-            print(f"[ERROR ENDLESS TIMEOUT] DUPLICATE DETECTED! Same as current question. Selecting different one...")
-            # Force selection of a different question
-            different_questions = [q for q in available_questions if q.get('id') != current_q_id]
-            if different_questions:
-                new_question = random.choice(different_questions)
-                print(f"[DEBUG ENDLESS TIMEOUT] Corrected to question ID: {new_question.get('id')}")
-        
-        session['endless_current_question'] = new_question
-        
-        # Add newly selected question to history to prevent immediate repetition
-        new_q_id = new_question.get('id')
-        if new_q_id and new_q_id not in recent_q_ids:
-            recent_q_ids.append(new_q_id)
-            # Keep only last 30
-            if len(recent_q_ids) > 30:
-                recent_q_ids = recent_q_ids[-30:]
-        
-        # Update session with updated history
-        session['endless_recent_questions'] = recent_q_ids
-        
+
         return redirect(url_for('endless_game'))
+
+    # ================= TIMEOUT =================
+    if time_left == 0:
+        session['endless_hp'] -= 5
+        session['endless_wrong'] += 1
+        session['endless_streak'] = 0
+        session['endless_total_answered'] += 1
+
+        if session['endless_hp'] <= 0:
+            return redirect(url_for('endless_result'))
+
+        recent = session['endless_recent_questions']
+        next_q = pick_next_endless_question(pool, recent, current_qid)
+
+        recent.append(next_q['id'])
+        session['endless_current_qid'] = next_q['id']
+        session['endless_question_start'] = time.time()
+
+        return redirect(url_for('endless_game'))
+
+    return render_template(
+        'endless.html',
+        question=question,
+        score=session['endless_score'],
+        hp=session['endless_hp'],
+        streak=session['endless_streak'],
+        highest_streak=session['endless_highest_streak'],
+        time_left=time_left
+    )
     
     # Handle answer submission
     if request.method == 'POST':
@@ -3250,7 +3049,7 @@ def endless_game():
                 if session['endless_streak'] % 5 == 0:
                     session['endless_hp'] = min(100, session.get('endless_hp', 100) + 20)
             else:
-                session['endless_hp'] = session.get('endless_hp', 100) - 10
+                session['endless_hp'] = session.get('endless_hp', 100) - 5  # Reduced from 10 to 5
                 session['endless_streak'] = 0
                 session['endless_wrong'] = session.get('endless_wrong', 0) + 1
             session['endless_question_start'] = time.time()
@@ -3345,9 +3144,26 @@ def endless_game():
             return redirect(url_for('endless_game'))
         except Exception as e:
             print(f"[ERROR] Endless mode POST error: {str(e)}")
-            # Force game over on error to prevent crash
-            session['endless_hp'] = 0
-            return redirect(url_for('endless_result'))
+            print(f"[DEBUG] POST Error details: HP={session.get('endless_hp', 'None')}, Question={session.get('endless_current_question', {}).get('id', 'None')}")
+            # Try to recover by resetting question instead of ending game
+            try:
+                # Reset current question and continue
+                endless_questions = get_questions_for_pool('endless_mode')
+                if not endless_questions:
+                    endless_questions = questions
+                if endless_questions:
+                    session['endless_current_question'] = random.choice(endless_questions)
+                    session['endless_question_start'] = time.time()
+                    flash('An error occurred, but the game continues with a new question.', 'warning')
+                    return redirect(url_for('endless_game'))
+                else:
+                    print(f"[CRITICAL] No questions available for recovery")
+                    session['endless_hp'] = 0
+                    return redirect(url_for('endless_result'))
+            except Exception as e2:
+                print(f"[CRITICAL] Failed to recover from POST error: {e2}")
+                session['endless_hp'] = 0
+                return redirect(url_for('endless_result'))
     
     return render_template('endless.html',
                           question=question,

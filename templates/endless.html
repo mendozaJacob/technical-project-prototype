@@ -74,7 +74,7 @@
             <div class="selected-answer" id="endlessSelectedDisplay" style="display: none;">
                 Selected: <span id="endlessSelectedText"></span>
             </div>
-            <button type="submit" class="btn" id="endlessSubmitButton" disabled>Submit</button>
+            <button type="submit" class="btn" id="endlessSubmitButton" disabled onclick="this.disabled=true; this.form.submit();">Submit</button>
             
         {% elif question_type == 'true_false' %}
             <!-- True/False Buttons -->
@@ -92,12 +92,12 @@
             <div class="selected-answer" id="endlessTfSelectedDisplay" style="display: none;">
                 Selected: <span id="endlessTfSelectedText"></span>
             </div>
-            <button type="submit" class="btn" id="endlessTfSubmitButton" disabled>Submit</button>
+            <button type="submit" class="btn" id="endlessTfSubmitButton" disabled onclick="this.disabled=true; this.form.submit();">Submit</button>
             
         {% else %}
             <!-- Short Answer Input -->
             <input type="text" name="answer" placeholder="Type your answer..." required autocomplete="off" style="font-size:1.2em; padding:8px 12px; border-radius:8px; border:2px solid #4b2e05;" class="short-answer-input">
-            <button type="submit" class="btn" style="margin-left:12px;">Submit</button>
+            <button type="submit" class="btn" style="margin-left:12px;" onclick="this.disabled=true; this.form.submit();">Submit</button>
         {% endif %}
     </form>
     </div>

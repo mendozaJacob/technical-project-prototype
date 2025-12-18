@@ -71,7 +71,7 @@
                 <div class="selected-answer" id="testSelectedDisplay" style="display: none;">
                     Selected: <span id="testSelectedText"></span>
                 </div>
-                <button type="submit" class="btn" id="testSubmitButton" disabled>Submit</button>
+                <button type="submit" class="btn" id="testSubmitButton" disabled onclick="this.disabled=true; this.form.submit();">Submit</button>
                 
             {% elif question_type == 'true_false' %}
                 <!-- True/False Buttons -->
@@ -89,12 +89,12 @@
                 <div class="selected-answer" id="testTfSelectedDisplay" style="display: none;">
                     Selected: <span id="testTfSelectedText"></span>
                 </div>
-                <button type="submit" class="btn" id="testTfSubmitButton" disabled>Submit</button>
+                <button type="submit" class="btn" id="testTfSubmitButton" disabled onclick="this.disabled=true; this.form.submit();">Submit</button>
                 
             {% else %}
                 <!-- Short Answer Input -->
                 <input type="text" name="answer" placeholder="Type your answer..." required autocomplete="off" class="short-answer-input">
-                <button type="submit" class="btn">Submit</button>
+                <button type="submit" class="btn" onclick="this.disabled=true; this.form.submit();">Submit</button>
             {% endif %}
         </form>
     </div>

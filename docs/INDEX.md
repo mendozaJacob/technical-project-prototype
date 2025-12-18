@@ -21,9 +21,10 @@ Welcome to the comprehensive documentation for Quiz Battle: Dungeons of Knowledg
 - **[Chapter Pool Integration](technical/CHAPTER_POOL_INTEGRATION.md)** - Advanced content management
 
 ### 💻 **For Development & Maintenance**
-- **[Implementation Details](development/IMPLEMENTATION_COMPLETE.md)** - Complete feature reference
+- **[Implementation Details](development/IMPLEMENTATION_COMPLETE.md)** - Complete feature reference with latest optimizations
+- **[Duplicate Prevention Guide](development/DUPLICATE_PREVENTION_GUIDE.md)** - Comprehensive duplicate question prevention system
 - **[Settings System](development/SETTINGS_SYSTEM_FIXED.md)** - Configuration management
-- **[Build Summary](development/BUILD_SUMMARY.md)** - Latest build information
+- **[Build Summary](development/BUILD_SUMMARY.md)** - Latest optimized build information (Dec 18, 2025)
 
 ## 📋 Documentation Structure
 

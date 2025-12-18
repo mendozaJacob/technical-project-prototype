@@ -11,10 +11,53 @@
 **Enhanced Save Popup: ✅ Shows detailed changes**
 **Teacher Reset Functions: ✅ Individual & Batch Operations**
 **WebSocket Integration: ✅ Live Answer Monitoring**
+**Duplicate Prevention: ✅ Comprehensive Protection for All Game Modes**
+**Performance Optimization: ✅ Optimized Session Management & Question Selection**
+**Build Optimization: ✅ Clean Workspace with Essential Files Only**
 
 ---
 
-## 🚀 **LATEST UPDATES**
+## 🚀 **LATEST UPDATES (December 2025)**
+
+### 🔄 **Duplicate Question Prevention System**
+
+**Comprehensive duplicate prevention across all game modes:**
+
+#### **Core Features:**
+- **Test Yourself Mode Protection**: `test_initialized` flag prevents re-initialization, `last_answered_qid` blocks duplicate POST requests
+- **Endless Mode Algorithm**: `pick_next_endless_question()` function with smart candidate selection:
+  - Maintains recent questions list (30 question memory)
+  - Excludes current question ID from next selection
+  - Automatic fallback to smaller memory (10 questions) if no candidates
+  - Final fallback to random selection if pool exhausted
+- **Frontend Double-Click Protection**: All submit buttons disabled on click to prevent accidental duplicates
+- **Session Lock System**: Robust duplicate submission prevention using session-based locks
+
+#### **Technical Implementation:**
+- **Test Yourself**: Lines 2547-2669 in app.py with `test_initialized` and `last_answered_qid` protection
+- **Endless Mode**: Lines 2787-2976 with optimized `pick_next_endless_question()` helper function
+- **Frontend Protection**: `onclick="this.disabled=true; this.form.submit();"` on all submit buttons
+- **Session Management**: Bulk session updates with `session.update()` for better performance
+
+### ⚡ **Performance Optimizations**
+
+**Enhanced session management and algorithm efficiency:**
+
+#### **Improvements:**
+- **Bulk Session Operations**: `session.update()` for initializing multiple session variables at once
+- **Efficient List Operations**: In-place list modifications using slice assignment (`recent_ids[:] = recent_ids[-30:]`)
+- **Optimized Question Selection**: Pre-filtered candidate lists before random selection
+- **Reduced Memory Footprint**: Smart memory management in recent questions tracking
+- **Cleaner Architecture**: Separated helper functions for better code maintainability
+
+#### **Build Optimization:**
+- **Cleaned Workspace**: Removed redundant files (build artifacts, duplicate specs, unnecessary docs)
+- **Essential Files Only**: Streamlined to core application files, executable, and primary documentation
+- **Reduced Build Size**: Optimized PyInstaller configuration and removed unnecessary inclusions
+
+---
+
+## 🚀 **PREVIOUS UPDATES**
 
 ### 📚 **Chapter Management System**
 

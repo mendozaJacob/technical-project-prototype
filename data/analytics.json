@@ -1361,5 +1361,29 @@
       "questions_answered": 0,
       "reason": "player_quit"
     }
+  },
+  {
+    "timestamp": 1765774075.9824646,
+    "event_type": "test_yourself_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
+  },
+  {
+    "timestamp": 1766028822.5777814,
+    "event_type": "test_yourself_quit",
+    "player_name": "Anonymous",
+    "session_id": "unknown",
+    "data": {
+      "questions_answered": 0,
+      "correct_answers": 0,
+      "score": 0,
+      "reason": "player_quit"
+    }
   }
 ]

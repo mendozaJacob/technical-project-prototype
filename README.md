@@ -143,6 +143,42 @@ Open your browser to `http://localhost:5000`
 3. **Game Configuration**: Adjust settings in the teacher dashboard
 4. **Content Review**: Check questions and levels are appropriate
 
+## 📦 Building Executable
+
+For distribution without Python installed:
+
+### Quick Build (Recommended)
+```bash
+build_exe.bat
+```
+
+### Manual Build
+**⚠️ Important:** Use correct Python environment and ensure data paths are fixed.
+
+1. **Install dependencies:**
+```bash
+python -m pip install -r requirements.txt
+python -m pip install pyinstaller
+```
+
+2. **Build executable:**
+```bash
+python -m PyInstaller --onefile --noconsole --add-data "data;data" --add-data "templates;templates" --add-data "static;static" --add-data "docs;docs" app.py
+```
+
+**✅ Verified Working Result:**
+- Output: `dist/QuizBattle_DungeonsOfKnowledge.exe`
+- Size: ~19-20 MB (includes all dependencies + data files)
+- ✅ No "module not found" errors
+- ✅ Levels display correctly  
+- ✅ Chapters load properly
+- ✅ Game fully playable
+
+**🚨 Critical Requirements:**
+- Use `python -m PyInstaller` (not `pyinstaller` directly)
+- Ensure `get_resource_path()` is used for all data file access
+- Include `--add-data "data;data"` to bundle data files
+
 ## 🎯 Question Types System
 
 ### 📝 Supported Question Types

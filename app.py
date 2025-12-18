@@ -372,7 +372,7 @@ def auto_generate_enemy(level, chapter_id=1, difficulty="Easy"):
     """Generate a complete enemy for a given level"""
     # Load chapters to determine theme
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         
         chapter = None
@@ -412,7 +412,7 @@ def add_enemy_to_file(enemy):
     """Add a new enemy to the enemies.json file"""
     try:
         # Load existing enemies
-        with open('data/enemies.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/enemies.json'), 'r', encoding='utf-8') as f:
             enemies = json.load(f)
         
         # Check if enemy already exists for this level
@@ -428,7 +428,7 @@ def add_enemy_to_file(enemy):
         enemies.sort(key=lambda x: x.get('level', 0))
         
         # Save back to file
-        with open('data/enemies.json', 'w', encoding='utf-8') as f:
+        with open(get_resource_path('data/enemies.json'), 'w', encoding='utf-8') as f:
             json.dump(enemies, f, indent=2, ensure_ascii=False)
         
         print(f"Added new enemy for level {enemy['level']}: {enemy['name']}")
@@ -1160,7 +1160,7 @@ def log_analytics_event(event_type, data=None):
         }
         
         # Append to analytics file
-        analytics_file = 'data/analytics.json'
+        analytics_file = get_resource_path('data/analytics.json')
         analytics_log = []
         
         # Load existing analytics
@@ -1203,7 +1203,7 @@ def log_student_answer(student_id, student_name, question_id, question_text, stu
         
         # Load existing answer logs
         try:
-            with open('data/student_answers_log.json', 'r') as f:
+            with open(get_resource_path('data/student_answers_log.json'), 'r') as f:
                 answers_data = json.load(f)
         except FileNotFoundError:
             answers_data = []
@@ -1216,8 +1216,8 @@ def log_student_answer(student_id, student_name, question_id, question_text, stu
             answers_data = answers_data[-500:]
         
         # Save updated answer logs
-        os.makedirs('data', exist_ok=True)
-        with open('data/student_answers_log.json', 'w') as f:
+        os.makedirs(os.path.dirname(get_resource_path('data/student_answers_log.json')), exist_ok=True)
+        with open(get_resource_path('data/student_answers_log.json'), 'w') as f:
             json.dump(answers_data, f, indent=2)
         
         # Emit real-time update to teachers (only if socketio is available)
@@ -1256,7 +1256,7 @@ def auto_save_progress():
         }
         
         # Save to auto-save file
-        auto_save_file = f"data/autosave_{session.get('player_name', 'anonymous')}.json"
+        auto_save_file = get_resource_path(f"data/autosave_{session.get('player_name', 'anonymous')}.json")
         os.makedirs('data', exist_ok=True)
         with open(auto_save_file, 'w', encoding='utf-8') as f:
             json.dump(progress_data, f, indent=2)
@@ -1269,7 +1269,7 @@ def auto_save_progress():
 def load_auto_save_progress(player_name):
     """Load auto-saved progress for a player"""
     try:
-        auto_save_file = f"data/autosave_{player_name}.json"
+        auto_save_file = get_resource_path(f"data/autosave_{player_name}.json")
         if not os.path.exists(auto_save_file):
             return None
             
@@ -1327,7 +1327,7 @@ def apply_adaptive_difficulty(base_questions, level_number):
     if accuracy > 0.8:  # Player doing very well - increase difficulty
         # Try to get harder questions from higher levels
         try:
-            with open("data/levels.json", "r", encoding="utf-8") as f:
+            with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
                 levels_data = json.load(f)
                 all_levels = levels_data.get("levels", [])
             
@@ -1348,7 +1348,7 @@ def apply_adaptive_difficulty(base_questions, level_number):
     elif accuracy < 0.5:  # Player struggling - decrease difficulty
         # Try to get easier questions from lower levels
         try:
-            with open("data/levels.json", "r", encoding="utf-8") as f:
+            with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
                 levels_data = json.load(f)
                 all_levels = levels_data.get("levels", [])
             
@@ -1373,7 +1373,7 @@ def apply_adaptive_difficulty(base_questions, level_number):
 @app.route('/select_level', methods=['GET', 'POST'])
 def select_level():
     try:
-        with open("data/levels.json", "r", encoding="utf-8") as f:
+        with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
             levels_data = json.load(f)
             levels = levels_data.get("levels", [])
     except Exception:
@@ -1445,7 +1445,7 @@ def select_level():
             if current_enemy_index is None or (selected_level == 1 and current_enemy_index == 0):
                 novice_idx = 0
                 try:
-                    with open('data/enemies.json', encoding='utf-8') as ef:
+                    with open(get_resource_path('data/enemies.json'), encoding='utf-8') as ef:
                         enemies_list = json.load(ef)
                     # Look for an enemy by name or level that indicates the novice gnome
                     for i, e in enumerate(enemies_list):
@@ -1461,7 +1461,7 @@ def select_level():
             else:
                 # Set enemy to match the selected level
                 try:
-                    with open('data/enemies.json', encoding='utf-8') as ef:
+                    with open(get_resource_path('data/enemies.json'), encoding='utf-8') as ef:
                         enemies_list = json.load(ef)
                     
                     # Set enemy index to match the selected level
@@ -1631,7 +1631,7 @@ def game():
     # Use selected level from session
     selected_level = session.get('selected_level', 1)
     try:
-        with open("data/levels.json", "r", encoding="utf-8") as f:
+        with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
             levels_data = json.load(f)
             levels = levels_data.get("levels", [])
     except FileNotFoundError:
@@ -2070,7 +2070,7 @@ def result():
     # If the level is completed, allow to select next level
     next_level = session.get('selected_level', 1) + 1
     try:
-        with open("data/levels.json", "r", encoding="utf-8") as f:
+        with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
             levels_data = json.load(f)
             levels = levels_data.get("levels", [])
     except Exception:
@@ -2132,7 +2132,7 @@ def result():
             print(f"DEBUG: Enemy progression - Level: {next_level}, Current idx: {current_idx}, Next idx: {next_idx}, Level-based idx: {level_based_idx}, Final idx: {final_idx}")
         # If we've unlocked past the maximum level, the player beat the game
         try:
-            with open("data/levels.json", "r", encoding="utf-8") as f:
+            with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
                 levels_data = json.load(f)
                 levels = levels_data.get("levels", [])
         except Exception:
@@ -2537,7 +2537,7 @@ def test_yourself():
     
     # Load chapters to check lock status
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapters = chapters_data.get('chapters', [])
     except (FileNotFoundError, json.JSONDecodeError):
@@ -2907,7 +2907,7 @@ def endless():
     
     # Load chapters to check lock status  
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapters = chapters_data.get('chapters', [])
     except (FileNotFoundError, json.JSONDecodeError):
@@ -2958,7 +2958,7 @@ def endless_start():
     
     # Load chapters to check lock status
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapters = chapters_data.get('chapters', [])
     except (FileNotFoundError, json.JSONDecodeError):
@@ -3554,7 +3554,7 @@ def toggle_chapter_lock():
         chapter_id = int(request.form.get('chapter_id'))
         mode = request.form.get('mode')
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapters = chapters_data.get('chapters', [])
         updated = False
@@ -3568,7 +3568,7 @@ def toggle_chapter_lock():
                     chapter['locked_endless_mode'] = not chapter.get('locked_endless_mode', True)
                 updated = True
         if updated:
-            with open('data/chapters.json', 'w', encoding='utf-8') as f:
+            with open(get_resource_path('data/chapters.json'), 'w', encoding='utf-8') as f:
                 json.dump(chapters_data, f, indent=2, ensure_ascii=False)
             return jsonify({'success': True})
         else:
@@ -3579,7 +3579,7 @@ def toggle_chapter_lock():
 @teacher_required
 def get_chapter(chapter_id):
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapter = next((ch for ch in chapters_data.get('chapters', []) if ch.get('id') == chapter_id), None)
         if chapter:
@@ -3592,7 +3592,7 @@ def get_chapter(chapter_id):
 @teacher_required
 def api_get_chapters():
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         return jsonify(chapters_data)
     except Exception as e:
@@ -3617,7 +3617,7 @@ def teacher_add_chapter():
         
         # Load existing chapters
         try:
-            with open('data/chapters.json', 'r', encoding='utf-8') as f:
+            with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
                 chapters_data = json.load(f)
         except:
             chapters_data = {"chapters": [], "metadata": {"last_updated": "", "version": "1.0.0", "total_chapters": 0}}
@@ -3664,7 +3664,7 @@ def teacher_add_chapter():
         chapters_data["metadata"]["total_chapters"] = len(chapters)
         
         # Save updated chapters
-        with open('data/chapters.json', 'w', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'w', encoding='utf-8') as f:
             json.dump(chapters_data, f, indent=2, ensure_ascii=False)
         
         # Generate enemies for all levels in the new chapter
@@ -3683,7 +3683,7 @@ def teacher_add_chapter():
         
         # Create basic levels for the chapter if none exist
         try:
-            with open('data/levels.json', 'r', encoding='utf-8') as f:
+            with open(get_resource_path('data/levels.json'), 'r', encoding='utf-8') as f:
                 levels_data = json.load(f)
                 levels = levels_data.get('levels', [])
         except:
@@ -3715,7 +3715,7 @@ def teacher_add_chapter():
             levels_data["levels"] = levels
             levels_data["metadata"]["last_updated"] = "2025-12-12"
             
-            with open('data/levels.json', 'w', encoding='utf-8') as f:
+            with open(get_resource_path('data/levels.json'), 'w', encoding='utf-8') as f:
                 json.dump(levels_data, f, indent=2, ensure_ascii=False)
         
         # Prepare success message
@@ -3739,14 +3739,14 @@ def teacher_add_chapter():
 def teacher_chapters():
     # Load chapters from chapters.json
     try:
-        with open('data/chapters.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/chapters.json'), 'r', encoding='utf-8') as f:
             chapters_data = json.load(f)
         chapters = chapters_data.get('chapters', [])
     except Exception as e:
         chapters = []
     # Load levels for assignment dropdown
     try:
-        with open('data/levels.json', 'r', encoding='utf-8') as f:
+        with open(get_resource_path('data/levels.json'), 'r', encoding='utf-8') as f:
             levels_data = json.load(f)
             all_levels = levels_data.get('levels', [])
     except Exception as e:
@@ -4341,7 +4341,7 @@ def teacher_analytics():
 def teacher_levels():
     # Load levels and enemies
     try:
-        with open("data/levels.json", "r", encoding="utf-8") as f:
+        with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
             levels_data = json.load(f)
             levels = levels_data.get("levels", [])
     except:
@@ -4817,7 +4817,7 @@ def teacher_edit_level():
 def teacher_get_level(level_id):
     try:
         # Load levels and return specific level data
-        with open("data/levels.json", "r", encoding="utf-8") as f:
+        with open(get_resource_path("data/levels.json"), "r", encoding="utf-8") as f:
             levels_data = json.load(f)
             levels = levels_data.get('levels', [])
         

@@ -2882,8 +2882,119 @@ def endless_start():
 
     return redirect(url_for('endless_game'))
 
+# ================= ENDLESS MODE CONSTANTS =================
+ENDLESS_HP_PENALTY = 10
+
+# ================= ENDLESS MODE HELPER FUNCTIONS =================
+def ensure_endless_state():
+    """Ensure endless mode session state is properly initialized"""
+    if 'endless_hp' not in session:
+        session['endless_hp'] = 100
+    if 'endless_score' not in session:
+        session['endless_score'] = 0
+    if 'endless_streak' not in session:
+        session['endless_streak'] = 0
+    if 'endless_pool' not in session:
+        session['endless_pool'] = []
+    if 'endless_used' not in session:
+        session['endless_used'] = []
+
+def next_from_pool(session_obj, question_list, pool_key, used_key):
+    """Get next question from pool, avoiding recently used ones"""
+    # Initialize pool if empty
+    if not session_obj.get(pool_key):
+        session_obj[pool_key] = [q['id'] for q in question_list]
+        random.shuffle(session_obj[pool_key])
+    
+    # Get used questions
+    used_questions = session_obj.get(used_key, [])
+    
+    # Find available questions
+    available = [qid for qid in session_obj[pool_key] if qid not in used_questions]
+    
+    # If no available questions, reset used pool but keep last 10 to avoid immediate repeats
+    if not available:
+        if len(used_questions) > 10:
+            session_obj[used_key] = used_questions[-10:]
+        else:
+            session_obj[used_key] = []
+        available = [qid for qid in session_obj[pool_key] if qid not in session_obj[used_key]]
+    
+    # Select random question from available ones
+    if available:
+        selected_qid = random.choice(available)
+        # Add to used questions
+        if used_key not in session_obj:
+            session_obj[used_key] = []
+        session_obj[used_key].append(selected_qid)
+        return selected_qid
+    
+    # Fallback: return random question from entire list
+    return random.choice(question_list)['id']
+
+def prevent_double_submit(session_obj, lock_key, question_id):
+    """Prevent double submission of the same question"""
+    lock_value = f"{lock_key}_{question_id}"
+    if session_obj.get(lock_key) == lock_value:
+        return True  # This is a duplicate submission
+    session_obj[lock_key] = lock_value
+    return False
+
+# Create question ID to question mapping
+QMAP = {q['id']: q for q in questions}
+
 @app.route('/endless/game', methods=['GET', 'POST'])
 def endless_game():
+    ensure_endless_state()
+
+    if session['endless_hp'] <= 0:
+        return redirect('/endless_result')
+
+    qid = session.get('endless_qid')
+    if not qid:
+        qid = next_from_pool(
+            session, questions,
+            'endless_pool', 'endless_used'
+        )
+        session['endless_qid'] = qid
+
+    question = QMAP[qid]
+
+    if request.method == 'POST':
+        if prevent_double_submit(session, 'endless_lock', qid):
+            return redirect(url_for('endless_game'))
+
+        is_correct, _, _ = check_answer_fuzzy(
+            request.form.get('answer', ''),
+            question
+        )
+
+        if not is_correct:
+            session['endless_hp'] -= ENDLESS_HP_PENALTY
+            session['endless_streak'] = 0
+        else:
+            session['endless_streak'] += 1
+            session['endless_score'] += 10
+
+        session['endless_qid'] = next_from_pool(
+            session, questions,
+            'endless_pool', 'endless_used'
+        )
+
+        return redirect(url_for('endless_game'))
+
+    return render_template(
+        'endless.html',
+        question=question,
+        hp=session['endless_hp'],
+        score=session['endless_score'],
+        streak=session['endless_streak'],
+        highest_streak=session.get('endless_highest_streak', 0),
+        time_left=60  # Default time for the new implementation
+    )
+
+@app.route('/endless/game_old', methods=['GET', 'POST'])
+def endless_game_old():
     if not get_current_game_settings().get('endless_mode_enabled', True):
         flash('Endless Mode is disabled.', 'error')
         return redirect(url_for('index'))

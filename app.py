@@ -30,7 +30,7 @@ import requests
 import hashlib
 import difflib
 from datetime import datetime
-from functools import wraps
+from functools import wraps, lru_cache
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_socketio import SocketIO, emit, join_room, leave_room
@@ -2571,6 +2571,12 @@ def test_yourself():
     # =========================
     # 2. TIMER
     # =========================
+    # Ensure session variables exist before using them
+    if 'test_start_time' not in session:
+        session['test_start_time'] = time.time()
+    if 'test_time_limit' not in session:
+        session['test_time_limit'] = 3600
+
     elapsed = time.time() - session['test_start_time']
     remaining = max(0, session['test_time_limit'] - elapsed)
 
@@ -2580,8 +2586,12 @@ def test_yourself():
     # =========================
     # 3. LOAD CURRENT QUESTION
     # =========================
-    q_index = session['test_q_index']
-    question_ids = session['test_question_ids']
+    # Check if test is properly initialized (if not, redirect to initialize)
+    if 'test_initialized' not in session or 'test_question_ids' not in session:
+        return redirect(url_for('test_yourself', new='1'))
+
+    q_index = session.get('test_q_index', 0)
+    question_ids = session.get('test_question_ids', [])
 
     if q_index >= len(question_ids) or q_index >= 40:
         return redirect(url_for('test_yourself_result'))
@@ -2645,6 +2655,7 @@ def test_yourself():
         'test_yourself.html',
         question=question,
         q_number=q_index + 1,
+        q_index=q_index,
         total_questions=len(question_ids),
         correct_count=session['test_correct'],
         time_left_min=mins,
@@ -2665,8 +2676,33 @@ def test_yourself_result():
     correct = session.get('test_correct', 0)
     percent = int((correct / total) * 100) if total else 0
     passed = percent >= 75
-    # Get user answers for review
-    user_answers = session.get('test_user_answers', [])
+    # Get user answers for review and enrich with full question data
+    stored_user_answers = session.get('test_user_answers', [])
+    user_answers = []
+    
+    # Load questions to get full question data and feedback
+    try:
+        questions_file = get_resource_path('data/questions.json')
+        with open(questions_file, encoding='utf-8') as f:
+            all_questions = json.load(f)
+        # Create a quick lookup map by question ID
+        questions_by_id = {q['id']: q for q in all_questions}
+    except (FileNotFoundError, json.JSONDecodeError):
+        questions_by_id = {}
+    
+    # Enrich user answers with full question data
+    for answer_data in stored_user_answers:
+        qid = answer_data.get('qid')
+        question_obj = questions_by_id.get(qid, {})
+        
+        user_answers.append({
+            'question': question_obj.get('q', 'Question not found'),
+            'user_answer': answer_data.get('answer', ''),
+            'correct_answer': question_obj.get('answer', 'Answer not found'),
+            'correct': answer_data.get('correct', False),
+            'feedback': question_obj.get('feedback', 'No feedback available'),
+            'qid': qid
+        })
     
     # Calculate time and score
     test_start_time = session.get('test_start_time', time.time())
@@ -2874,71 +2910,56 @@ def endless_start():
         'endless_score_initialized': True
     })
 
-    pool = get_questions_for_pool('endless_mode') or questions
-    first = random.choice(pool)
+    ensure_endless_state()
+    session["endless_qid"] = next_from_pool("endless_pool", "endless_used")
 
-    session['endless_current_qid'] = first['id']
-    session['endless_recent_questions'] = [first['id']]
-
-    return redirect(url_for('endless_game'))
+    return redirect(url_for("endless_game"))
 
 # ================= ENDLESS MODE CONSTANTS =================
-ENDLESS_HP_PENALTY = 10
+ENDLESS_HP_START = 100
+ENDLESS_HP_PENALTY = 5
+ENDLESS_TIMEOUT = 60
+MAX_TEST_QUESTIONS = 40
 
 # ================= ENDLESS MODE HELPER FUNCTIONS =================
 def ensure_endless_state():
     """Ensure endless mode session state is properly initialized"""
-    if 'endless_hp' not in session:
-        session['endless_hp'] = 100
-    if 'endless_score' not in session:
-        session['endless_score'] = 0
-    if 'endless_streak' not in session:
-        session['endless_streak'] = 0
-    if 'endless_pool' not in session:
-        session['endless_pool'] = []
-    if 'endless_used' not in session:
-        session['endless_used'] = []
+    session.setdefault("endless_hp", ENDLESS_HP_START)
+    session.setdefault("endless_score", 0)
+    session.setdefault("endless_streak", 0)
+    session.setdefault("endless_highest_streak", 0)
+    session.setdefault("endless_total_answered", 0)
+    session.setdefault("endless_start_time", time.time())
+    session.setdefault("endless_question_start", time.time())
 
-def next_from_pool(session_obj, question_list, pool_key, used_key):
-    """Get next question from pool, avoiding recently used ones"""
-    # Initialize pool if empty
-    if not session_obj.get(pool_key):
-        session_obj[pool_key] = [q['id'] for q in question_list]
-        random.shuffle(session_obj[pool_key])
-    
-    # Get used questions
-    used_questions = session_obj.get(used_key, [])
-    
-    # Find available questions
-    available = [qid for qid in session_obj[pool_key] if qid not in used_questions]
-    
-    # If no available questions, reset used pool but keep last 10 to avoid immediate repeats
-    if not available:
-        if len(used_questions) > 10:
-            session_obj[used_key] = used_questions[-10:]
-        else:
-            session_obj[used_key] = []
-        available = [qid for qid in session_obj[pool_key] if qid not in session_obj[used_key]]
-    
-    # Select random question from available ones
-    if available:
-        selected_qid = random.choice(available)
-        # Add to used questions
-        if used_key not in session_obj:
-            session_obj[used_key] = []
-        session_obj[used_key].append(selected_qid)
-        return selected_qid
-    
-    # Fallback: return random question from entire list
-    return random.choice(question_list)['id']
-
-def prevent_double_submit(session_obj, lock_key, question_id):
+def prevent_double_submit(lock_key, qid):
     """Prevent double submission of the same question"""
-    lock_value = f"{lock_key}_{question_id}"
-    if session_obj.get(lock_key) == lock_value:
-        return True  # This is a duplicate submission
-    session_obj[lock_key] = lock_value
+    if session.get(lock_key) == qid:
+        return True
+    session[lock_key] = qid
     return False
+
+def init_pool(pool_key, used_key):
+    """Initialize question pool if not exists"""
+    if pool_key not in session:
+        ids = [q["id"] for q in questions]
+        random.shuffle(ids)
+        session[pool_key] = ids
+        session[used_key] = []
+
+def next_from_pool(pool_key, used_key):
+    """Get next question from pool with smart rotation"""
+    init_pool(pool_key, used_key)
+
+    if not session[pool_key]:
+        ids = [q["id"] for q in questions]
+        random.shuffle(ids)
+        session[pool_key] = ids
+        session[used_key] = []
+
+    qid = session[pool_key].pop()
+    session[used_key].append(qid)
+    return qid
 
 # Create question ID to question mapping
 QMAP = {q['id']: q for q in questions}
@@ -2947,50 +2968,64 @@ QMAP = {q['id']: q for q in questions}
 def endless_game():
     ensure_endless_state()
 
-    if session['endless_hp'] <= 0:
-        return redirect('/endless_result')
+    if session["endless_hp"] <= 0:
+        return redirect(url_for("endless_result"))
 
-    qid = session.get('endless_qid')
+    qid = session.get("endless_qid")
     if not qid:
-        qid = next_from_pool(
-            session, questions,
-            'endless_pool', 'endless_used'
-        )
-        session['endless_qid'] = qid
+        qid = next_from_pool("endless_pool", "endless_used")
+        session["endless_qid"] = qid
 
-    question = QMAP[qid]
+    question = QMAP.get(qid)
 
-    if request.method == 'POST':
-        if prevent_double_submit(session, 'endless_lock', qid):
-            return redirect(url_for('endless_game'))
+    # TIMER
+    elapsed = time.time() - session["endless_question_start"]
+    time_left = max(0, ENDLESS_TIMEOUT - int(elapsed))
 
-        is_correct, _, _ = check_answer_fuzzy(
-            request.form.get('answer', ''),
-            question
-        )
+    # POST (ANSWER)
+    if request.method == "POST":
+        if prevent_double_submit("endless_lock", qid):
+            return redirect(url_for("endless_game"))
 
-        if not is_correct:
-            session['endless_hp'] -= ENDLESS_HP_PENALTY
-            session['endless_streak'] = 0
+        user_answer = request.form.get("answer", "").strip()
+        is_correct, _, _ = check_answer_fuzzy(user_answer, question)
+
+        if is_correct:
+            session["endless_score"] += 10
+            session["endless_streak"] += 1
+            session["endless_highest_streak"] = max(
+                session.get("endless_highest_streak", 0),
+                session["endless_streak"]
+            )
         else:
-            session['endless_streak'] += 1
-            session['endless_score'] += 10
+            session["endless_hp"] -= ENDLESS_HP_PENALTY
+            session["endless_streak"] = 0
 
-        session['endless_qid'] = next_from_pool(
-            session, questions,
-            'endless_pool', 'endless_used'
-        )
+        session["endless_total_answered"] = session.get("endless_total_answered", 0) + 1
+        session["endless_question_start"] = time.time()
+        session["endless_qid"] = next_from_pool("endless_pool", "endless_used")
 
-        return redirect(url_for('endless_game'))
+        return redirect(url_for("endless_game"))
+
+    # TIMEOUT
+    if time_left == 0:
+        session["endless_hp"] -= ENDLESS_HP_PENALTY
+        session["endless_streak"] = 0
+        session["endless_total_answered"] = session.get("endless_total_answered", 0) + 1
+        session["endless_question_start"] = time.time()
+        session["endless_qid"] = next_from_pool("endless_pool", "endless_used")
+        return redirect(url_for("endless_game"))
 
     return render_template(
-        'endless.html',
+        "endless.html",
         question=question,
-        hp=session['endless_hp'],
-        score=session['endless_score'],
-        streak=session['endless_streak'],
-        highest_streak=session.get('endless_highest_streak', 0),
-        time_left=60  # Default time for the new implementation
+        q_number=session.get("endless_total_answered", 0) + 1,
+        streak=session["endless_streak"],
+        score=session["endless_score"],
+        player_hp=session["endless_hp"],
+        highest_streak=session.get("endless_highest_streak", 0),
+        total_questions=100,
+        time_left=time_left
     )
 
 @app.route('/endless/game_old', methods=['GET', 'POST'])

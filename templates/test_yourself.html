@@ -47,7 +47,7 @@
     
     <div class="timer" id="timer">Time Left: {{ time_left_min }}m {{ '%02d' % time_left_sec }}s</div>
     <div class="questions-left">Questions Left: {{ 40 - q_index }}</div>
-        <div class="progress">Question {{ q_number }} of 40 | Correct: {{ correct_count }}</div>
+        <div class="progress">Question {{ q_number }} of 40</div>
         {% if question and question['q'] %}
             <div class="question">{{ question['q'] }}</div>
         {% else %}

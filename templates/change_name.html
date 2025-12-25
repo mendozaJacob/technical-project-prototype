@@ -65,7 +65,7 @@
                        maxlength="20" required>
             </div>
             <div class="button-group">
-                <button type="submit" class="btn">Update Name</button>
+                <button type="submit" class="btn" onclick="this.disabled=true; this.form.submit();">Update Name</button>
                 <a href="{{ url_for('index') }}" class="btn" style="background: #8b7355;">Cancel</a>
             </div>
         </form>

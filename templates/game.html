@@ -374,7 +374,7 @@
                 <div class="selected-answer" id="selectedAnswerDisplay" style="display: none;">
                     Selected: <span id="selectedAnswerText"></span>
                 </div>
-                <button type="submit" class="btn" id="submitButton" disabled>Attack!</button>
+                <button type="submit" class="btn" id="submitButton" disabled onclick="this.disabled=true; this.form.submit();">Attack!</button>
                 
             {% elif question_type == 'true_false' %}
                 <!-- True/False Buttons -->
@@ -392,12 +392,12 @@
                 <div class="selected-answer" id="tfSelectedDisplay" style="display: none;">
                     Selected: <span id="tfSelectedText"></span>
                 </div>
-                <button type="submit" class="btn" id="tfSubmitButton" disabled>Attack!</button>
+                <button type="submit" class="btn" id="tfSubmitButton" disabled onclick="this.disabled=true; this.form.submit();">Attack!</button>
                 
             {% else %}
                 <!-- Short Answer Input -->
                 <input type="text" name="answer" placeholder="Type your answer..." required class="short-answer-input">
-                <button type="submit" class="btn">Attack!</button>
+                <button type="submit" class="btn" onclick="this.disabled=true; this.form.submit();">Attack!</button>
             {% endif %}
         </form>
     </div>

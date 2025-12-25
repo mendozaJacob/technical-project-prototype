@@ -351,12 +351,12 @@
                 });
             }
 
-            // Endless Mode
+            // Endless Mode - bypass general name checking since it has its own setup
             const endlessBtn = document.querySelector('a[href="/endless"]');
             if (endlessBtn) {
                 endlessBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    checkLoginAndStartGame('/endless');
+                    window.location.href = '/endless';
                 });
             }
         });

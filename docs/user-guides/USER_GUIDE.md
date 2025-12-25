@@ -1,10 +1,10 @@
 # 🎮 Quiz Battle: Dungeons of Knowledge - User Guide
-*Updated: December 2025*
+*Updated: December 22, 2025*
 
 ## 📥 Getting Started with the Executable
 
 ### **Step 1: Download and Run**
-1. **Download** the `QuizBattle_DungeonsOfKnowledge.exe` file (approximately 8MB)
+1. **Download** the `QuizBattle_DungeonsOfKnowledge.exe` file (18.6MB optimized build)
 2. **Extract** if downloaded as a ZIP archive
 3. **Right-click** the executable → **Properties** → **Unblock** (if applicable)
 4. **Double-click** the executable file to launch
@@ -253,11 +253,11 @@ Password: teacher123
 ## � Complete Feature Reference
 
 ### **✅ Core Features**
-- **🎮 Single Executable**: No installation, portable application
+- **🎮 Single Executable**: No installation, portable application (18.6MB optimized)
 - **🌐 Automatic Browser Launch**: Seamless startup experience
 - **👨‍🏫 Teacher Dashboard**: Comprehensive management portal
 - **👥 Student Management**: Individual progress tracking
-- **❓ Question Engine**: Multiple choice quiz system
+- **❓ Question Engine**: Multiple choice quiz system with smart selection
 - **🎯 Level Progression**: RPG-style advancement system
 - **📊 Real-Time Analytics**: Live performance monitoring
 - **🤖 AI Integration**: OpenAI-powered content generation
@@ -265,6 +265,8 @@ Password: teacher123
 - **🏆 Leaderboards**: Competitive scoring system
 - **♾️ Multiple Game Modes**: Chapter, Level, Endless, Test modes
 - **💾 Data Persistence**: Automatic progress saving
+- **🔄 Duplicate Prevention**: Advanced protection against repeated questions
+- **⚡ Performance Optimization**: Enhanced session management and memory efficiency
 
 ### **🎓 Educational Benefits**
 
@@ -307,17 +309,20 @@ Password: teacher123
 ### **🔄 Version Information**
 
 #### **Current Build (December 2025):**
-- **Build Date**: December 12, 2025
-- **Python Version**: 3.13.7
+- **Build Date**: December 22, 2025
+- **Python Version**: 3.13.9
 - **PyInstaller Version**: 6.17.0
+- **Executable Size**: 18.6MB (optimized)
 - **Key Dependencies**: Flask 2.3.3, Whoosh 2.7.4, OpenAI 1.6.1
 
-#### **Recent Improvements:**
-- Enhanced AI question generation accuracy
-- Improved real-time monitoring performance  
-- Better error handling and user feedback
-- Optimized executable size and startup time
-- Updated security measures and session management
+#### **Latest Improvements (December 2025):**
+- **✅ Duplicate Question Prevention**: Comprehensive protection for Test Yourself and Endless modes
+- **🚀 Performance Optimizations**: Enhanced session management and question selection algorithms
+- **🔧 User Experience**: Double-click protection on submit buttons prevents accidental duplicates
+- **💻 Code Quality**: Streamlined functions with cleaner architecture and better error handling
+- **🎯 Build Optimization**: Cleaned workspace with essential files only
+- **📊 Session Management**: Improved state handling with robust duplicate protection
+- **⚡ Memory Efficiency**: Smart caching and optimized data structures
 
 ### **📞 Support & Resources**
 

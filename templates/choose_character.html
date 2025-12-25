@@ -64,7 +64,7 @@
     <input type="hidden" name="character" id="characterInput" value="">
     <button id="startGameBtn" disabled>{% if student_name %}Save Character{% else %}Start Game{% endif %}</button>
     {% if current_character and not student_name %}
-      <button type="submit" id="keepCharBtn" style="background: #4CAF50; margin-left: 15px;">Keep Current Character & Start</button>
+      <button type="submit" id="keepCharBtn" style="background: #4CAF50; margin-left: 15px;" onclick="this.disabled=true; this.form.submit();">Keep Current Character & Start</button>
     {% endif %}
   </form>
 

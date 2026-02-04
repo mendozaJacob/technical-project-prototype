@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEM World Map - Quiz Battle: Dungeons of Knowledge</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top, #0a1a2f, #020814);
+      color: #e6f1ff;
+      overflow: hidden;
+    }
+
+    /* --- MAP CONTAINER --- */
+    .map {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(rgba(0,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,255,0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* --- CIRCUIT PATHS --- */
+    .path {
+      position: absolute;
+      background: linear-gradient(90deg, #00f6ff, #0ff);
+      box-shadow: 0 0 12px #00f6ff;
+    }
+
+    /* --- WORLD NODES --- */
+    .node {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      border: 2px solid #00f6ff;
+      box-shadow: 0 0 20px rgba(0,246,255,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .node:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 30px rgba(0,246,255,0.8);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .node h3 {
+      margin: 6px 0 2px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .node span {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* --- ICONS --- */
+    .icon {
+      font-size: 42px;
+    }
+
+    /* --- HUD --- */
+    .hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #00f6ff;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 0 16px rgba(0,246,255,0.4);
+    }
+
+    .hud h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .hud p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* --- NAVIGATION --- */
+    .nav-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #00f6ff;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 0 16px rgba(0,246,255,0.4);
+    }
+
+    .nav-btn {
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      border: 1px solid #00f6ff;
+      color: #e6f1ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      margin: 0 4px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(145deg, #1a3d5a, #132840);
+      box-shadow: 0 0 12px rgba(0,246,255,0.6);
+      color: #e6f1ff;
+      text-decoration: none;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .map {
+        padding: 20px;
+        overflow-y: auto;
+        background-size: 20px 20px;
+      }
+      
+      .hud {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin: 0 0 20px 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .nav-controls {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 0 0 20px 0;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .node {
+        position: relative !important;
+        display: block;
+        width: 100%;
+        margin: 20px 0;
+        padding: 20px;
+        min-height: 80px;
+      }
+      
+      .path {
+        display: none;
+      }
+      
+      .icon {
+        font-size: 32px;
+      }
+      
+      .node h3 {
+        font-size: 18px;
+      }
+      
+      .node span {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="map">
+
+    <!-- HUD -->
+    <div class="hud">
+      <h2>⚙️ STEM Nexus</h2>
+      <p>Choose a zone to deploy</p>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+      <a href="{{ url_for('index') }}" class="nav-btn">🏠 Home</a>
+      {% if session.get('is_student') %}
+        <a href="{{ url_for('student_dashboard') }}" class="nav-btn">📊 Dashboard</a>
+      {% endif %}
+      <a href="{{ url_for('stem_command_center') }}" class="nav-btn">💻 Command Center</a>
+      <a href="{{ url_for('battle_arena') }}" class="nav-btn">🎨 Arena</a>
+      <a href="{{ url_for('select_level') }}" class="nav-btn">⚔️ Adventure Mode</a>
+    </div>
+
+    <!-- CIRCUIT PATHS -->
+    <div class="path" style="top: 260px; left: 250px; width: 220px; height: 4px;"></div>
+    <div class="path" style="top: 340px; left: 470px; width: 4px; height: 180px;"></div>
+    <div class="path" style="top: 520px; left: 470px; width: 260px; height: 4px;"></div>
+
+    <!-- NODES / WORLDS -->
+    <a href="{{ url_for('select_level', stem_world='basics') }}" class="node" style="top: 200px; left: 150px;">
+      <div class="icon">🖥️</div>
+      <h3>Core Circuit City</h3>
+      <span>Basics & Logic</span>
+    </a>
+
+    <a href="{{ url_for('select_level', stem_world='operations') }}" class="node" style="top: 280px; left: 380px;">
+      <div class="icon">🤖</div>
+      <h3>Robot Assembly Bay</h3>
+      <span>Operations & Algebra</span>
+    </a>
+
+    <a href="{{ url_for('select_level', stem_world='analysis') }}" class="node" style="top: 480px; left: 380px;">
+      <div class="icon">🔬</div>
+      <h3>Quantum Lab</h3>
+      <span>Equations & Analysis</span>
+    </a>
+
+    <a href="{{ url_for('select_level', stem_world='advanced') }}" class="node" style="top: 460px; left: 650px;">
+      <div class="icon">🛰️</div>
+      <h3>AI Space Station</h3>
+      <span>Advanced Problem Solving</span>
+    </a>
+
+  </div>
+
+  <script>
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function() {
+      const paths = document.querySelectorAll('.path');
+      
+      // Animate circuit paths
+      paths.forEach((path, index) => {
+        setTimeout(() => {
+          path.style.opacity = '0';
+          path.style.transition = 'opacity 2s ease-in-out';
+          
+          setInterval(() => {
+            path.style.opacity = path.style.opacity === '0' ? '1' : '0';
+          }, 2000 + index * 500);
+        }, index * 300);
+      });
+    });
+  </script>
+</body>
+</html>

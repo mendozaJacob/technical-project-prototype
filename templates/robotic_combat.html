@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotic Combat Interface - Quiz Battle</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: radial-gradient(circle at top, #071a2f, #020814);
+      color: #e6f1ff;
+    }
+
+    .battle-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* PLAYER & ENEMY PANELS */
+    .panel {
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid #00f6ff;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 0 25px rgba(0,246,255,0.35);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 22px;
+    }
+
+    .robot {
+      text-align: center;
+    }
+
+    .robot-icon {
+      font-size: 110px;
+      filter: drop-shadow(0 0 18px #00f6ff);
+    }
+
+    /* STATUS BARS */
+    .bar {
+      background: #111;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 10px 0;
+      height: 18px;
+    }
+
+    .integrity {
+      background: linear-gradient(90deg, #00ff88, #00cc66);
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+
+    .power {
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+
+    .enemy-integrity {
+      background: linear-gradient(90deg, #ff4444, #cc0000);
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+
+    /* QUESTION PANEL */
+    .question-panel {
+      grid-column: span 2;
+      background: rgba(0, 0, 0, 0.75);
+      border: 2px solid #00f6ff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 0 30px rgba(0,246,255,0.45);
+    }
+
+    .question-panel h3 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .answers button {
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      border: 2px solid #00f6ff;
+      border-radius: 12px;
+      padding: 14px;
+      color: #e6f1ff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .answers button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 18px rgba(0,246,255,0.8);
+    }
+
+    .answers button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* COMBAT LOG */
+    .combat-log {
+      margin-top: 12px;
+      font-size: 14px;
+      opacity: 0.9;
+      max-height: 80px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 246, 255, 0.3);
+    }
+
+    /* NAVIGATION */
+    .nav-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      border: 1px solid #00f6ff;
+      color: #e6f1ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      margin: 0 4px;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(145deg, #1a3d5a, #132840);
+      box-shadow: 0 0 12px rgba(0,246,255,0.6);
+      color: #e6f1ff;
+      text-decoration: none;
+    }
+
+    /* TIMER */
+    .timer {
+      text-align: center;
+      font-size: 18px;
+      color: #00f6ff;
+      margin-bottom: 10px;
+    }
+
+    /* SCORE */
+    .score-display {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .battle-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        padding: 15px;
+        min-height: 100vh;
+      }
+      
+      .panel {
+        margin-bottom: 15px;
+        padding: 15px;
+      }
+      
+      .robot-icon {
+        font-size: 80px;
+      }
+      
+      .panel h2 {
+        font-size: 18px;
+      }
+      
+      .question-panel {
+        grid-column: 1;
+        padding: 15px;
+      }
+      
+      .question-panel h3 {
+        font-size: 18px;
+      }
+      
+      .answers {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .answers button {
+        padding: 18px;
+        font-size: 16px;
+        min-height: 56px;
+      }
+      
+      .combat-log {
+        max-height: 60px;
+        font-size: 12px;
+      }
+      
+      .nav-controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        z-index: 1001;
+      }
+      
+      .nav-btn {
+        margin: 2px;
+        padding: 6px 10px;
+        font-size: 10px;
+      }
+      
+      /* Touch interactions */
+      .answers button:active {
+        transform: scale(0.95);
+        background: linear-gradient(145deg, #1a3d5a, #132840);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Controls -->
+  <div class="nav-controls">
+    <a href="{{ url_for('index') }}" class="nav-btn">🏠 Home</a>
+    {% if session.get('is_student') %}
+      <a href="{{ url_for('student_dashboard') }}" class="nav-btn">📊 Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('stem_command_center') }}" class="nav-btn">💻 Command Center</a>
+    <a href="{{ url_for('battle_arena') }}" class="nav-btn">🎨 Arena</a>
+    <a href="{{ url_for('boss_combat') }}" class="nav-btn">💀 Boss</a>
+    <a href="{{ url_for('select_level') }}" class="nav-btn">⚔️ Adventure Mode</a>
+    <a href="{{ url_for('game') }}" class="nav-btn">🎮 Classic View</a>
+  </div>
+
+  <div class="battle-container">
+
+    <!-- PLAYER -->
+    <div class="panel">
+      <h2>🧠 {{ session.get('student_name', 'Student Engineer') }}</h2>
+      <div class="robot">
+        {% if session.get('character') %}
+          <div class="robot-icon">{{ '🤖🦸‍♂️🧙‍♀️👨‍💻👩‍🔬🧑‍🚀👨‍🏭👩‍💼🧑‍🔧👨‍🎓👩‍⚕️🧑‍🏫👨‍🔬👩‍💻🧑‍⚖️👨‍🎨'[session.character - 1] if session.character <= 16 else '🤖' }}</div>
+        {% else %}
+          <div class="robot-icon">🤖</div>
+        {% endif %}
+        <div>System Integrity</div>
+        <div class="bar">
+          <div class="integrity" id="player-hp" style="width: {{ (session.get('player_hp', 100) / 100 * 100)|int }}%"></div>
+        </div>
+        <div>Power Level</div>
+        <div class="bar">
+          <div class="power" style="width: 85%"></div>
+        </div>
+        <div class="score-display">
+          <strong>Score: <span id="score">{{ session.get('score', 0) }}</span></strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENEMY -->
+    <div class="panel">
+      <h2>⚠️ {{ enemy.name if enemy else 'Rogue AI Unit' }}</h2>
+      <div class="robot">
+        <div class="robot-icon">{{ enemy.image if enemy else '🦾' }}</div>
+        <div>System Integrity</div>
+        <div class="bar">
+          <div class="enemy-integrity" id="enemy-hp" style="width: {{ (session.get('enemy_hp', 50) / enemy.hp * 100)|int if enemy else 70 }}%"></div>
+        </div>
+        {% if enemy and enemy.taunt %}
+          <div style="margin-top: 10px; font-style: italic; color: #ff6b6b;">
+            "{{ enemy.taunt }}"
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- QUESTION -->
+    <div class="question-panel">
+      <h3>🔐 Execute Program</h3>
+      
+      {% if time_left %}
+        <div class="timer">Time Remaining: <span id="timer">{{ time_left }}</span>s</div>
+      {% endif %}
+      
+      <p>{{ question.q if question else 'What is 9 × 6?' }}</p>
+
+      <div class="answers">
+        {% if question and question.options %}
+          {% for option in question.options %}
+            <button onclick="submitAnswer('{{ option }}')" id="option-{{ loop.index }}">{{ option }}</button>
+          {% endfor %}
+        {% else %}
+          <button onclick="submitAnswer('42')">42</button>
+          <button onclick="submitAnswer('54')">54</button>
+          <button onclick="submitAnswer('56')">56</button>
+          <button onclick="submitAnswer('48')">48</button>
+        {% endif %}
+      </div>
+
+      <div class="combat-log" id="combat-log">
+        {% if combat_log %}
+          {% for log_entry in combat_log %}
+            > {{ log_entry }}<br>
+          {% endfor %}
+        {% else %}
+          > Laser Beam initialized… Awaiting input
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let timeLeft = {{ time_left if time_left else 30 }};
+    let timerInterval;
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          submitAnswer(''); // Submit empty answer when time runs out
+        }
+      }, 1000);
+    }
+
+    function submitAnswer(answer) {
+      // Disable all buttons
+      const buttons = document.querySelectorAll('.answers button');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      clearInterval(timerInterval);
+      
+      // Add to combat log
+      const log = document.getElementById('combat-log');
+      log.innerHTML += `> Processing input: "${answer}"...<br>`;
+      log.scrollTop = log.scrollHeight;
+      
+      // Submit answer via POST request
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '';
+      
+      const answerInput = document.createElement('input');
+      answerInput.type = 'hidden';
+      answerInput.name = 'answer';
+      answerInput.value = answer;
+      
+      const timeInput = document.createElement('input');
+      timeInput.type = 'hidden';
+      timeInput.name = 'time_taken';
+      timeInput.value = {{ time_left if time_left else 30 }} - timeLeft;
+      
+      form.appendChild(answerInput);
+      form.appendChild(timeInput);
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    function updateHealthBar(elementId, percentage) {
+      const bar = document.getElementById(elementId);
+      if (bar) {
+        bar.style.width = percentage + '%';
+      }
+    }
+
+    // Start timer when page loads
+    {% if question %}
+      window.onload = function() {
+        startTimer();
+      };
+    {% endif %}
+
+    // Add keyboard support
+    document.addEventListener('keydown', function(e) {
+      if (e.key >= '1' && e.key <= '4') {
+        const buttonIndex = parseInt(e.key) - 1;
+        const buttons = document.querySelectorAll('.answers button');
+        if (buttons[buttonIndex] && !buttons[buttonIndex].disabled) {
+          buttons[buttonIndex].click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

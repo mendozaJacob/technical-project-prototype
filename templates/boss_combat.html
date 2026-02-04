@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boss Combat System - Quiz Battle</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #06162a, #020814);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: #e6f1ff;
+      overflow: hidden;
+    }
+
+    .arena {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 80px;
+    }
+
+    .robot {
+      font-size: 120px;
+      position: relative;
+      filter: drop-shadow(0 0 20px #00f6ff);
+      transition: all 0.3s ease;
+    }
+
+    .boss {
+      filter: drop-shadow(0 0 30px #ff003c);
+      animation: bossIdle 2s ease-in-out infinite;
+    }
+
+    @keyframes bossIdle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* HEALTH BARS */
+    .health-bar {
+      position: absolute;
+      width: 300px;
+      height: 25px;
+      background: #111;
+      border-radius: 12px;
+      border: 2px solid #00f6ff;
+    }
+
+    .player-health {
+      top: 120px;
+      left: 80px;
+    }
+
+    .boss-health {
+      top: 120px;
+      right: 80px;
+      border-color: #ff003c;
+    }
+
+    .health-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .player-health .health-fill {
+      background: linear-gradient(90deg, #00ff88, #00cc66);
+    }
+
+    .boss-health .health-fill {
+      background: linear-gradient(90deg, #ff4444, #cc0000);
+    }
+
+    /* DAMAGE NUMBERS */
+    .damage {
+      position: absolute;
+      font-size: 26px;
+      color: #ff4d4d;
+      animation: floatUp 1s forwards;
+      font-weight: bold;
+      text-shadow: 0 0 10px #ff0000;
+    }
+
+    .heal {
+      color: #4dff4d;
+      text-shadow: 0 0 10px #00ff00;
+    }
+
+    @keyframes floatUp {
+      to { transform: translateY(-60px); opacity: 0; }
+    }
+
+    /* STATUS ICONS */
+    .status {
+      position: absolute;
+      top: -30px;
+      right: 0;
+      font-size: 24px;
+    }
+
+    /* PHASE BAR */
+    .phase {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #ff003c;
+      border-radius: 12px;
+      padding: 12px 24px;
+      box-shadow: 0 0 20px rgba(255,0,60,0.6);
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* ATTACK EFFECTS */
+    .overload {
+      position: absolute;
+      top: 50%;
+      right: 180px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255,0,60,0.9);
+      box-shadow: 0 0 30px rgba(255,0,60,1);
+      animation: overloadBlast 0.8s forwards;
+      z-index: 10;
+    }
+
+    @keyframes overloadBlast {
+      to {
+        width: 500px;
+        height: 500px;
+        transform: translate(250px, -250px);
+        opacity: 0;
+      }
+    }
+
+    .laser {
+      position: absolute;
+      top: 50%;
+      left: 180px;
+      height: 8px;
+      width: 0;
+      background: linear-gradient(90deg, #00f6ff, #0099cc);
+      box-shadow: 0 0 20px #00f6ff;
+      animation: laserShoot 0.6s forwards;
+      z-index: 10;
+    }
+
+    @keyframes laserShoot {
+      to { width: calc(100% - 360px); }
+    }
+
+    /* QUESTION PANEL */
+    .question-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.9);
+      border-top: 3px solid #ff003c;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .question-text {
+      font-size: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #ff9999;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .answer-btn {
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 2px solid #ff003c;
+      background: linear-gradient(145deg, #4a1a1a, #2d1010);
+      color: #e6f1ff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .answer-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255,0,60,0.8);
+    }
+
+    .answer-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* HUD ELEMENTS */
+    .hud {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #00f6ff;
+      border-radius: 10px;
+      padding: 15px;
+      z-index: 50;
+    }
+
+    .timer {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #ff003c;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 18px;
+      z-index: 50;
+      color: #ff9999;
+    }
+
+    /* NAVIGATION */
+    .nav-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #00f6ff;
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      color: #e6f1ff;
+      text-decoration: none;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      box-shadow: 0 0 10px rgba(0,246,255,0.6);
+      text-decoration: none;
+      color: #e6f1ff;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .arena {
+        padding: 20px 15px;
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        justify-content: flex-start;
+        gap: 20px;
+      }
+      
+      .robot {
+        font-size: 80px;
+        order: 2;
+      }
+      
+      .robot.player {
+        order: 4;
+      }
+      
+      .health-bar {
+        width: 200px;
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 0 auto;
+      }
+      
+      .player-health {
+        order: 3;
+      }
+      
+      .enemy-health {
+        order: 1;
+      }
+      
+      .question-panel {
+        position: relative;
+        order: 5;
+        margin-top: 20px;
+      }
+      
+      .question-text {
+        font-size: 16px;
+      }
+      
+      .answers {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .answer-btn {
+        padding: 18px 20px;
+        font-size: 16px;
+        min-height: 56px;
+      }
+      
+      .nav-controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 10px;
+      }
+      
+      .hud, .timer {
+        position: relative;
+        display: inline-block;
+        margin: 5px;
+      }
+      
+      .phase {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: 10px;
+        font-size: 14px;
+      }
+      
+      /* Touch-friendly interactions */
+      .answer-btn:hover {
+        transform: none;
+      }
+      
+      .answer-btn:active {
+        transform: scale(0.95);
+        background: linear-gradient(145deg, #6a2a2a, #4d1515);
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Controls -->
+  <div class="nav-controls">
+    <a href="{{ url_for('index') }}" class="nav-btn">🏠 Home</a>
+    <a href="{{ url_for('battle_arena') }}" class="nav-btn">🎨 Arena</a>
+    <a href="{{ url_for('robotic_combat') }}" class="nav-btn">🤖 Combat</a>
+  </div>
+
+  <!-- Phase Indicator -->
+  <div class="phase" id="phaseBar">
+    ⚠️ Boss Phase {{ session.get('boss_phase', 1) }} - {{ boss.name if boss else 'AI Core' }}
+  </div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div><strong>Score:</strong> <span id="score">{{ session.get('score', 0) }}</span></div>
+    <div><strong>Questions:</strong> {{ session.get('current_question_index', 0) + 1 }}</div>
+  </div>
+
+  <!-- Timer -->
+  {% if time_left %}
+  <div class="timer">
+    ⏱️ <span id="timer">{{ time_left }}</span>s
+  </div>
+  {% endif %}
+
+  <!-- Battle Arena -->
+  <div class="arena">
+    <!-- Player Health Bar -->
+    <div class="health-bar player-health">
+      <div class="health-fill" id="player-health" style="width: {{ (session.get('player_hp', 100))|int }}%"></div>
+    </div>
+
+    <!-- Boss Health Bar -->
+    <div class="health-bar boss-health">
+      <div class="health-fill" id="boss-health" style="width: {{ (session.get('boss_hp', 150) / 150 * 100)|int }}%"></div>
+    </div>
+
+    <!-- Player Robot -->
+    <div id="player" class="robot player">
+      {% if session.get('character') %}
+        {{ '🤖🦸‍♂️🧙‍♀️👨‍💻👩‍🔬🧑‍🚀👨‍🏭👩‍💼🧑‍🔧👨‍🎓👩‍⚕️🧑‍🏫👨‍🔬👩‍💻🧑‍⚖️👨‍🎨'[session.character - 1] if session.character <= 16 else '🤖' }}
+      {% else %}
+        🤖
+      {% endif %}
+    </div>
+
+    <!-- Boss Robot -->
+    <div id="boss" class="robot boss">
+      {{ boss.image if boss else '🧠' }}
+      <div class="status">{{ '💀😡🔥'[session.get('boss_phase', 1) - 1] if session.get('boss_phase', 1) <= 3 else '💥' }}</div>
+    </div>
+  </div>
+
+  <!-- Question Panel -->
+  {% if question %}
+  <div class="question-panel">
+    <div class="question-text">💀 BOSS CHALLENGE: {{ question.q }}</div>
+    <div class="answers">
+      {% for option in question.options %}
+        <button class="answer-btn" onclick="submitAnswer('{{ option }}')" id="option-{{ loop.index }}">{{ option }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <script>
+    let timeLeft = {{ time_left if time_left else 30 }};
+    let timerInterval;
+    let bossHP = {{ session.get('boss_hp', 150) }};
+    let phase = {{ session.get('boss_phase', 1) }};
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const timerElement = document.getElementById('timer');
+        if (timerElement) {
+          timerElement.textContent = timeLeft;
+        }
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          submitAnswer(''); // Submit empty answer when time runs out
+        }
+      }, 1000);
+    }
+
+    function playerAttack() {
+      const laser = document.createElement('div');
+      laser.className = 'laser';
+      document.body.appendChild(laser);
+
+      // Boss hit effect
+      document.getElementById('boss').classList.add('hit');
+      showDamage(20, 'boss');
+
+      setTimeout(() => {
+        laser.remove();
+        document.getElementById('boss').classList.remove('hit');
+      }, 600);
+    }
+
+    function bossAttack() {
+      const blast = document.createElement('div');
+      blast.className = 'overload';
+      document.body.appendChild(blast);
+      
+      // Player hit effect
+      document.getElementById('player').style.filter = 'brightness(0.5) drop-shadow(0 0 20px #ff0000)';
+      showDamage(15, 'player');
+      
+      setTimeout(() => {
+        blast.remove();
+        document.getElementById('player').style.filter = 'drop-shadow(0 0 20px #00f6ff)';
+      }, 800);
+    }
+
+    function showDamage(amount, target) {
+      const dmg = document.createElement('div');
+      dmg.className = 'damage';
+      dmg.innerText = `-${amount}`;
+      
+      // Position damage number
+      const targetEl = document.getElementById(target);
+      targetEl.appendChild(dmg);
+      
+      setTimeout(() => dmg.remove(), 1000);
+    }
+
+    function showHeal(amount, target) {
+      const heal = document.createElement('div');
+      heal.className = 'damage heal';
+      heal.innerText = `+${amount}`;
+      
+      const targetEl = document.getElementById(target);
+      targetEl.appendChild(heal);
+      
+      setTimeout(() => heal.remove(), 1000);
+    }
+
+    function submitAnswer(answer) {
+      // Disable all buttons
+      const buttons = document.querySelectorAll('.answer-btn');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      clearInterval(timerInterval);
+      
+      // Determine if answer is correct
+      const correct = answer.toLowerCase() === '{{ question.a.lower() if question else "" }}';
+      
+      // Add visual effect
+      if (correct) {
+        playerAttack();
+      } else {
+        bossAttack();
+      }
+      
+      // Submit answer via POST request
+      setTimeout(() => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+        
+        const answerInput = document.createElement('input');
+        answerInput.type = 'hidden';
+        answerInput.name = 'answer';
+        answerInput.value = answer;
+        
+        const timeInput = document.createElement('input');
+        timeInput.type = 'hidden';
+        timeInput.name = 'time_taken';
+        timeInput.value = {{ time_left if time_left else 30 }} - timeLeft;
+        
+        form.appendChild(answerInput);
+        form.appendChild(timeInput);
+        document.body.appendChild(form);
+        form.submit();
+      }, 1200);
+    }
+
+    function updateHealthBar(elementId, percentage) {
+      const bar = document.getElementById(elementId);
+      if (bar) {
+        bar.style.width = Math.max(0, Math.min(100, percentage)) + '%';
+      }
+    }
+
+    function updateBossPhase() {
+      const phaseBar = document.getElementById('phaseBar');
+      if (bossHP <= 100 && phase === 1) {
+        phase = 2;
+        phaseBar.innerText = '⚠️ Boss Phase 2 – Aggressive Mode';
+      }
+      if (bossHP <= 50 && phase === 2) {
+        phase = 3;
+        phaseBar.innerText = '🚨 Final Phase – Core Meltdown';
+      }
+      if (bossHP <= 0) {
+        phaseBar.innerText = '💥 BOSS DEFEATED!';
+      }
+    }
+
+    // Start timer when page loads
+    {% if question %}
+      window.onload = function() {
+        startTimer();
+        updateBossPhase();
+      };
+    {% endif %}
+
+    // Add keyboard support
+    document.addEventListener('keydown', function(e) {
+      if (e.key >= '1' && e.key <= '4') {
+        const buttonIndex = parseInt(e.key) - 1;
+        const buttons = document.querySelectorAll('.answer-btn');
+        if (buttons[buttonIndex] && !buttons[buttonIndex].disabled) {
+          buttons[buttonIndex].click();
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

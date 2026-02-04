@@ -242,6 +242,46 @@
                 <a href="{{ url_for('select_level') }}" class="btn btn-large">Start Adventure</a>
             </div>
 
+            <!-- STEM World Map -->
+            <div class="game-card">
+                <div class="game-icon">🌐</div>
+                <div class="game-title">STEM World Map</div>
+                <div class="game-description">Explore different STEM zones and choose your learning path!</div>
+                <a href="{{ url_for('stem_world_map') }}" class="btn btn-large">Explore Worlds</a>
+            </div>
+
+            <!-- STEM Command Center -->
+            <div class="game-card">
+                <div class="game-icon">💻</div>
+                <div class="game-title">Command Center</div>
+                <div class="game-description">Access your mission control dashboard and monitor progress!</div>
+                <a href="{{ url_for('stem_command_center') }}" class="btn btn-large">Open Center</a>
+            </div>
+
+            <!-- Battle Arena -->
+            <div class="game-card">
+                <div class="game-icon">🎨</div>
+                <div class="game-title">Battle Arena</div>
+                <div class="game-description">Experience epic animated battles with laser and EMP effects!</div>
+                <a href="{{ url_for('battle_arena') }}" class="btn btn-large">Enter Arena</a>
+            </div>
+
+            <!-- Boss Combat System -->
+            <div class="game-card">
+                <div class="game-icon">💀</div>
+                <div class="game-title">Boss Battle</div>
+                <div class="game-description">Face the ultimate challenge in multi-phase boss battles!</div>
+                <a href="{{ url_for('boss_combat') }}" class="btn btn-large">Challenge Boss</a>
+            </div>
+
+            <!-- Robotic Combat Interface -->
+            <div class="game-card">
+                <div class="game-icon">🤖</div>
+                <div class="game-title">Robot Combat</div>
+                <div class="game-description">Engage in futuristic robot battles while solving problems!</div>
+                <a href="{{ url_for('robotic_combat') }}" class="btn btn-large">Enter Combat</a>
+            </div>
+
             <!-- Test Yourself Mode -->
             {% if settings and settings.test_yourself_enabled %}
             <div class="game-card">

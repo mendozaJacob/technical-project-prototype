@@ -1388,6 +1388,28 @@ def select_level():
     chapters_data = load_chapters()
     all_chapters = sorted(chapters_data.get("chapters", []), key=lambda x: x.get("order", 0))
     
+    # Handle STEM world filtering if coming from world map
+    stem_world = request.args.get('stem_world')
+    if stem_world:
+        # Filter chapters based on STEM world type
+        stem_world_mapping = {
+            'basics': ['programming_fundamentals', 'basic_commands'],
+            'operations': ['system_administration', 'file_operations'],
+            'analysis': ['networking', 'security'],
+            'advanced': ['advanced_scripting', 'system_optimization']
+        }
+        
+        # Filter chapters based on stem_world parameter
+        if stem_world in stem_world_mapping:
+            chapter_keywords = stem_world_mapping[stem_world]
+            filtered_chapters = []
+            for chapter in all_chapters:
+                chapter_name = chapter.get('name', '').lower()
+                chapter_desc = chapter.get('description', '').lower()
+                if any(keyword in chapter_name or keyword in chapter_desc for keyword in chapter_keywords):
+                    filtered_chapters.append(chapter)
+            all_chapters = filtered_chapters
+    
     # Group levels by chapters
     chapter_levels = {}
     for chapter in all_chapters:
@@ -1534,6 +1556,533 @@ def howto():
     # Check if student is logged in to provide proper navigation context
     is_student = session.get('is_student', False)
     return render_template('howto.html', is_student=is_student)
+
+
+# STEM World Map route
+@app.route('/stem_world_map')
+def stem_world_map():
+    """Display the STEM World Map interface"""
+    # Check if student is logged in for navigation context
+    is_student = session.get('is_student', False)
+    return render_template('stem_world_map.html', is_student=is_student)
+
+
+# Robotic Combat Interface route
+@app.route('/robotic_combat', methods=['GET', 'POST'])
+def robotic_combat():
+    """Robotic Combat Interface - Alternative battle view"""
+    # Ensure player has selected a level and has basic session data initialized
+    if 'selected_level' not in session:
+        flash('Please select a level first.', 'warning')
+        return redirect(url_for('select_level'))
+
+    # Load current game state
+    current_question_index = session.get('current_question_index', 0)
+    selected_level = session.get('selected_level', 1)
+    player_hp = session.get('player_hp', 100)
+    enemy_hp = session.get('enemy_hp', 50)
+    score = session.get('score', 0)
+    
+    # Load questions for current level
+    try:
+        with open(get_resource_path("data/questions.json"), "r", encoding="utf-8") as f:
+            questions_data = json.load(f)
+            all_questions = questions_data.get("questions", [])
+    except Exception:
+        all_questions = []
+
+    # Filter questions by level
+    level_questions = [q for q in all_questions if q.get('level') == selected_level]
+    
+    if not level_questions:
+        flash('No questions found for this level!', 'error')
+        return redirect(url_for('select_level'))
+
+    # Load enemy data
+    try:
+        with open(get_resource_path("data/enemies.json"), "r", encoding="utf-8") as f:
+            enemies_data = json.load(f)
+            enemies = enemies_data.get("enemies", [])
+    except Exception:
+        enemies = []
+
+    # Get current enemy based on question index
+    enemy_index = min(current_question_index, len(enemies) - 1) if enemies else 0
+    current_enemy = enemies[enemy_index] if enemies else None
+    
+    # Check if game is over
+    if player_hp <= 0:
+        return redirect(url_for('you_lose'))
+    
+    if current_question_index >= len(level_questions):
+        return redirect(url_for('you_win'))
+
+    # Get current question
+    current_question = level_questions[current_question_index]
+    
+    # Handle answer submission
+    if request.method == 'POST':
+        answer = request.form.get('answer', '').strip().lower()
+        correct_answer = current_question.get('a', '').strip().lower()
+        time_taken = int(request.form.get('time_taken', 30))
+        
+        # Check if answer is correct
+        is_correct = answer == correct_answer
+        
+        # Calculate damage and update health
+        settings = get_current_game_settings()
+        base_damage = settings.get('base_damage', 10)
+        
+        if is_correct:
+            # Player deals damage to enemy
+            damage = base_damage + max(0, 30 - time_taken)  # Bonus for speed
+            enemy_hp = max(0, enemy_hp - damage)
+            session['enemy_hp'] = enemy_hp
+            session['score'] = score + (100 + max(0, 30 - time_taken) * 5)
+            
+            # Add combat log
+            combat_message = f"Direct hit! Enemy takes {damage} damage!"
+        else:
+            # Enemy deals damage to player
+            damage = base_damage
+            player_hp = max(0, player_hp - damage)
+            session['player_hp'] = player_hp
+            
+            # Add combat log
+            combat_message = f"System breached! You take {damage} damage!"
+        
+        # Move to next question if enemy is defeated or continue
+        if enemy_hp <= 0:
+            session['current_question_index'] = current_question_index + 1
+            # Reset enemy HP for next enemy
+            session['enemy_hp'] = settings.get('base_enemy_hp', 50)
+            combat_message += " Enemy unit destroyed!"
+        
+        # Store combat log in session
+        combat_log = session.get('combat_log', [])
+        combat_log.append(combat_message)
+        session['combat_log'] = combat_log[-5:]  # Keep only last 5 messages
+        
+        # Redirect to refresh the page with new state
+        return redirect(url_for('robotic_combat'))
+    
+    # Calculate time limit
+    settings = get_current_game_settings()
+    time_limit = settings.get('question_time_limit', 30)
+    
+    return render_template('robotic_combat.html',
+                         question=current_question,
+                         enemy=current_enemy,
+                         time_left=time_limit,
+                         combat_log=session.get('combat_log', []))
+
+
+# STEM Command Center route
+@app.route('/stem_command_center')
+def stem_command_center():
+    """Display the STEM Command Center dashboard"""
+    # Get current game settings
+    settings = get_current_game_settings()
+    
+    # Get student progress if logged in
+    progress = None
+    if session.get('is_student') and session.get('student_id'):
+        try:
+            with open(get_resource_path('data/student_progress.json'), 'r', encoding='utf-8') as f:
+                all_progress = json.load(f)
+                progress = all_progress.get(str(session.get('student_id')), {})
+        except (FileNotFoundError, json.JSONDecodeError):
+            progress = {}
+    
+    return render_template('stem_command_center.html', 
+                         settings=settings,
+                         progress=progress)
+
+
+# Boss Analytics Functions
+def save_boss_analytics(student_id, boss_id, phase_data, overall_accuracy, time_spent):
+    """Save boss battle analytics data"""
+    try:
+        analytics_file = get_resource_path('data/boss_analytics.json')
+        try:
+            with open(analytics_file, 'r', encoding='utf-8') as f:
+                analytics_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            analytics_data = []
+        
+        # Create new analytics entry
+        new_entry = {
+            'student_id': student_id,
+            'boss_id': boss_id,
+            'timestamp': datetime.now().isoformat(),
+            'attempt': len([a for a in analytics_data if a.get('student_id') == student_id and a.get('boss_id') == boss_id]) + 1,
+            'phases': phase_data,
+            'overall_accuracy': overall_accuracy,
+            'time_spent': time_spent
+        }
+        
+        analytics_data.append(new_entry)
+        
+        with open(analytics_file, 'w', encoding='utf-8') as f:
+            json.dump(analytics_data, f, indent=2, ensure_ascii=False)
+            
+    except Exception as e:
+        print(f"Error saving boss analytics: {e}")
+
+def load_boss_analytics():
+    """Load all boss analytics data"""
+    try:
+        analytics_file = get_resource_path('data/boss_analytics.json')
+        with open(analytics_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def get_phase_failure_stats():
+    """Calculate phase failure statistics for teacher dashboard"""
+    analytics = load_boss_analytics()
+    if not analytics:
+        return {}
+    
+    phase_stats = {
+        'phase_1': {'total': 0, 'failed': 0},
+        'phase_2': {'total': 0, 'failed': 0}, 
+        'phase_3': {'total': 0, 'failed': 0}
+    }
+    
+    for entry in analytics:
+        phases = entry.get('phases', {})
+        for phase_name, phase_data in phases.items():
+            if phase_data.get('entered', False):
+                phase_stats[phase_name]['total'] += 1
+                if phase_data.get('failed', False):
+                    phase_stats[phase_name]['failed'] += 1
+    
+    # Calculate failure percentages
+    result = {}
+    for phase, stats in phase_stats.items():
+        if stats['total'] > 0:
+            failure_rate = (stats['failed'] / stats['total']) * 100
+            result[phase] = {
+                'failure_rate': round(failure_rate, 1),
+                'total_attempts': stats['total'],
+                'skill_indicator': 'Basic recall' if phase == 'phase_1' else 
+                                 'Multi-step reasoning' if phase == 'phase_2' else 
+                                 'Advanced synthesis'
+            }
+    
+    return result
+
+
+# Battle Arena route
+@app.route('/battle_arena', methods=['GET', 'POST'])
+def battle_arena():
+    """Animated Battle Arena Interface"""
+    # Ensure player has selected a level and has basic session data initialized
+    if 'selected_level' not in session:
+        flash('Please select a level first.', 'warning')
+        return redirect(url_for('select_level'))
+
+    # Load current game state
+    current_question_index = session.get('current_question_index', 0)
+    selected_level = session.get('selected_level', 1)
+    player_hp = session.get('player_hp', 100)
+    enemy_hp = session.get('enemy_hp', 50)
+    score = session.get('score', 0)
+    
+    # Load questions for current level
+    try:
+        with open(get_resource_path("data/questions.json"), "r", encoding="utf-8") as f:
+            questions_data = json.load(f)
+            all_questions = questions_data.get("questions", [])
+    except Exception:
+        all_questions = []
+
+    # Filter questions by level
+    level_questions = [q for q in all_questions if q.get('level') == selected_level]
+    
+    if not level_questions:
+        flash('No questions found for this level!', 'error')
+        return redirect(url_for('select_level'))
+
+    # Load enemy data
+    try:
+        with open(get_resource_path("data/enemies.json"), "r", encoding="utf-8") as f:
+            enemies_data = json.load(f)
+            enemies = enemies_data.get("enemies", [])
+    except Exception:
+        enemies = []
+
+    # Get current enemy based on question index
+    enemy_index = min(current_question_index, len(enemies) - 1) if enemies else 0
+    current_enemy = enemies[enemy_index] if enemies else None
+    
+    # Check if game is over
+    if player_hp <= 0:
+        return redirect(url_for('you_lose'))
+    
+    if current_question_index >= len(level_questions):
+        return redirect(url_for('you_win'))
+
+    # Get current question
+    current_question = level_questions[current_question_index]
+    
+    # Handle answer submission
+    if request.method == 'POST':
+        answer = request.form.get('answer', '').strip().lower()
+        correct_answer = current_question.get('a', '').strip().lower()
+        time_taken = int(request.form.get('time_taken', 30))
+        
+        # Check if answer is correct
+        is_correct = answer == correct_answer
+        
+        # Calculate damage and update health
+        settings = get_current_game_settings()
+        base_damage = settings.get('base_damage', 10)
+        
+        if is_correct:
+            # Player deals damage to enemy
+            damage = base_damage + max(0, 30 - time_taken)  # Bonus for speed
+            enemy_hp = max(0, enemy_hp - damage)
+            session['enemy_hp'] = enemy_hp
+            session['score'] = score + (100 + max(0, 30 - time_taken) * 5)
+            
+            # Add combat log
+            combat_message = f"Laser strike successful! Enemy takes {damage} damage!"
+        else:
+            # Enemy deals damage to player
+            damage = base_damage
+            player_hp = max(0, player_hp - damage)
+            session['player_hp'] = player_hp
+            
+            # Add combat log
+            combat_message = f"EMP blast hits! You take {damage} damage!"
+        
+        # Move to next question if enemy is defeated or continue
+        if enemy_hp <= 0:
+            session['current_question_index'] = current_question_index + 1
+            # Reset enemy HP for next enemy
+            session['enemy_hp'] = settings.get('base_enemy_hp', 50)
+            combat_message += " Target eliminated!"
+        
+        # Store combat log in session
+        combat_log = session.get('combat_log', [])
+        combat_log.append(combat_message)
+        session['combat_log'] = combat_log[-5:]  # Keep only last 5 messages
+        
+        # Redirect to refresh the page with new state
+        return redirect(url_for('battle_arena'))
+    
+    # Calculate time limit
+    settings = get_current_game_settings()
+    time_limit = settings.get('question_time_limit', 30)
+    
+    return render_template('battle_arena.html',
+                         question=current_question,
+                         enemy=current_enemy,
+                         time_left=time_limit,
+                         combat_log=session.get('combat_log', []))
+
+
+# Boss Combat route
+@app.route('/boss_combat', methods=['GET', 'POST'])
+def boss_combat():
+    """Boss Combat System - Advanced battle mode"""
+    # Ensure player has selected a level and has basic session data initialized
+    if 'selected_level' not in session:
+        flash('Please select a level first.', 'warning')
+        return redirect(url_for('select_level'))
+
+    # Initialize boss combat if not already started
+    if 'boss_hp' not in session:
+        session['boss_hp'] = 150  # Boss has more HP
+        session['boss_phase'] = 1
+        session['boss_questions_answered'] = 0
+        session['boss_start_time'] = datetime.now().timestamp()
+        session['boss_phase_data'] = {
+            'phase_1': {'entered': True, 'failed': False, 'accuracy': 100, 'questions': 0, 'correct': 0},
+            'phase_2': {'entered': False, 'failed': False, 'accuracy': 0, 'questions': 0, 'correct': 0},
+            'phase_3': {'entered': False, 'failed': False, 'accuracy': 0, 'questions': 0, 'correct': 0}
+        }
+
+    # Load current game state
+    current_question_index = session.get('current_question_index', 0)
+    selected_level = session.get('selected_level', 1)
+    player_hp = session.get('player_hp', 100)
+    boss_hp = session.get('boss_hp', 150)
+    boss_phase = session.get('boss_phase', 1)
+    score = session.get('score', 0)
+    phase_data = session.get('boss_phase_data', {})
+    
+    # Load questions for current level (boss gets harder questions)
+    try:
+        with open(get_resource_path("data/questions.json"), "r", encoding="utf-8") as f:
+            questions_data = json.load(f)
+            all_questions = questions_data.get("questions", [])
+    except Exception:
+        all_questions = []
+
+    # Filter questions by level and get harder ones for boss
+    level_questions = [q for q in all_questions if q.get('level') >= selected_level]
+    
+    if not level_questions:
+        flash('No questions found for boss battle!', 'error')
+        return redirect(url_for('select_level'))
+
+    # Load boss enemy data
+    try:
+        with open(get_resource_path("data/enemies.json"), "r", encoding="utf-8") as f:
+            enemies_data = json.load(f)
+            enemies = enemies_data.get("enemies", [])
+    except Exception:
+        enemies = []
+
+    # Get boss enemy (use last enemy as boss)
+    boss_enemy = enemies[-1] if enemies else {'name': 'AI Core', 'image': '🧠', 'hp': 150}
+    
+    # Check if game is over
+    if player_hp <= 0:
+        # Save analytics on failure
+        if session.get('is_student') and session.get('student_id'):
+            current_phase = f"phase_{boss_phase}"
+            phase_data[current_phase]['failed'] = True
+            time_spent = datetime.now().timestamp() - session.get('boss_start_time', datetime.now().timestamp())
+            
+            # Calculate overall accuracy
+            total_questions = sum(p['questions'] for p in phase_data.values())
+            total_correct = sum(p['correct'] for p in phase_data.values())
+            overall_accuracy = (total_correct / total_questions * 100) if total_questions > 0 else 0
+            
+            save_boss_analytics(
+                session.get('student_id'),
+                boss_enemy.get('name', 'AI_Core'),
+                phase_data,
+                round(overall_accuracy, 1),
+                round(time_spent)
+            )
+        return redirect(url_for('you_lose'))
+    
+    if boss_hp <= 0:
+        # Save analytics on success
+        if session.get('is_student') and session.get('student_id'):
+            time_spent = datetime.now().timestamp() - session.get('boss_start_time', datetime.now().timestamp())
+            
+            # Calculate overall accuracy
+            total_questions = sum(p['questions'] for p in phase_data.values())
+            total_correct = sum(p['correct'] for p in phase_data.values())
+            overall_accuracy = (total_correct / total_questions * 100) if total_questions > 0 else 0
+            
+            save_boss_analytics(
+                session.get('student_id'),
+                boss_enemy.get('name', 'AI_Core'),
+                phase_data,
+                round(overall_accuracy, 1),
+                round(time_spent)
+            )
+        
+        session['boss_defeated'] = True
+        return redirect(url_for('you_win'))
+
+    # Get current question (cycle through available questions)
+    question_index = current_question_index % len(level_questions)
+    current_question = level_questions[question_index]
+    
+    # Handle answer submission
+    if request.method == 'POST':
+        answer = request.form.get('answer', '').strip().lower()
+        correct_answer = current_question.get('a', '').strip().lower()
+        time_taken = int(request.form.get('time_taken', 30))
+        
+        # Check if answer is correct
+        is_correct = answer == correct_answer
+        
+        # Update phase analytics
+        current_phase = f"phase_{boss_phase}"
+        phase_data[current_phase]['questions'] += 1
+        if is_correct:
+            phase_data[current_phase]['correct'] += 1
+        
+        # Calculate phase accuracy
+        phase_questions = phase_data[current_phase]['questions']
+        phase_correct = phase_data[current_phase]['correct']
+        phase_data[current_phase]['accuracy'] = round((phase_correct / phase_questions) * 100, 1) if phase_questions > 0 else 0
+        
+        session['boss_phase_data'] = phase_data
+        
+        # Calculate damage based on boss phase
+        settings = get_current_game_settings()
+        base_damage = settings.get('base_damage', 10)
+        
+        if is_correct:
+            # Player deals damage to boss (more damage in later phases)
+            damage = base_damage + max(0, 30 - time_taken) + (boss_phase * 5)
+            boss_hp = max(0, boss_hp - damage)
+            session['boss_hp'] = boss_hp
+            session['score'] = score + (200 + max(0, 30 - time_taken) * 10)
+            
+            # Check for phase changes
+            if boss_hp <= 100 and boss_phase == 1:
+                session['boss_phase'] = 2
+                phase_data['phase_2']['entered'] = True
+                session['boss_phase_data'] = phase_data
+            elif boss_hp <= 50 and boss_phase == 2:
+                session['boss_phase'] = 3
+                phase_data['phase_3']['entered'] = True
+                session['boss_phase_data'] = phase_data
+                
+        else:
+            # Boss deals damage to player (more damage in later phases)
+            damage = base_damage + (boss_phase * 5)
+            player_hp = max(0, player_hp - damage)
+            session['player_hp'] = player_hp
+        
+        # Move to next question
+        session['current_question_index'] = current_question_index + 1
+        session['boss_questions_answered'] = session.get('boss_questions_answered', 0) + 1
+        
+        # Redirect to refresh the page with new state
+        return redirect(url_for('boss_combat'))
+    
+    # Calculate time limit (shorter time in later phases)
+    settings = get_current_game_settings()
+    base_time = settings.get('question_time_limit', 30)
+    time_limit = max(15, base_time - (boss_phase * 5))
+    
+    return render_template('boss_combat.html',
+                         question=current_question,
+                         boss=boss_enemy,
+                         time_left=time_limit)
+
+
+# Teacher Boss Analytics Dashboard
+@app.route('/teacher/boss_analytics')
+def teacher_boss_analytics():
+    """Teacher dashboard for boss battle analytics"""
+    if not check_teacher_session():
+        return redirect(url_for('teacher_login'))
+    
+    # Get phase failure statistics
+    phase_stats = get_phase_failure_stats()
+    
+    # Get all analytics for detailed view
+    all_analytics = load_boss_analytics()
+    
+    # Group analytics by student
+    student_analytics = {}
+    for entry in all_analytics:
+        student_id = entry.get('student_id')
+        if student_id not in student_analytics:
+            student_analytics[student_id] = []
+        student_analytics[student_id].append(entry)
+    
+    # Load student names
+    students = load_students()
+    student_names = {s['id']: s['full_name'] for s in students}
+    
+    return render_template('teacher_boss_analytics.html',
+                         phase_stats=phase_stats,
+                         student_analytics=student_analytics,
+                         student_names=student_names)
 
 
 @app.route('/choose_character', methods=['GET', 'POST'])
@@ -4637,7 +5186,23 @@ def teacher_clear_progress():
         # Clear leaderboard
         with open('data/leaderboard.json', 'w', encoding='utf-8') as f:
             json.dump([], f)
-        return jsonify({'success': True})
+        
+        # Clear guest leaderboard
+        with open('data/guest_leaderboard.json', 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        
+        # Clear student progress data
+        with open('data/student_progress.json', 'w', encoding='utf-8') as f:
+            json.dump({}, f)
+        
+        # Clear student answers log
+        try:
+            with open('data/student_answers_log.json', 'w', encoding='utf-8') as f:
+                json.dump([], f)
+        except FileNotFoundError:
+            pass  # File might not exist yet
+        
+        return jsonify({'success': True, 'message': 'All student progress, leaderboards, and answer logs cleared successfully!'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
@@ -4648,6 +5213,34 @@ def teacher_clear_leaderboard():
         with open('data/leaderboard.json', 'w', encoding='utf-8') as f:
             json.dump([], f)
         return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/teacher/reset-questions', methods=['POST'])
+@teacher_required
+def teacher_reset_questions():
+    """Reset all questions to the original set by removing custom/AI questions"""
+    try:
+        # Load current questions
+        with open(get_resource_path('data/questions.json'), 'r', encoding='utf-8') as f:
+            all_questions = json.load(f)
+        
+        # Keep only original questions (non-AI generated and non-custom)
+        original_questions = [q for q in all_questions if not q.get('ai_generated', False) and not q.get('is_new', False)]
+        
+        # Save the filtered questions
+        with open(get_resource_path('data/questions.json'), 'w', encoding='utf-8') as f:
+            json.dump(original_questions, f, indent=2, ensure_ascii=False)
+        
+        # Update global questions variable
+        global questions
+        questions = original_questions
+        
+        removed_count = len(all_questions) - len(original_questions)
+        return jsonify({
+            'success': True, 
+            'message': f'Questions reset successfully! Removed {removed_count} custom/AI questions, kept {len(original_questions)} original questions.'
+        })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 

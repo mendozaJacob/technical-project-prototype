@@ -107,6 +107,45 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #0008; }
         .small { font-size: 0.9em; padding: 10px 18px; }
         footer { margin-top: 40px; color: #d2b48c; }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .scroll-box { 
+                flex-direction: column; 
+                padding: 20px;
+                margin: 20px;
+            }
+            .intro { 
+                text-align: center; 
+                margin-bottom: 30px;
+            }
+            .site-title {
+                font-size: 2em;
+                margin-top: 30px;
+            }
+            .tagline {
+                font-size: 1em;
+            }
+            .controls {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 15px;
+                width: 100%;
+            }
+            .btn {
+                font-size: 16px;
+                padding: 15px;
+                min-height: 56px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .teacher-login-btn {
+                padding: 15px 20px;
+                font-size: 16px;
+            }
+        }
+        
         @media (max-width: 800px) {
             .scroll-box { flex-direction: column; padding: 20px; }
             .intro { text-align: center; }
@@ -143,6 +182,11 @@
 
         <div class="controls">
             <a href="{{ url_for('select_level') }}" class="btn">🎮 Start Game</a>
+            <a href="{{ url_for('stem_world_map') }}" class="btn">🌐 STEM World Map</a>
+            <a href="{{ url_for('stem_command_center') }}" class="btn">💻 Command Center</a>
+            <a href="{{ url_for('battle_arena') }}" class="btn">🎨 Battle Arena</a>
+            <a href="{{ url_for('boss_combat') }}" class="btn">💀 Boss Battle</a>
+            <a href="{{ url_for('robotic_combat') }}" class="btn">🤖 Robot Combat</a>
             {% if settings and settings.test_yourself_enabled %}
             <a href="{{ url_for('test_yourself', new=1) }}" class="btn">🧪 Test Yourself</a>
             {% endif %}

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEM Battle Arena - Quiz Battle</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #071a2f, #020814);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: #e6f1ff;
+      overflow: hidden;
+    }
+
+    .arena {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 80px;
+    }
+
+    .robot {
+      font-size: 120px;
+      filter: drop-shadow(0 0 20px #00f6ff);
+      transition: transform 0.3s ease;
+    }
+
+    .player { 
+      left: 0; 
+    }
+    
+    .enemy { 
+      right: 0; 
+    }
+
+    /* HEALTH BARS */
+    .health-bar {
+      position: absolute;
+      width: 200px;
+      height: 20px;
+      background: #111;
+      border-radius: 10px;
+      border: 2px solid #00f6ff;
+    }
+
+    .player-health {
+      top: 100px;
+      left: 80px;
+    }
+
+    .enemy-health {
+      top: 100px;
+      right: 80px;
+    }
+
+    .health-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 0.5s ease;
+    }
+
+    .player-health .health-fill {
+      background: linear-gradient(90deg, #00ff88, #00cc66);
+    }
+
+    .enemy-health .health-fill {
+      background: linear-gradient(90deg, #ff4444, #cc0000);
+    }
+
+    /* LASER */
+    .laser {
+      position: absolute;
+      top: 50%;
+      left: 180px;
+      height: 6px;
+      width: 0;
+      background: linear-gradient(90deg, #ff003c, #ff6b6b);
+      box-shadow: 0 0 18px #ff003c;
+      animation: laserShoot 0.5s forwards;
+      z-index: 10;
+    }
+
+    @keyframes laserShoot {
+      to { width: calc(100% - 360px); }
+    }
+
+    /* EMP */
+    .emp {
+      position: absolute;
+      top: 50%;
+      right: 180px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(0,255,255,0.9);
+      box-shadow: 0 0 25px rgba(0,255,255,1);
+      animation: empBlast 0.7s forwards;
+      z-index: 10;
+    }
+
+    @keyframes empBlast {
+      to {
+        width: 400px;
+        height: 400px;
+        transform: translate(200px, -200px);
+        opacity: 0;
+      }
+    }
+
+    /* DAMAGE FLASH */
+    .hit {
+      animation: hitFlash 0.3s;
+    }
+
+    @keyframes hitFlash {
+      50% { filter: brightness(2) drop-shadow(0 0 30px #ff0000); }
+    }
+
+    .correct-hit {
+      animation: correctFlash 0.5s;
+    }
+
+    @keyframes correctFlash {
+      50% { filter: brightness(1.5) drop-shadow(0 0 30px #00ff00); }
+    }
+
+    /* QUESTION PANEL */
+    .question-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.85);
+      border-top: 3px solid #00f6ff;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .question-text {
+      font-size: 18px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .answer-btn {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 2px solid #00f6ff;
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      color: #e6f1ff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .answer-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0,246,255,0.8);
+    }
+
+    .answer-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* HUD ELEMENTS */
+    .hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #00f6ff;
+      border-radius: 10px;
+      padding: 15px;
+      z-index: 50;
+    }
+
+    .timer {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #00f6ff;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 18px;
+      z-index: 50;
+    }
+
+    .combat-log {
+      position: absolute;
+      top: 120px;
+      left: 20px;
+      width: 300px;
+      max-height: 150px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #00f6ff;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 12px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    /* NAVIGATION */
+    .nav-controls {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #00f6ff;
+      background: linear-gradient(145deg, #102a43, #0b1d30);
+      color: #e6f1ff;
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      box-shadow: 0 0 10px rgba(0,246,255,0.6);
+      text-decoration: none;
+      color: #e6f1ff;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .arena {
+        flex-direction: column;
+        padding: 20px 15px;
+        height: auto;
+        min-height: 100vh;
+        justify-content: flex-start;
+        gap: 20px;
+      }
+      
+      .robot {
+        font-size: 80px;
+        order: 2;
+      }
+      
+      .robot.player {
+        order: 4;
+      }
+      
+      .health-bar {
+        width: 100%;
+        max-width: 200px;
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 10px auto;
+      }
+      
+      .player-health {
+        order: 3;
+      }
+      
+      .enemy-health {
+        order: 1;
+      }
+      
+      .question-panel {
+        position: relative;
+        order: 5;
+        margin-top: 20px;
+      }
+      
+      .question-text {
+        font-size: 16px;
+      }
+      
+      .answers {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .answer-btn {
+        padding: 18px;
+        font-size: 16px;
+        min-height: 56px;
+      }
+      
+      .nav-controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 10px;
+      }
+      
+      .hud, .timer {
+        position: relative;
+        display: inline-block;
+        margin: 5px;
+        font-size: 14px;
+      }
+      
+      .combat-log {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        max-height: 80px;
+        margin: 10px 0;
+        order: 6;
+      }
+      
+      /* Touch interactions */
+      .answer-btn:active {
+        transform: scale(0.95);
+        background: linear-gradient(145deg, #1a3d5a, #132840);
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Controls -->
+  <div class="nav-controls">
+    <a href="{{ url_for('index') }}" class="nav-btn">🏠 Home</a>
+    <a href="{{ url_for('game') }}" class="nav-btn">🎮 Classic</a>
+    <a href="{{ url_for('robotic_combat') }}" class="nav-btn">🤖 Robots</a>
+    <a href="{{ url_for('boss_combat') }}" class="nav-btn">💀 Boss</a>
+    <a href="{{ url_for('stem_command_center') }}" class="nav-btn">💻 Command</a>
+  </div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div><strong>Score:</strong> <span id="score">{{ session.get('score', 0) }}</span></div>
+    <div><strong>Level:</strong> {{ session.get('selected_level', 1) }}</div>
+  </div>
+
+  <!-- Timer -->
+  {% if time_left %}
+  <div class="timer">
+    ⏱️ <span id="timer">{{ time_left }}</span>s
+  </div>
+  {% endif %}
+
+  <!-- Combat Log -->
+  <div class="combat-log" id="combat-log">
+    {% if combat_log %}
+      {% for log_entry in combat_log %}
+        > {{ log_entry }}<br>
+      {% endfor %}
+    {% else %}
+      > Battle systems online...<br>
+      > Awaiting combat input...
+    {% endif %}
+  </div>
+
+  <!-- Battle Arena -->
+  <div class="arena">
+    <!-- Player Health Bar -->
+    <div class="health-bar player-health">
+      <div class="health-fill" id="player-health" style="width: {{ (session.get('player_hp', 100) / 100 * 100)|int }}%"></div>
+    </div>
+
+    <!-- Enemy Health Bar -->
+    <div class="health-bar enemy-health">
+      <div class="health-fill" id="enemy-health" style="width: {{ (session.get('enemy_hp', 50) / (enemy.hp if enemy else 50) * 100)|int }}%"></div>
+    </div>
+
+    <!-- Player Robot -->
+    <div id="player" class="robot player">
+      {% if session.get('character') %}
+        {{ '🤖🦸‍♂️🧙‍♀️👨‍💻👩‍🔬🧑‍🚀👨‍🏭👩‍💼🧑‍🔧👨‍🎓👩‍⚕️🧑‍🏫👨‍🔬👩‍💻🧑‍⚖️👨‍🎨'[session.character - 1] if session.character <= 16 else '🤖' }}
+      {% else %}
+        🤖
+      {% endif %}
+    </div>
+
+    <!-- Enemy Robot -->
+    <div id="enemy" class="robot enemy">{{ enemy.image if enemy else '🦾' }}</div>
+  </div>
+
+  <!-- Question Panel -->
+  {% if question %}
+  <div class="question-panel">
+    <div class="question-text">{{ question.q }}</div>
+    <div class="answers">
+      {% for option in question.options %}
+        <button class="answer-btn" onclick="submitAnswer('{{ option }}')" id="option-{{ loop.index }}">{{ option }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <script>
+    let timeLeft = {{ time_left if time_left else 30 }};
+    let timerInterval;
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const timerElement = document.getElementById('timer');
+        if (timerElement) {
+          timerElement.textContent = timeLeft;
+        }
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          submitAnswer(''); // Submit empty answer when time runs out
+        }
+      }, 1000);
+    }
+
+    function fireLaser() {
+      const laser = document.createElement('div');
+      laser.className = 'laser';
+      document.body.appendChild(laser);
+
+      document.getElementById('enemy').classList.add('hit');
+
+      setTimeout(() => {
+        laser.remove();
+        document.getElementById('enemy').classList.remove('hit');
+      }, 500);
+    }
+
+    function fireEMP() {
+      const emp = document.createElement('div');
+      emp.className = 'emp';
+      document.body.appendChild(emp);
+
+      document.getElementById('player').classList.add('correct-hit');
+
+      setTimeout(() => {
+        emp.remove();
+        document.getElementById('player').classList.remove('correct-hit');
+      }, 700);
+    }
+
+    function submitAnswer(answer) {
+      // Disable all buttons
+      const buttons = document.querySelectorAll('.answer-btn');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      clearInterval(timerInterval);
+      
+      // Determine if answer is correct (simplified check)
+      const correct = answer.toLowerCase() === '{{ question.a.lower() if question else "" }}';
+      
+      // Add visual effect
+      if (correct) {
+        fireLaser(); // Player attacks enemy
+        updateCombatLog('> Direct hit! Enemy systems damaged!');
+      } else {
+        fireEMP(); // Enemy attacks player
+        updateCombatLog('> Incoming attack! Shield systems compromised!');
+      }
+      
+      // Submit answer via POST request
+      setTimeout(() => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+        
+        const answerInput = document.createElement('input');
+        answerInput.type = 'hidden';
+        answerInput.name = 'answer';
+        answerInput.value = answer;
+        
+        const timeInput = document.createElement('input');
+        timeInput.type = 'hidden';
+        timeInput.name = 'time_taken';
+        timeInput.value = {{ time_left if time_left else 30 }} - timeLeft;
+        
+        form.appendChild(answerInput);
+        form.appendChild(timeInput);
+        document.body.appendChild(form);
+        form.submit();
+      }, 1000);
+    }
+
+    function updateCombatLog(message) {
+      const log = document.getElementById('combat-log');
+      log.innerHTML += message + '<br>';
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function updateHealthBar(elementId, percentage) {
+      const bar = document.getElementById(elementId);
+      if (bar) {
+        bar.style.width = Math.max(0, Math.min(100, percentage)) + '%';
+      }
+    }
+
+    // Start timer when page loads
+    {% if question %}
+      window.onload = function() {
+        startTimer();
+      };
+    {% endif %}
+
+    // Add keyboard support
+    document.addEventListener('keydown', function(e) {
+      if (e.key >= '1' && e.key <= '4') {
+        const buttonIndex = parseInt(e.key) - 1;
+        const buttons = document.querySelectorAll('.answer-btn');
+        if (buttons[buttonIndex] && !buttons[buttonIndex].disabled) {
+          buttons[buttonIndex].click();
+        }
+      }
+    });
+
+    // Auto-scroll combat log
+    const combatLog = document.getElementById('combat-log');
+    if (combatLog) {
+      combatLog.scrollTop = combatLog.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>

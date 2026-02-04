@@ -33,6 +33,22 @@
             font-size: 0.9em;
             padding: 8px 15px;
         }
+        .robot-switch-btn {
+            position: absolute;
+            top: 20px;
+            right: 120px;
+            z-index: 1000;
+            background: #007acc;
+            font-size: 0.9em;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+        }
+        .robot-switch-btn:hover {
+            background: #0066aa;
+        }
         body { 
             font-family: 'Times New Roman', Times, serif; 
             background: #2e3d1f; 
@@ -281,7 +297,11 @@
     </style>
 </head>
 <body>
-    <!-- Quit Button -->
+    <!-- Navigation Buttons -->
+    <a href="{{ url_for('boss_combat') }}" class="robot-switch-btn" style="right: 480px;">💀 Boss</a>
+    <a href="{{ url_for('battle_arena') }}" class="robot-switch-btn" style="right: 360px;">🎨 Arena</a>
+    <a href="{{ url_for('stem_command_center') }}" class="robot-switch-btn" style="right: 240px;">💻 Command</a>
+    <a href="{{ url_for('robotic_combat') }}" class="robot-switch-btn">🤖 Robot View</a>
     <button onclick="quitGame()" class="btn quit-btn">🚪 Quit</button>
     
     <!-- Main container for the game content -->

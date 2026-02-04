@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Battle Analytics - Teacher Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .analytics-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        /* Phase Failure Heatmap */
+        .heatmap-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .heatmap-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .phase-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .phase-card {
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-1 { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .phase-2 { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .phase-3 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        .phase-card h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+
+        .failure-rate {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .skill-indicator {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .warning-icon {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+        }
+
+        /* Student Breakdown */
+        .students-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .students-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .student-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+
+        .student-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .student-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .student-summary {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s;
+        }
+
+        .student-details {
+            padding: 20px;
+            background: #fff;
+            display: none;
+        }
+
+        .student-details.expanded {
+            display: block;
+        }
+
+        .attempt-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .phase-result {
+            text-align: center;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .phase-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .phase-fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .phase-not-entered {
+            background: #e2e3e5;
+            color: #6c757d;
+        }
+
+        .recommendations {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+
+        .recommendations h4 {
+            margin: 0 0 10px;
+            color: #2980b9;
+        }
+
+        .rec-item {
+            margin: 5px 0;
+            color: #34495e;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .analytics-container {
+                margin: 20px;
+                padding: 15px;
+            }
+
+            .phase-stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .attempt-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .student-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .heatmap-section, .students-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="analytics-container">
+        <a href="{{ url_for('teacher_dashboard') }}" class="nav-back">← Back to Teacher Dashboard</a>
+
+        <div class="header">
+            <h1>💀 Boss Battle Analytics</h1>
+            <p>Phase-based performance insights for targeted instruction</p>
+        </div>
+
+        <!-- Phase Failure Heatmap -->
+        <div class="heatmap-section">
+            <h2 class="heatmap-title">📊 Phase Failure Heatmap</h2>
+            
+            {% if phase_stats %}
+            <div class="phase-stats-grid">
+                {% for phase, stats in phase_stats.items() %}
+                <div class="phase-card phase-{{ phase.split('_')[1] }}">
+                    {% if stats.failure_rate > 60 %}
+                        <div class="warning-icon">🚨</div>
+                    {% elif stats.failure_rate > 30 %}
+                        <div class="warning-icon">⚠️</div>
+                    {% endif %}
+                    
+                    <h3>{{ phase.replace('_', ' ').title() }}</h3>
+                    <div class="failure-rate">{{ stats.failure_rate }}%</div>
+                    <div>of students failing</div>
+                    <div class="skill-indicator">{{ stats.skill_indicator }}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">
+                        {{ stats.total_attempts }} total attempts
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #666; padding: 40px;">
+                <h3>No boss battle data available yet</h3>
+                <p>Students need to attempt boss battles for analytics to appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Student Breakdown -->
+        <div class="students-section">
+            <h2 class="students-title">👥 Student Performance Breakdown</h2>
+            
+            {% if student_analytics %}
+            {% for student_id, attempts in student_analytics.items() %}
+            <div class="student-card">
+                <div class="student-header" onclick="toggleStudentDetails('{{ student_id }}')">
+                    <div>
+                        <div class="student-name">{{ student_names.get(student_id, 'Student ' + student_id) }}</div>
+                        <div class="student-summary">
+                            {{ attempts|length }} attempt{{ 's' if attempts|length != 1 else '' }} • 
+                            Latest: {{ attempts[-1].overall_accuracy }}% accuracy
+                        </div>
+                    </div>
+                    <div class="expand-icon" id="icon-{{ student_id }}">▼</div>
+                </div>
+                
+                <div class="student-details" id="details-{{ student_id }}">
+                    {% for attempt in attempts %}
+                    <div class="attempt-row">
+                        <div>
+                            <strong>Attempt {{ attempt.attempt }}</strong><br>
+                            <small>{{ attempt.timestamp.split('T')[0] }}</small>
+                        </div>
+                        
+                        {% for phase_name, phase_data in attempt.phases.items() %}
+                        {% if phase_data.entered %}
+                            {% if phase_data.failed %}
+                            <div class="phase-result phase-fail">
+                                {{ phase_name.replace('_', ' ').title() }}<br>
+                                ❌ Failed ({{ phase_data.accuracy }}%)
+                            </div>
+                            {% else %}
+                            <div class="phase-result phase-pass">
+                                {{ phase_name.replace('_', ' ').title() }}<br>
+                                ✅ Passed ({{ phase_data.accuracy }}%)
+                            </div>
+                            {% endif %}
+                        {% else %}
+                        <div class="phase-result phase-not-entered">
+                            {{ phase_name.replace('_', ' ').title() }}<br>
+                            Not Reached
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Auto-generated Recommendations -->
+                    <div class="recommendations">
+                        <h4>📋 Recommendations</h4>
+                        {% set latest_attempt = attempts[-1] %}
+                        {% if latest_attempt.phases.phase_1.failed %}
+                        <div class="rec-item">• Practice Mode → Basic Concepts Review</div>
+                        <div class="rec-item">• Focus on fundamental recall exercises</div>
+                        {% elif latest_attempt.phases.phase_2.failed %}
+                        <div class="rec-item">• Practice Mode → Multi-step Problem Solving</div>
+                        <div class="rec-item">• Review logical reasoning strategies</div>
+                        {% elif latest_attempt.phases.phase_3.failed %}
+                        <div class="rec-item">• Advanced Practice Sessions</div>
+                        <div class="rec-item">• Focus on synthesis and application</div>
+                        {% else %}
+                        <div class="rec-item">• Excellent performance! Ready for advanced challenges</div>
+                        {% endif %}
+                        <div class="rec-item">• Assign easier boss battles for confidence building</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div style="text-align: center; color: #666; padding: 40px;">
+                <h3>No student boss battle data available</h3>
+                <p>Students need to attempt boss battles for detailed analytics to appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function toggleStudentDetails(studentId) {
+            const details = document.getElementById('details-' + studentId);
+            const icon = document.getElementById('icon-' + studentId);
+            
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                details.classList.add('expanded');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+</body>
+</html>
